@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Wave Picking • 6 kutija na kolicima</title>
+    <!-- SheetJS za Excel import -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #0a7;
+            --warning: #f0ad4e;
+            --danger: #d9534f;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: #f1f5f9;
+            color: var(--dark);
+        }
+        
+        h2 { 
+            margin-top: 0;
+            font-weight: 600;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 12px;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.03);
+        }
+        
+        .btn {
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            margin-right: 6px;
+            margin-top: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s;
+            min-height: 44px; /* Minimum touch target size */
+            min-width: 44px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
+        .btn-success { background: var(--success); border-color: var(--success); color: white; }
+        .btn-warning { background: var(--warning); border-color: var(--warning); color: #111; }
+        .btn-danger { background: var(--danger); border-color: var(--danger); color: white; }
+        .btn-purple { background: #8b5cf6; border-color: #8b5cf6; color: white; }
+        
+        .muted { color: #64748b; font-size: 0.85rem; }
+        .big { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        
+        td, th {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 6px;
+            vertical-align: middle;
+            text-align: left;
+        }
+        
+        /* Mobilni prikaz za tabelu */
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px;
+            }
+            td, th {
+                padding: 8px 4px;
+            }
+            .btn {
+                padding: 8px 10px;
+                font-size: 11px;
+                min-height: 36px;
+                min-width: 36px;
+            }
+        }
+        
+        .doneRow {
+            opacity: 0.65;
+            text-decoration: line-through;
+            background: #f1f5f9;
+        }
+        
+        .pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            margin-left: 8px;
+            background: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-red { border-color: var(--danger); color: var(--danger); background: #fee2e2; }
+        .badge-orange { border-color: var(--warning); color: #b45309; background: #fffbeb; }
+        .badge-green { border-color: var(--success); color: var(--success); background: #e6f7e6; }
+        .badge-gray { border-color: #94a3b8; color: #475569; background: #f1f5f9; }
+        .badge-blue { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+        
+        .mainGrid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        /* Mobilni raspored - jedna kolona */
+        @media (max-width: 768px) {
+            .mainGrid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            .big {
+                font-size: 18px;
+            }
+        }
+        
+        .boxes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        /* Na manjim ekranima, 2 kutije u redu */
+        @media (max-width: 480px) {
+            .boxes-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+        }
+        
+        .box-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            background: white;
+            position: relative;
+            transition: transform 0.1s ease;
+            cursor: pointer;
+        }
+        
+        .box-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .box-card:active {
+            transform: scale(0.98);
+        }
+        
+        .box-card.active {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+        
+        .box-card.completed {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+        
+        .box-number {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 480px) {
+            .box-number {
+                font-size: 18px;
+            }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 999px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-fill.completed {
+            background: var(--success);
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .invoice-pill {
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        
+        .scan-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 3px solid var(--primary);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+        
+        .scan-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .box-tag {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 6px;
+            cursor: help;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Fleksibilni kontejneri za mobilne */
+        .flex-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        @media (max-width: 480px) {
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Poboljšanja za touch uređaje */
+        button, .box-card, [onclick] {
+            touch-action: manipulation;
+        }
+        
+        /* Skrivanje nekih elemenata na malim ekranima ako je potrebno */
+        @media (max-width: 480px) {
+            .desktop-only {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>🏭 Wave Picking • 6 kutija</h2>
+
+    <!-- Sekcija za skeniranje i Excel upload -->
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+            <div class="big">🔍 Skeniraj fakture (max 6)</div>
+            <div class="badge badge-blue" id="scanCounter">0/6</div>
+        </div>
+        
+        <input type="text" id="barcodeInput" class="scan-input" placeholder="Skeniraj barkod fakture..." autofocus>
+        
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;" id="scannedInvoices"></div>
+        
+        <!-- INFO O ULAZIMA/IZLAZIMA I NAČINU RUTIRANJA -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div style="padding:10px; background:#f1f5f9; border-radius:8px;">
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap;">
+                    <span style="font-weight:600">🚪 Ulazi:</span>
+                </div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap">
+                    <div><span class="badge badge-blue">ENTRANCE_1</span></div>
+                    <div><span class="badge badge-blue">ENTRANCE_2</span></div>
+                </div>
+            </div>
+            
+            <div style="padding:10px; background:#f1f5f9; border-radius:8px;">
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap;">
+                    <span style="font-weight:600">🗺️ Rutiranje:</span>
+                </div>
+                <select id="routingMode" style="padding:8px; width:100%; border-radius:8px; border:2px solid var(--border); background:white; font-weight:500">
+                    <option value="optimal" selected>⚡ Optimalno</option>
+                    <option value="sector">📍 Po sektorima</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- EXCEL UPLOAD -->
+        <div style="margin-top:16px; padding:12px; background:#f8fafc; border-radius:12px; border:2px dashed var(--border)">
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:20px;">📊</span>
+                    <span style="font-weight:600;">Excel:</span>
+                </div>
+                
+                <input type="file" id="excelUpload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(this)">
+                
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button class="btn" onclick="document.getElementById('excelUpload').click()" style="background:var(--primary); color:white;">
+                        📂 Izaberi fajl
+                    </button>
+                    <button class="btn" onclick="downloadSampleExcel()" style="background:#8b5cf6; color:white;">
+                        📥 Uzorak
+                    </button>
+                </div>
+                
+                <span id="uploadStatus" class="muted" style="font-size:12px;"></span>
+            </div>
+            
+            <div class="muted" style="margin-top:8px; font-size:11px;">
+                📌 Kolone: broj fak, lokacija, sku, kolicina
+            </div>
+        </div>
+        
+        <div style="display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="startWaveBtn" onclick="startWave()" disabled style="font-size:16px; padding:12px 20px; flex:1;">
+                🚀 KREĆEMO
+            </button>
+            <button class="btn" onclick="clearScanned()">🗑️</button>
+            <button class="btn" onclick="debugWave()">🐞</button>
+        </div>
+    </div>
+
+    <div id="loadingIndicator" style="display:none; text-align:center; padding:15px">
+        <div class="spinner" style="width:28px; height:28px;"></div>
+        <div style="margin-top:6px">Učitavanje...</div>
+    </div>
+
+    <!-- Glavni grid - pojavljuje se nakon starta -->
+    <div class="mainGrid" id="mainGrid" style="display:none;">
+        <!-- Leva strana - Pickovanje -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div class="big">📍 <span id="curLoc" style="color:var(--primary);">-</span></div>
+                    <div id="currentBoxInfo" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;"></div>
+                </div>
+                <div class="pill" id="progressPill">0/0</div>
+            </div>
+            
+            <div style="margin-top:4px; display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <span class="muted" id="routeInfo"></span>
+                <span id="progressPercent" style="font-weight:600; color:var(--success)">0%</span>
+            </div>
+
+            <div style="margin-top:12px; max-height:500px; overflow-y:auto; border-radius:12px; border:1px solid var(--border)">
+                <table id="itemsTable">
+                    <thead style="background:#f8fafc; position:sticky; top:0">
+                        <tr>
+                            <th>📦 SKU</th>
+                            <th>📊 Kol</th>
+                            <th>📋 Faktura</th>
+                            <th>📦 Kutija</th>
+                            <th>🔖 Status</th>
+                            <th>🎯</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Desna strana - Status kutija i statistika -->
+        <div class="card">
+            <!-- STATISTIKA DEO -->
+            <div style="margin-bottom:16px; padding:12px; background:#f8fafc; border-radius:12px; border:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+                    <div class="big" style="font-size:16px;">📊 Statistika</div>
+                    <span class="badge badge-blue" id="timerDisplay">00:00</span>
+                </div>
+                
+                <div class="stat-grid">
+                    <div style="padding:6px; background:white; border-radius:8px;">
+                        <div style="font-size:11px; color:var(--dark);">📦 Artikli/sat</div>
+                        <div style="font-size:16px; font-weight:700;" id="itemsPerHour">0</div>
+                    </div>
+                    <div style="padding:6px; background:white; border-radius:8px;">
+                        <div style="font-size:11px; color:var(--dark);">⏱️ Vreme po lok.</div>
+                        <div style="font-size:16px; font-weight:700;" id="avgTimePerLoc">0s</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top:6px; padding:6px; background:white; border-radius:8px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-size:11px; color:var(--dark);">📏 Pređeno:</span>
+                        <span style="font-weight:600;" id="totalDistanceStat">0 m</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+                <div class="big">📦 Kutije</div>
+                <div class="badge badge-blue" id="totalDistanceDisplay">- m</div>
+            </div>
+            <div id="boxesContainer" class="boxes-grid"></div>
+            
+            <div style="margin-top:16px;">
+                <div class="big" style="font-size:16px;">📋 Izveštaj</div>
+                <div id="reportMini" style="margin-top:8px; max-height:200px; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== KONFIGURACIJA ====================
+        const API = "http://127.0.0.1:8000";
+        let SESSION_ID = null;
+        let LOADING = false;
+        let scannedInvoices = [];
+        let uploadedItems = [];
+        let waveData = null;  // Globalna promenljiva za podatke o wave-u
+        let waveStartTime = null;
+        let timerInterval = null;
+
+        // ==================== UTILITY ====================
+        function setLoading(isLoading) {
+            LOADING = isLoading;
+            document.getElementById("loadingIndicator").style.display = isLoading ? "block" : "none";
+            document.querySelectorAll("button").forEach(b => b.disabled = isLoading);
+        }
+
+        function escapeHtml(s) {
+            return String(s||'').replace(/[&<>"]/g, function(m) {
+                return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[m];
+            });
+        }
+
+        function statusBadge(st) {
+            const badges = {
+                "pending": `<span class="badge badge-gray">⏳</span>`,
+                "partial": `<span class="badge badge-orange">⚠️</span>`,
+                "taken": `<span class="badge badge-green">✅</span>`,
+                "oos": `<span class="badge badge-orange">❌</span>`,
+                "problem": `<span class="badge badge-red">🔧</span>`
+            };
+            return badges[st] || `<span class="badge badge-gray">${st}</span>`;
+        }
+
+        // ==================== FUNKCIJE ZA TAJMER I STATISTIKU ====================
+        function startTimer() {
+            waveStartTime = Date.now();
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                if (!waveStartTime) return;
+                
+                const elapsed = Math.floor((Date.now() - waveStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById("timerDisplay").innerText = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                updateStats();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateStats() {
+            if (!waveData || !waveStartTime) return;
+            
+            const elapsedHours = (Date.now() - waveStartTime) / 3600000;
+            const elapsedMinutes = (Date.now() - waveStartTime) / 60000;
+            
+            const pickedQty = waveData.progress?.picked_qty || 0;
+            const itemsPerHour = elapsedHours > 0 ? Math.round(pickedQty / elapsedHours) : pickedQty;
+            document.getElementById("itemsPerHour").innerText = itemsPerHour;
+            
+            const doneLocs = waveData.progress?.done_locations || 0;
+            const avgTimePerLoc = doneLocs > 0 && elapsedMinutes > 0 
+                ? Math.round((elapsedMinutes / doneLocs) * 60) + 's' 
+                : '0s';
+            document.getElementById("avgTimePerLoc").innerText = avgTimePerLoc;
+            
+            document.getElementById("totalDistanceStat").innerText = (waveData.distance_m || 0) + ' m';
+        }
+
+        // ==================== SKENIRANJE FAKTURA ====================
+        document.getElementById("barcodeInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                const invoice = this.value.trim();
+                if (invoice && scannedInvoices.length < 6) {
+                    if (!scannedInvoices.includes(invoice)) {
+                        scannedInvoices.push(invoice);
+                        updateScannedList();
+                        this.value = "";
+                        document.getElementById("startWaveBtn").disabled = false;
+                    } else {
+                        alert("❌ Faktura već skenirana!");
+                        this.value = "";
+                    }
+                } else if (scannedInvoices.length >= 6) {
+                    alert("❌ Maksimalno 6 faktura!");
+                }
+            }
+        });
+
+        function updateScannedList() {
+            const container = document.getElementById("scannedInvoices");
+            container.innerHTML = '';
+            
+            scannedInvoices.forEach((inv, index) => {
+                const boxNum = index + 1;
+                const div = document.createElement('div');
+                div.className = 'invoice-pill';
+                div.innerHTML = `
+                    ✅ ${inv} 
+                    <span style="background:var(--primary); color:white; padding:2px 8px; border-radius:20px;">K${boxNum}</span>
+                    <span style="cursor:pointer; margin-left:3px;" onclick="removeInvoice('${inv}')">❌</span>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.getElementById("scanCounter").innerText = `${scannedInvoices.length}/6`;
+        }
+
+        function removeInvoice(invoice) {
+            scannedInvoices = scannedInvoices.filter(i => i !== invoice);
+            updateScannedList();
+            if (scannedInvoices.length === 0) {
+                document.getElementById("startWaveBtn").disabled = true;
+            }
+        }
+
+        function clearScanned() {
+            scannedInvoices = [];
+            updateScannedList();
+            document.getElementById("startWaveBtn").disabled = true;
+        }
+
+        // ==================== EXCEL UPLOAD ====================
+        async function handleExcelUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            setLoading(true);
+            document.getElementById("uploadStatus").innerHTML = `⏳ Učitavam ${file.name}...`;
+            
+            try {
+                let data = [];
+                
+                if (file.name.endsWith('.csv')) {
+                    const text = await file.text();
+                    data = parseCSV(text);
+                } else {
+                    const buffer = await file.arrayBuffer();
+                    const workbook = XLSX.read(buffer, { type: 'array' });
+                    const firstSheet = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheet];
+                    const csv = XLSX.utils.sheet_to_csv(worksheet);
+                    data = parseCSV(csv);
+                }
+                
+                uploadedItems = data;
+                const invoices = [...new Set(data.map(row => row.faktura))];
+                
+                if (invoices.length === 0) {
+                    alert("❌ Nema validnih podataka u fajlu!");
+                    return;
+                }
+                
+                if (invoices.length > 6) {
+                    alert(`❌ Previše faktura! Maksimalno 6, a u fajlu ih ima ${invoices.length}`);
+                    return;
+                }
+                
+                scannedInvoices = invoices;
+                updateScannedList();
+                
+                document.getElementById("uploadStatus").innerHTML = 
+                    `✅ ${data.length} stavki, ${invoices.length} faktura`;
+                
+                document.getElementById("startWaveBtn").disabled = false;
+                
+                console.log("Učitane stavke:", data);
+                console.log("Pronađene fakture:", invoices);
+                
+            } catch (err) {
+                document.getElementById("uploadStatus").innerHTML = `❌ Greška: ${err.message}`;
+                console.error(err);
+            } finally {
+                setLoading(false);
+                input.value = '';
+            }
+        }
+
+        function parseCSV(csvText) {
+            const cleanText = csvText.replace(/"/g, '');
+            const lines = cleanText.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+            
+            if (lines.length === 0) return [];
+            
+            const headers = lines[0].split(/[,\t;]/).map(h => h.trim().toLowerCase());
+            console.log("Zaglavlje:", headers);
+            
+            const fakturaIdx = headers.findIndex(h => 
+                h.includes('broj fak') || h.includes('faktura') || h.includes('invoice') || h === 'broj');
+            const lokacijaIdx = headers.findIndex(h => 
+                h.includes('lokacija') || h.includes('location') || h === 'lok');
+            const skuIdx = headers.findIndex(h => 
+                h.includes('sku') || h.includes('sifra') || h.includes('artikal') || h === 'sku');
+            const kolicinaIdx = headers.findIndex(h => 
+                h.includes('kolicina') || h.includes('qty') || h.includes('quantity') || h === 'kol');
+            
+            if (fakturaIdx === -1 || lokacijaIdx === -1 || skuIdx === -1 || kolicinaIdx === -1) {
+                console.error("Indeksi:", {fakturaIdx, lokacijaIdx, skuIdx, kolicinaIdx});
+                throw new Error("Fajl mora sadržati kolone: broj fak, lokacija, sku, kolicina");
+            }
+            
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const values = line.split(/[,\t;]/).map(v => v.trim());
+                if (values.length < 4) continue;
+                
+                const faktura = values[fakturaIdx]?.trim();
+                const lokacija = values[lokacijaIdx]?.trim().toUpperCase();
+                let sku = values[skuIdx]?.trim();
+                const kolicina = parseInt(values[kolicinaIdx]?.trim(), 10);
+                
+                if (sku) {
+                    sku = String(sku).replace(/\D/g, '');
+                    sku = sku.padStart(6, '0').slice(0,6);
+                }
+                
+                if (!faktura || !lokacija || !sku || isNaN(kolicina) || kolicina < 1) continue;
+                if (!/^\d{6}$/.test(sku)) continue;
+                
+                result.push({ 
+                    faktura: faktura, 
+                    lokacija: lokacija, 
+                    sku: sku, 
+                    kolicina: kolicina 
+                });
+            }
+            
+            console.log("Parsirani podaci:", result);
+            return result;
+        }
+
+        function downloadSampleExcel() {
+            const sampleData = [
+                ['lokacija', 'sku', 'kolicina', 'broj fak'],
+                ['A581', '123456', '2', 'FAKTURA-01'],
+                ['A581', '654321', '10', 'FAKTURA-02'],
+                ['A98', '111111', '1', 'FAKTURA-03'],
+                ['A87', '222222', '1', 'FAKTURA-01'],
+                ['C1', '444444', '1', 'FAKTURA-01'],
+                ['D52', '888888', '1', 'FAKTURA-02'],
+                ['B1987', '101010', '1', 'FAKTURA-02'],
+            ];
+            
+            let csv = sampleData.map(row => row.join('\t')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fakture_uzorak.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            document.getElementById("uploadStatus").innerHTML = "📥 Uzorak preuzet";
+        }
+
+        // ==================== BOJE ZA KUTIJE ====================
+        function getBoxColor(box) {
+            const colors = {
+                1: '#3b82f6',
+                2: '#22c55e',
+                3: '#eab308',
+                4: '#f97316',
+                5: '#ef4444',
+                6: '#a855f7'
+            };
+            return colors[box] || '#64748b';
+        }
+
+        // ==================== FUNKCIJA ZA PRIKAZ KUTIJE ====================
+        function updateCurrentBoxInfo(data) {
+            const curLoc = data.current_location;
+            const infoDiv = document.getElementById("currentBoxInfo");
+            
+            if (!curLoc) {
+                infoDiv.innerHTML = '';
+                return;
+            }
+            
+            const items = data.items_by_loc[curLoc] || [];
+            
+            if (items.length === 0) {
+                infoDiv.innerHTML = '';
+                return;
+            }
+            
+            const boxesMap = new Map();
+            
+            items.forEach(it => {
+                if (it.status === "pending" || it.status === "partial") {
+                    const boxNum = it.box;
+                    if (!boxesMap.has(boxNum)) {
+                        boxesMap.set(boxNum, []);
+                    }
+                    boxesMap.get(boxNum).push({sku: it.sku, qty: it.qty_required - (it.qty_picked || 0)});
+                }
+            });
+            
+            if (boxesMap.size === 0) {
+                infoDiv.innerHTML = '<span style="color:#0a7; font-weight:500;">✅ Sve</span>';
+                return;
+            }
+            
+            let html = '';
+            const boxes = Array.from(boxesMap.entries());
+            
+            boxes.forEach(([box, items]) => {
+                const itemList = items.map(it => `${it.sku} (${it.qty})`).join(', ');
+                const bgColor = getBoxColor(box);
+                
+                html += `<span style="display:inline-block; background:${bgColor}; color:white; padding:4px 12px; border-radius:25px; font-size:14px; font-weight:600; margin-right:5px; cursor:help; box-shadow:0 2px 4px rgba(0,0,0,0.1);" title="${itemList}">📦 ${box}</span>`;
+            });
+            
+            infoDiv.innerHTML = html;
+        }
+
+        // ==================== FUNKCIJE ZA RENDEROVANJE ====================
+        function renderBoxes(data) {
+            const container = document.getElementById("boxesContainer");
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 6; i++) {
+                let invoice = null;
+                let boxProgress = { total: 0, done: 0 };
+                
+                for (const [inv, boxNum] of Object.entries(data.box_assignment || {})) {
+                    if (boxNum === i) {
+                        invoice = inv;
+                        break;
+                    }
+                }
+
+                if (invoice && data.progress.boxes && data.progress.boxes[invoice]) {
+                    boxProgress = data.progress.boxes[invoice];
+                }
+
+                const percent = boxProgress.total > 0 ? Math.round((boxProgress.done / boxProgress.total) * 100) : 0;
+                const isCompleted = boxProgress.total > 0 && boxProgress.done === boxProgress.total;
+                const boxColor = getBoxColor(i);
+
+                let boxClass = 'box-card';
+                if (isCompleted) boxClass += ' completed';
+
+                const boxHtml = `
+                    <div class="${boxClass}" style="border-color: ${boxColor}; cursor: pointer;" onclick="showBoxDetails(${i})">
+                        <div class="box-number" style="color: ${boxColor};">📦 ${i}</div>
+                        ${invoice ? `<div class="invoice-pill" style="margin-bottom:6px; background:${boxColor}; color:white;">📋 ${invoice}</div>` : 
+                                    `<div class="muted" style="margin-bottom:6px;">⏳</div>`}
+                        ${invoice ? `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                <span>${boxProgress.done}/${boxProgress.total}</span>
+                                <span>${percent}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${isCompleted ? 'completed' : ''}" style="width:${percent}%; background-color: ${boxColor};"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                container.innerHTML += boxHtml;
+            }
+        }
+
+        function renderItemsTable(data) {
+            const tbody = document.querySelector("#itemsTable tbody");
+            tbody.innerHTML = "";
+
+            const curLoc = data.current_location;
+            if (!curLoc) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:15px">🏁 Završeno!</td></tr>`;
+                return;
+            }
+
+            const items = data.items_by_loc[curLoc] || [];
+            
+            for (const it of items) {
+                const tr = document.createElement("tr");
+                if (it.status !== "pending" && it.status !== "partial") tr.classList.add("doneRow");
+
+                let actionButtons = "";
+                if (it.status === "pending" || it.status === "partial") {
+                    actionButtons = `
+                        <button class="btn btn-success" style="padding:4px 6px; font-size:10px" 
+                                onclick="takeItem('${it.sku}', '${it.invoice}', ${it.qty_required})">✅</button>
+                        <button class="btn btn-warning" style="padding:4px 6px; font-size:10px" 
+                                onclick="setOOS('${it.sku}', '${it.invoice}')">❌</button>
+                        <button class="btn btn-danger" style="padding:4px 6px; font-size:10px" 
+                                onclick="setProblem('${it.sku}', '${it.invoice}')">🔧</button>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td><span class="mono">${it.sku}</span></td>
+                    <td>${it.qty_picked ? `${it.qty_picked}/${it.qty_required}` : it.qty_required}</td>
+                    <td><span class="invoice-pill">📋 ${it.invoice}</span></td>
+                    <td><span style="display:inline-block; background:${getBoxColor(it.box)}; color:white; padding:2px 8px; border-radius:20px; font-size:11px;">${it.box}</span></td>
+                    <td>${statusBadge(it.status)}</td>
+                    <td>${actionButtons || '<span class="badge badge-gray">✔️</span>'}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function renderMiniReport(data) {
+            const container = document.getElementById("reportMini");
+            container.innerHTML = '';
+
+            const problems = [];
+            const taken = [];
+
+            for (const loc of data.ordered_locations || []) {
+                const items = data.items_by_loc[loc] || [];
+                for (const it of items) {
+                    if (it.status === "problem" || it.status === "oos") {
+                        problems.push(it);
+                    } else if (it.status === "taken") {
+                        taken.push(it);
+                    }
+                }
+            }
+
+            if (problems.length > 0) {
+                container.innerHTML += '<div style="margin-bottom:6px;"><span class="badge badge-red">🔧 PROBLEM</span></div>';
+                problems.forEach(it => {
+                    container.innerHTML += `
+                        <div style="padding:6px; background:#fff5f5; border-radius:6px; margin-bottom:4px; font-size:12px;">
+                            <div><strong>${it.sku}</strong> (K${it.box})</div>
+                            <div>📋 ${it.invoice}</div>
+                            <div class="muted">${it.note || ''}</div>
+                            <div style="display:flex; gap:4px; margin-top:4px;">
+                                <button class="btn btn-purple" style="padding:4px 8px; font-size:10px; flex:1;" 
+                                        onclick="dopuni('${it.sku}', '${it.invoice}', ${it.qty_required}, ${it.qty_picked || 0})">
+                                    📦 DOPUNI
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (taken.length > 0) {
+                container.innerHTML += '<div style="margin:6px 0;"><span class="badge badge-green">✅ UZETO</span></div>';
+                taken.slice(0, 3).forEach(it => {
+                    container.innerHTML += `<div style="font-size:11px;">${it.sku} (K${it.box})</div>`;
+                });
+                if (taken.length > 3) {
+                    container.innerHTML += `<div class="muted" style="font-size:10px;">+ još ${taken.length - 3}</div>`;
+                }
+            }
+        }
+
+        // ==================== FUNKCIJA ZA PRIKAZ DETALJA KUTIJE ====================
+        function showBoxDetails(boxNum) {
+            if (!SESSION_ID || !waveData) {
+                alert("Nema aktivne sesije!");
+                return;
+            }
+            
+            let invoice = null;
+            for (const [inv, box] of Object.entries(waveData.box_assignment || {})) {
+                if (box === boxNum) {
+                    invoice = inv;
+                    break;
+                }
+            }
+            
+            if (!invoice) {
+                alert(`Kutija ${boxNum} je prazna.`);
+                return;
+            }
+            
+            const boxItems = [];
+            
+            for (const location in waveData.items_by_loc) {
+                const items = waveData.items_by_loc[location];
+                for (const it of items) {
+                    if (it.box === boxNum) {
+                        it.locationName = location;
+                        boxItems.push(it);
+                    }
+                }
+            }
+            
+            if (boxItems.length === 0) {
+                alert(`Nema stavki u kutiji ${boxNum}`);
+                return;
+            }
+            
+            let message = `📦 KUTIJA ${boxNum} - ${invoice}\n`;
+            message += `──────────────────\n\n`;
+            
+            let ukupno = 0;
+            let uzeto = 0;
+            
+            boxItems.forEach((it, index) => {
+                const statusIcon = it.status === "taken" ? "✅" : 
+                                  (it.status === "problem" ? "🔧" : 
+                                  (it.status === "oos" ? "❌" : "⏳"));
+                message += `${index+1}. ${statusIcon} ${it.sku}\n`;
+                message += `   📍 ${it.location || it.locationName}\n`;
+                message += `   📊 ${it.qty_picked || 0}/${it.qty_required}`;
+                if (it.status !== "taken" && it.qty_missing > 0) {
+                    message += ` (fali ${it.qty_missing})`;
+                }
+                message += `\n`;
+                if (it.note) message += `   📝 ${it.note}\n`;
+                message += `\n`;
+                
+                ukupno += it.qty_required;
+                uzeto += it.qty_picked || 0;
+            });
+            
+            message += `──────────────────\n`;
+            message += `UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
+            
+            alert(message);
+        }
+
+        // ==================== RENDER WAVE ====================
+        async function renderWave(data) {
+            waveData = data;
+            
+            document.getElementById("curLoc").innerText = data.current_location || "ZAVRŠENO";
+            document.getElementById("routeInfo").innerHTML = 
+                `${data.mode} | 🚪 ${data.start}→${data.end} | ${data.distance_m}m`;
+            
+            document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
+            
+            const p = data.progress || {};
+            document.getElementById("progressPill").innerHTML = 
+                `📦 ${p.done_items || 0}/${p.total_items || 0}`;
+            document.getElementById("progressPercent").innerHTML = `${p.progress_percent || 0}%`;
+
+            renderBoxes(data);
+            renderItemsTable(data);
+            renderMiniReport(data);
+            updateCurrentBoxInfo(data);
+            updateStats();
+            
+            if (!data.current_location) {
+                stopTimer();
+            }
+        }
+
+        // ==================== START WAVE ====================
+        async function startWave() {
+            if (scannedInvoices.length === 0) {
+                alert("❌ Nema skeniranih faktura!");
+                return;
+            }
+
+            if (uploadedItems.length === 0) {
+                alert("❌ Nema učitanih stavki!");
+                return;
+            }
+
+            setLoading(true);
+            try {
+                const mode = document.getElementById("routingMode").value;
+                
+                const itemsForBackend = uploadedItems
+                    .filter(item => scannedInvoices.includes(item.faktura))
+                    .map(item => ({
+                        sku: item.sku,
+                        qty: item.kolicina,
+                        location: item.lokacija,
+                        invoice: item.faktura
+                    }));
+                
+                const res = await fetch(`${API}/wave/start`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        items: itemsForBackend,
+                        mode: mode
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    alert("❌ Greška: " + (data.detail || JSON.stringify(data)));
+                    console.error(data);
+                    return;
+                }
+
+                SESSION_ID = data.session_id;
+                document.getElementById("mainGrid").style.display = "grid";
+                
+                startTimer();
+                await renderWave(data);
+                
+            } catch (err) {
+                alert("❌ Greška: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // ==================== AKCIJE ====================
+        async function takeItem(sku, invoice, required) {
+            setLoading(true);
+            try {
+                await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        sku, invoice, action: "take", qty_picked: required
+                    })
+                });
+                await refreshWave();
+            } catch (err) {
+                alert("❌ Greška: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function setOOS(sku, invoice) {
+            const note = prompt("Komentar:");
+            if (note === null) return;
+            
+            setLoading(true);
+            try {
+                await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({sku, invoice, action: "oos", note})
+                });
+                await refreshWave();
+            } catch (err) {
+                alert("❌ Greška: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function setProblem(sku, invoice) {
+            const picked = parseInt(prompt(`Koliko? (0)`, "0"));
+            if (isNaN(picked)) return;
+            
+            const note = prompt("Problem:");
+            if (note === null) return;
+            
+            setLoading(true);
+            try {
+                await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({sku, invoice, action: "problem", qty_picked: picked, note})
+                });
+                await refreshWave();
+            } catch (err) {
+                alert("❌ Greška: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function dopuni(sku, invoice, required, picked) {
+            const fali = required - (picked || 0);
+            
+            if (fali <= 0) {
+                alert("✅ Već kompletno!");
+                return;
+            }
+            
+            if (!confirm(`Dopunio SKU ${sku} sa ${fali} kom?`)) {
+                return;
+            }
+            
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        sku: sku,
+                        invoice: invoice,
+                        action: "dopuna",
+                        qty_picked: required,
+                        note: `Dopuna +${fali}`
+                    })
+                });
+                
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "Greška");
+                }
+                
+                await refreshWave();
+                alert(`✅ ${sku} kompletiran!`);
+                
+            } catch (err) {
+                alert("❌ Greška: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function refreshWave() {
+            if (!SESSION_ID) return;
+            
+            const res = await fetch(`${API}/wave/${SESSION_ID}`);
+            const data = await res.json();
+            await renderWave(data);
+        }
+
+        async function debugWave() {
+            if (!SESSION_ID) {
+                const res = await fetch(`${API}/wave/__debug`);
+                const data = await res.json();
+                console.log("DEBUG:", data);
+                alert("Proveri konzolu");
+                return;
+            }
+            
+            const res = await fetch(`${API}/wave/${SESSION_ID}`);
+            const data = await res.json();
+            console.log("WAVE DATA:", data);
+            alert("Proveri konzolu");
+        }
+
+        // ==================== EKSPORT FUNKCIJA ====================
+        window.removeInvoice = removeInvoice;
+        window.clearScanned = clearScanned;
+        window.startWave = startWave;
+        window.debugWave = debugWave;
+        window.takeItem = takeItem;
+        window.setOOS = setOOS;
+        window.setProblem = setProblem;
+        window.dopuni = dopuni;
+        window.handleExcelUpload = handleExcelUpload;
+        window.downloadSampleExcel = downloadSampleExcel;
+        window.showBoxDetails = showBoxDetails;
+    </script>
+</body>
+</html>

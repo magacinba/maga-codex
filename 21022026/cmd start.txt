@@ -1,0 +1,2 @@
+cd "C:\Users\ThinkCentre Win10\magacin-routing"
+python -m uvicorn wave_app:app --reload --host 127.0.0.1 --port 8000

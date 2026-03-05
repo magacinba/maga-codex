@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magacin Picking – Phase 2 | OPTIMIZOVANO</title>
+    <!-- SheetJS za Excel import -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <!-- Chart.js za grafikone -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Chart.js annotation plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #0a7;
+            --warning: #f0ad4e;
+            --danger: #d9534f;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            max-width: 1700px;
+            margin: 0 auto;
+            background: #f1f5f9;
+            color: var(--dark);
+        }
+        
+        h2 { 
+            margin-top: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            background: white;
+        }
+        
+        .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 16px;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.03);
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-top: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
+        .btn-ok { background: var(--success); border-color: var(--success); color: white; }
+        .btn-warn { background: var(--warning); border-color: var(--warning); color: #111; }
+        .btn-bad { background: var(--danger); border-color: var(--danger); color: white; }
+        .btn-skip { background: #64748b; border-color: #64748b; color: white; }
+        .btn-purple { background: #8b5cf6; border-color: #8b5cf6; color: white; }
+        
+        .muted { color: #64748b; font-size: 0.9rem; }
+        .big { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+        
+        td, th {
+            border-bottom: 1px solid var(--border);
+            padding: 14px 8px;
+            vertical-align: middle;
+            text-align: left;
+        }
+        
+        .doneRow {
+            opacity: 0.65;
+            text-decoration: line-through;
+            background: #f1f5f9;
+        }
+        
+        .pill {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            margin-left: 12px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .note {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+            padding-left: 8px;
+            border-left: 2px solid var(--warning);
+        }
+        
+        .mainGrid {
+            display: grid;
+            grid-template-columns: 1.5fr 0.9fr 0.9fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 1300px) {
+            .mainGrid { grid-template-columns: 1fr; }
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-red { border-color: var(--danger); color: var(--danger); background: #fee2e2; }
+        .badge-orange { border-color: var(--warning); color: #b45309; background: #fffbeb; }
+        .badge-green { border-color: var(--success); color: var(--success); background: #e6f7e6; }
+        .badge-gray { border-color: #94a3b8; color: #475569; background: #f1f5f9; }
+        .badge-blue { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+        
+        .list {
+            margin: 8px 0 0 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .list li {
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        
+        .routeItem {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            width: 100%;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 999px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Zoom kontrola za mapu */
+        .map-zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .map-zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border);
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .map-zoom-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>🏭 Magacin Picking • Optimizovana ruta</h2>
+
+    <div class="card">
+        <div class="row">
+            <!-- LEVI DEO - UNOS STAVKI I EXCEL UPLOAD -->
+            <div style="flex:2; min-width:380px">
+                <div class="muted" style="margin-bottom:8px">
+                    📦 Unos stavki: <b>lokacija,sku,qty</b> ili <b>sku,qty,lokacija</b> (separator , ili ;)
+                </div>
+                
+                <textarea id="items">A581,123456,2
+A581,654321,10
+A98,111111,1
+A87,222222,1
+C1,444444,1
+D52,888888,1
+B1987,101010,1</textarea>
+                
+                <!-- TOOLBAR ZA EXCEL -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px">
+                    <div style="display:flex; gap:8px">
+                        <button class="btn" onclick="document.getElementById('excelFile').click()" style="padding:6px 12px; font-size:13px">
+                            📂 Učitaj Excel
+                        </button>
+                        <button class="btn" onclick="downloadSampleExcel()" style="padding:6px 12px; font-size:13px">
+                            📥 Primer
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn" onclick="clearItems()" style="padding:6px 12px; font-size:13px; background:#fee2e2; border-color:#d9534f; color:#d9534f">
+                            🗑️ Obriši sve
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- HIDDEN FILE INPUT -->
+                <input 
+                    type="file" 
+                    id="excelFile" 
+                    accept=".xlsx, .xls, .csv" 
+                    style="display:none"
+                    onchange="handleExcelUpload(this)"
+                >
+                
+                <!-- STATUS FAJLA -->
+                <span id="fileName" class="muted" style="font-size:12px; margin-top:8px; display:none; padding:4px 12px; background:#e6f7e6; border-radius:999px">
+                    ✅ 
+                </span>
+            </div>
+            
+            <!-- DESNI DEO - MODE I DUGMAD -->
+            <div style="flex:1; min-width:280px">
+                <div style="display:flex; flex-direction:column; gap:12px">
+                    <div>
+                        <label style="display:block; margin-bottom:6px; font-weight:600">🚚 Režim rada:</label>
+                        <select id="mode" style="padding:12px; width:100%; border-radius:10px; border:2px solid var(--border); background:white; font-weight:500">
+                            <option value="optimal" selected>⚡ Optimalno (TSP + 2-opt)</option>
+                            <option value="hybrid">🔄 Hibridno (sektori + TSP)</option>
+                            <option value="sector">📍 Po sektorima (A→B→C→D→E)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- INFO O ULAZIMA/IZLAZIMA -->
+                    <div style="padding:12px; background:#f1f5f9; border-radius:8px; margin-top:4px">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
+                            <span style="font-weight:600">🚪 Ulazi/Izlazi:</span>
+                        </div>
+                        <div style="display:flex; gap:16px; flex-wrap:wrap">
+                            <div><span class="badge badge-blue">ENTRANCE_1</span> Levo (C2)</div>
+                            <div><span class="badge badge-blue">ENTRANCE_2</span> Desno (M2)</div>
+                        </div>
+                        <div class="muted" style="margin-top:6px; font-size:12px">
+                            ⚡ Sistem automatski bira najkraći ulaz/izlaz
+                        </div>
+                    </div>
+                    
+                    <div class="toolbar">
+                        <button class="btn btn-primary" onclick="startTask()" style="flex:1">🚀 Start</button>
+                        <button class="btn" onclick="refreshTask()">🔄 Refresh</button>
+                        <button class="btn" onclick="clearSession()" title="Obriši trenutnu sesiju">🗑️</button>
+                        <button class="btn" onclick="debugTask()">🐞 Debug</button>
+                    </div>
+                    
+                    <div id="status" class="muted" style="background:#f1f5f9; padding:10px; border-radius:8px; margin-top:4px">
+                        ⏳ Spreman
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingIndicator" style="display:none; text-align:center; padding:20px">
+        <div class="spinner" style="width:32px; height:32px;"></div>
+        <div style="margin-top:8px">Učitavanje...</div>
+    </div>
+
+    <div class="mainGrid" id="mainGrid" style="display:none">
+        <!-- LEVI PANEL - Trenutna lokacija i stavke -->
+        <div class="card" id="taskCard">
+            <div class="big">
+                <span>📍 Trenutna lokacija:</span>
+                <span id="curLoc" style="background:var(--primary); color:white; padding:4px 16px; border-radius:999px; font-size:20px">-</span>
+                <span class="pill" id="progressPill">0/0</span>
+            </div>
+            
+            <div style="margin-top:4px; display:flex; justify-content:space-between; align-items:center">
+                <span class="muted" id="routeInfo"></span>
+                <span id="progressPercent" style="font-weight:600; color:var(--success)">0%</span>
+            </div>
+            
+            <div class="progress-bar" id="progressBarContainer" style="display:none">
+                <div class="progress-fill" id="progressBarFill" style="width:0%"></div>
+            </div>
+
+            <div style="margin-top:16px; max-height:400px; overflow-y:auto; border-radius:12px; border:1px solid var(--border)">
+                <table id="itemsTable">
+                    <thead style="background:#f8fafc; position:sticky; top:0">
+                        <tr>
+                            <th style="width:140px">📦 SKU</th>
+                            <th style="width:130px">📊 Količina</th>
+                            <th style="width:110px">🔖 Status</th>
+                            <th>🎯 Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap">
+                <button class="btn btn-skip" onclick="skipAllOnLocation()" id="skipAllBtn" style="display:none">⏭️ Preskoči sve na lokaciji</button>
+                <span class="muted" style="font-size:12px; flex:1; text-align:right">
+                    💡 PARTIAL → moraš zatvoriti (Nema/Problem/Skip)
+                </span>
+            </div>
+        </div>
+
+        <!-- SREDNJI PANEL - Izveštaj -->
+        <div class="card" id="reportCard">
+            <div class="reportTitle" style="display:flex; justify-content:space-between; align-items:center">
+                <div class="big">📋 Izveštaj</div>
+                <div class="badge badge-blue" id="reportCounts">-</div>
+            </div>
+            <div class="muted" id="reportMeta" style="margin-bottom:12px"></div>
+            
+            <div style="margin-top:8px; border-bottom:2px solid var(--border); padding-bottom:8px">
+                <span class="badge badge-red">⛔ Nije nađeno / Problem</span>
+            </div>
+            <div id="repMissing" style="max-height:400px; overflow-y:auto;"></div>
+
+            <div style="margin-top:16px; border-bottom:2px solid var(--border); padding-bottom:8px">
+                <span class="badge badge-green">✅ Uzeto</span>
+            </div>
+            <ul class="list" id="repTaken" style="max-height:200px; overflow-y:auto"></ul>
+
+            <div style="margin-top:16px; border-bottom:2px solid var(--border); padding-bottom:8px">
+                <span class="badge badge-gray">⏳ Na čekanju / Partial</span>
+            </div>
+            <ul class="list" id="repPending" style="max-height:200px; overflow-y:auto"></ul>
+            
+            <div style="margin-top:16px; text-align:right">
+                <button class="btn" onclick="exportReport()" style="font-size:12px">📤 Export izveštaja</button>
+            </div>
+        </div>
+
+        <!-- DESNI PANEL - Ruta + Mapa -->
+        <div class="card" id="routeCard">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+                <div class="big">🗺️ Putanja</div>
+                <div class="badge badge-gray" id="routeTotal">- m</div>
+            </div>
+            
+            <!-- TABOVI - Putanja / Mapa -->
+            <div style="display:flex; gap:8px; margin-bottom:16px; border-bottom:2px solid var(--border); padding-bottom:8px">
+                <button id="tabRouteBtn" class="btn" style="background:var(--primary); color:white; border:none" onclick="switchRouteTab('route')">
+                    📋 Lista rute
+                </button>
+                <button id="tabMapBtn" class="btn" onclick="switchRouteTab('map')">
+                    🗺️ Grafička mapa
+                </button>
+            </div>
+            
+            <!-- PRIKAZ LISTE RUTE (podrazumevano) -->
+            <div id="routeListContainer">
+                <div class="muted small" style="margin-bottom:12px">
+                    🚪 Ulaz → Lokacije → Izlaz (Manhattan distance)
+                </div>
+                <div style="max-height:400px; overflow-y:auto">
+                    <ul class="list" id="routeList" style="margin-top:0"></ul>
+                </div>
+                <div style="margin-top:16px; padding:12px; background:#f1f5f9; border-radius:8px">
+                    <div style="display:flex; justify-content:space-between">
+                        <span class="mono" id="routeStart">-</span>
+                        <span>→</span>
+                        <span class="mono" id="routeEnd">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PRIKAZ GRAFIČKE MAPE (sakriveno) -->
+            <div id="routeMapContainer" style="display:none">
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px">
+                    <span class="muted">📐 2D prikaz magacina</span>
+                    <span class="badge badge-blue" id="mapLegend">📍 A • B • C • D • E</span>
+                </div>
+                
+                <!-- Canvas za crtanje mape -->
+                <div style="position:relative; background:#0f172a; border-radius:16px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.1); margin-bottom:16px; overflow:auto; max-height:800px">
+                    <canvas id="warehouseMap" style="width:100%; height:700px; background:#0f172a; border-radius:12px; transition:transform 0.2s;"></canvas>
+                    
+                    <!-- Legenda preko mape -->
+                    <div style="position:absolute; top:20px; left:20px; background:rgba(15,23,42,0.85); padding:12px 20px; border-radius:999px; backdrop-filter:blur(4px); border:1px solid #334155; display:flex; gap:20px; flex-wrap:wrap; z-index:50">
+                        <div style="display:flex; align-items:center; gap:6px">
+                            <div style="width:12px; height:12px; background:#ef4444; border-radius:2px;"></div>
+                            <span style="color:white; font-size:12px">Ulaz/Izlaz</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px">
+                            <div style="width:12px; height:12px; background:#3b82f6; border-radius:2px;"></div>
+                            <span style="color:white; font-size:12px">Lokacija</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px">
+                            <div style="width:12px; height:12px; background:#f59e0b; border-radius:2px;"></div>
+                            <span style="color:white; font-size:12px">Trenutna</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px">
+                            <div style="width:20px; height:2px; background:#10b981;"></div>
+                            <span style="color:white; font-size:12px">Putanja</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Zoom dugmad -->
+                    <div class="map-zoom-controls">
+                        <button class="map-zoom-btn" onclick="zoomMapIn()">+</button>
+                        <button class="map-zoom-btn" onclick="zoomMapOut()">-</button>
+                        <button class="map-zoom-btn" onclick="resetMapZoom()">⟲</button>
+                    </div>
+                </div>
+                
+                <!-- Statistički podaci -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+                    <div style="background:#f1f5f9; padding:12px; border-radius:12px">
+                        <div style="font-size:11px; color:#475569">Ukupna distanca</div>
+                        <div style="font-size:24px; font-weight:700; color:var(--primary)" id="mapTotalDist">0 m</div>
+                    </div>
+                    <div style="background:#f1f5f9; padding:12px; border-radius:12px">
+                        <div style="font-size:11px; color:#475569">Broj lokacija</div>
+                        <div style="font-size:24px; font-weight:700; color:var(--success)" id="mapLocationsCount">0</div>
+                    </div>
+                    <div style="background:#f1f5f9; padding:12px; border-radius:12px">
+                        <div style="font-size:11px; color:#475569">Ulaz</div>
+                        <div style="font-size:16px; font-weight:600" id="mapStartPoint">-</div>
+                    </div>
+                    <div style="background:#f1f5f9; padding:12px; border-radius:12px">
+                        <div style="font-size:11px; color:#475569">Izlaz</div>
+                        <div style="font-size:16px; font-weight:600" id="mapEndPoint">-</div>
+                    </div>
+                </div>
+                
+                <!-- Navigacija kroz rutu -->
+                <div style="margin-top:16px; display:flex; gap:8px; justify-content:center; align-items:center">
+                    <button class="btn" onclick="previousMapPoint()" style="padding:8px 20px; background:var(--primary); color:white; border:none">
+                        ◀ Prethodni
+                    </button>
+                    <span id="mapCurrentPoint" style="padding:8px 20px; background:white; border-radius:8px; font-weight:600; border:2px solid var(--border)">
+                        0/0
+                    </span>
+                    <button class="btn" onclick="nextMapPoint()" style="padding:8px 20px; background:var(--primary); color:white; border:none">
+                        Sledeći ▶
+                    </button>
+                    <button class="btn" onclick="debugMapPoints()" style="margin-left:8px">🐞</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== KONFIGURACIJA ====================
+        const API = "http://127.0.0.1:8000";
+        let SESSION_ID = null;
+        let LOADING = false;
+        let mapChart = null;
+        let currentMapPointIndex = 0;
+        let mapPoints = [];
+        let mapZoomLevel = 1.0;
+
+        // ==================== UTILITY FUNKCIJE ====================
+        function escapeHtml(s) {
+            if (s === null || s === undefined) return "";
+            return String(s)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function setLoading(isLoading) {
+            LOADING = isLoading;
+            document.getElementById("loadingIndicator").style.display = isLoading ? "block" : "none";
+            document.querySelectorAll("button").forEach(b => b.disabled = isLoading);
+        }
+
+        function setStatus(msg, isError = false) {
+            const el = document.getElementById("status");
+            el.innerText = msg;
+            el.style.background = isError ? "#fee2e2" : "#f1f5f9";
+            el.style.color = isError ? "#b91c1c" : "#475569";
+        }
+
+        // ==================== PARSIRANJE ====================
+        function parseLines(text) {
+            const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+            const items = [];
+            
+            for (const line of lines) {
+                const parts = line.split(/[,;]+/).map(x => x.trim()).filter(Boolean);
+                if (parts.length < 3) continue;
+
+                let loc = null, sku = null, qty = null;
+
+                for (const p of parts) {
+                    if (/^[A-Za-z]\d+$/.test(p)) loc = p.toUpperCase();
+                    else if (/^\d{6}$/.test(p)) sku = p;
+                    else if (/^\d+$/.test(p)) qty = parseInt(p, 10);
+                }
+
+                if (!loc && /^[A-Za-z]\d+$/.test(parts[0])) loc = parts[0].toUpperCase();
+                if (!sku && /^\d{6}$/.test(parts[1])) sku = parts[1];
+                if (!qty && /^\d+$/.test(parts[2])) qty = parseInt(parts[2], 10);
+
+                if (loc && sku && qty) {
+                    items.push({ location: loc, sku: sku, qty: qty });
+                }
+            }
+            return items;
+        }
+
+        function statusBadge(st) {
+            const badges = {
+                "pending": `<span class="badge badge-gray">⏳ PENDING</span>`,
+                "partial": `<span class="badge badge-orange">⚠️ PARTIAL</span>`,
+                "taken": `<span class="badge badge-green">✅ UZETO</span>`,
+                "oos": `<span class="badge badge-orange">❌ NEMA</span>`,
+                "problem": `<span class="badge badge-red">🔧 PROBLEM</span>`,
+                "skipped": `<span class="badge badge-gray">⏭️ PRESKOČENO</span>`
+            };
+            return badges[st] || `<span class="badge badge-gray">${st}</span>`;
+        }
+
+        // ==================== EXCEL UPLOAD ====================
+        async function handleExcelUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            setLoading(true);
+            setStatus(`📊 Učitavam fajl: ${file.name}...`);
+            
+            document.getElementById("fileName").style.display = "inline-block";
+            document.getElementById("fileName").innerHTML = `✅ ${file.name}`;
+            
+            try {
+                let text = "";
+                
+                if (file.name.endsWith('.csv')) {
+                    text = await file.text();
+                } else {
+                    const data = await file.arrayBuffer();
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheet];
+                    text = XLSX.utils.sheet_to_csv(worksheet);
+                }
+                
+                const converted = convertExcelToItems(text);
+                document.getElementById("items").value = converted;
+                
+                setStatus(`✅ Učitano ${countLines(converted)} stavki iz ${file.name}`, false);
+                
+            } catch (err) {
+                setStatus("❌ Greška pri učitavanju fajla: " + err.message, true);
+                console.error(err);
+            } finally {
+                setLoading(false);
+                input.value = '';
+            }
+        }
+
+        function convertExcelToItems(csvText) {
+            const lines = csvText.split(/\r?\n/).filter(line => line.trim());
+            const result = [];
+            
+            const firstLine = lines[0]?.toLowerCase() || '';
+            const hasHeader = firstLine.includes('lokacija') || 
+                                firstLine.includes('sku') || 
+                                firstLine.includes('qty') ||
+                                firstLine.includes('kolicina') ||
+                                firstLine.includes('location');
+            
+            const startIndex = hasHeader ? 1 : 0;
+            
+            for (let i = startIndex; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const parts = line.split(/[,;]+/).map(p => p.trim()).filter(p => p);
+                if (parts.length < 3) continue;
+                
+                let loc = '', sku = '', qty = '';
+                
+                for (const p of parts) {
+                    if (/^[A-Za-z]\d+$/.test(p)) loc = p.toUpperCase();
+                    else if (/^\d{6}$/.test(p)) sku = p;
+                    else if (/^\d+$/.test(p)) qty = p;
+                }
+                
+                if (!loc && parts[0] && /^[A-Za-z]/.test(parts[0])) loc = parts[0].toUpperCase();
+                if (!sku && parts[1] && /^\d{6}$/.test(parts[1])) sku = parts[1];
+                if (!qty && parts[2] && /^\d+$/.test(parts[2])) qty = parts[2];
+                
+                if (!loc && parts[2] && /^[A-Za-z]\d+$/.test(parts[2])) loc = parts[2].toUpperCase();
+                if (!sku && parts[0] && /^\d{6}$/.test(parts[0])) sku = parts[0];
+                if (!qty && parts[1] && /^\d+$/.test(parts[1])) qty = parts[1];
+                
+                if (loc && sku && qty) {
+                    result.push(`${loc},${sku},${qty}`);
+                }
+            }
+            
+            return result.join('\n');
+        }
+
+        function countLines(text) {
+            return text.split('\n').filter(l => l.trim()).length;
+        }
+
+        function downloadSampleExcel() {
+            const sampleData = [
+                ['lokacija', 'sku', 'kolicina'],
+                ['A581', '123456', '2'],
+                ['A581', '654321', '10'],
+                ['A98', '111111', '1'],
+                ['A87', '222222', '1'],
+                ['C1', '444444', '1'],
+                ['D52', '888888', '1'],
+                ['B1987', '101010', '1']
+            ];
+            
+            let csv = sampleData.map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pick-list-sample.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            setStatus("📥 Skinut primer fajla (pick-list-sample.csv)");
+        }
+
+        function clearItems() {
+            if (confirm("Obriši sve stavke?")) {
+                document.getElementById("items").value = "";
+                document.getElementById("fileName").style.display = "none";
+                setStatus("🗑️ Unos očišćen");
+            }
+        }
+
+        // ==================== API POZIVI ====================
+        async function startTask() {
+            const mode = document.getElementById("mode").value;
+            const text = document.getElementById("items").value;
+            const items = parseLines(text);
+            
+            if (!items.length) {
+                setStatus("❌ Nema validnih stavki. Proveri format (lokacija,sku,qty)", true);
+                return;
+            }
+
+            setLoading(true);
+            setStatus("🚀 Pokrećem task...");
+
+            try {
+                const res = await fetch(`${API}/task/start`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ items, mode })
+                });
+
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    setStatus("❌ Greška: " + (data.detail || JSON.stringify(data)), true);
+                    return;
+                }
+
+                SESSION_ID = data.session_id;
+                setStatus(`✅ Session: ${SESSION_ID.substring(0,8)}... | Mod: ${data.mode} | ${data.ordered_locations.length} lokacija`);
+                
+                document.getElementById("mainGrid").style.display = "grid";
+                await renderTask();
+            } catch (err) {
+                setStatus("❌ Mrežna greška: " + err.message, true);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function refreshTask() {
+            if (!SESSION_ID) {
+                setStatus("❌ Nema aktivne sesije. Klikni Start.", true);
+                return;
+            }
+            setLoading(true);
+            await renderTask();
+            setLoading(false);
+        }
+
+        async function clearSession() {
+            if (SESSION_ID && confirm("Obriši trenutnu sesiju?")) {
+                try {
+                    await fetch(`${API}/task/${SESSION_ID}`, { method: "DELETE" });
+                } catch (e) {}
+                SESSION_ID = null;
+                document.getElementById("mainGrid").style.display = "none";
+                setStatus("🗑️ Sesija obrisana");
+            }
+        }
+
+        // ==================== RENDER FUNKCIJE ====================
+        function buildRoutePanel(data) {
+            const list = document.getElementById("routeList");
+            if (!list) return;
+            
+            list.innerHTML = "";
+            
+            const legs = data.route_legs?.legs || [];
+            const total = data.route_legs?.total_m ?? data.distance_m ?? "-";
+            
+            document.getElementById("routeTotal").innerHTML = `📏 Ukupno ~ ${total} m`;
+            
+            let startName = data.start || "START";
+            let endName = data.end || "END";
+            
+            if (startName === "M2") startName = "ENTRANCE_2 (Desno)";
+            if (startName === "C2") startName = "ENTRANCE_1 (Levo)";
+            if (startName === "D2") startName = "ENTRANCE_1 (Levo)";
+            
+            if (endName === "M2") endName = "ENTRANCE_2 (Desno)";
+            if (endName === "C2") endName = "ENTRANCE_1 (Levo)";
+            if (endName === "D2") endName = "ENTRANCE_1 (Levo)";
+            
+            document.getElementById("routeStart").innerText = startName;
+            document.getElementById("routeEnd").innerText = endName;
+
+            const cur = data.current_location;
+
+            if (legs.length === 0) {
+                list.innerHTML = `<li class="muted" style="padding:16px; text-align:center">⛔ Nema podataka o ruti</li>`;
+                return;
+            }
+
+            for (const leg of legs) {
+                const isCur = (leg.to === cur) || (leg.from === cur);
+                
+                let fromName = leg.from;
+                let toName = leg.to;
+                
+                if (fromName === "M2") fromName = "ENTRANCE_2";
+                if (fromName === "C2") fromName = "ENTRANCE_1";
+                if (fromName === "D2") fromName = "ENTRANCE_1";
+                
+                if (toName === "M2") toName = "ENTRANCE_2";
+                if (toName === "C2") toName = "ENTRANCE_1";
+                if (toName === "D2") toName = "ENTRANCE_1";
+                
+                list.innerHTML += `
+                    <li style="padding:8px 12px; ${isCur ? 'background:#eff6ff; border-left:4px solid var(--primary);' : ''}">
+                        <div class="routeItem">
+                            <div>
+                                <span class="mono">${escapeHtml(fromName)}</span>
+                                <span style="margin:0 8px">→</span>
+                                <span class="mono">${escapeHtml(toName)}</span>
+                            </div>
+                            <div class="mono" style="font-weight:600; color:${isCur ? 'var(--primary)' : '#475569'}">${leg.dist_m} m</div>
+                        </div>
+                    </li>`;
+            }
+        }
+
+        // ==================== GRAFIČKA MAPA ====================
+        function switchRouteTab(tab) {
+            const routeContainer = document.getElementById("routeListContainer");
+            const mapContainer = document.getElementById("routeMapContainer");
+            const tabRoute = document.getElementById("tabRouteBtn");
+            const tabMap = document.getElementById("tabMapBtn");
+            
+            if (!routeContainer || !mapContainer) return;
+            
+            if (tab === 'route') {
+                routeContainer.style.display = "block";
+                mapContainer.style.display = "none";
+                tabRoute.style.background = "var(--primary)";
+                tabRoute.style.color = "white";
+                tabMap.style.background = "white";
+                tabMap.style.color = "var(--dark)";
+            } else {
+                routeContainer.style.display = "none";
+                mapContainer.style.display = "block";
+                tabMap.style.background = "var(--primary)";
+                tabMap.style.color = "white";
+                tabRoute.style.background = "white";
+                tabRoute.style.color = "var(--dark)";
+                
+                setTimeout(() => drawWarehouseMap(), 100);
+            }
+        }
+
+        function drawWarehouseMap() {
+            if (!SESSION_ID) return;
+            
+            fetch(`${API}/task/${SESSION_ID}`)
+                .then(res => res.json())
+                .then(data => {
+                    const legs = data.route_legs?.legs || [];
+                    const total = data.route_legs?.total_m ?? data.distance_m ?? 0;
+                    
+                    document.getElementById("mapTotalDist").innerText = `${total} m`;
+                    document.getElementById("mapStartPoint").innerText = formatEntranceName(data.start);
+                    document.getElementById("mapEndPoint").innerText = formatEntranceName(data.end);
+                    
+                    mapPoints = [];
+                    
+                    // Dodaj start
+                    mapPoints.push({
+                        name: formatEntranceName(data.start),
+                        type: 'entrance',
+                        x: getEntranceX(data.start),
+                        y: getEntranceY(data.start)
+                    });
+                    
+                    // Dodaj sve lokacije
+                    data.ordered_locations.forEach(loc => {
+                        const sector = loc.charAt(0);
+                        const number = parseInt(loc.substring(1)) || 0;
+                        
+                        mapPoints.push({
+                            name: loc,
+                            type: 'location',
+                            isCurrent: loc === data.current_location,
+                            sector: sector,
+                            x: getLocationX(sector, number),
+                            y: getLocationY(sector, number)
+                        });
+                    });
+                    
+                    // Dodaj end
+                    mapPoints.push({
+                        name: formatEntranceName(data.end),
+                        type: 'entrance',
+                        x: getEntranceX(data.end),
+                        y: getEntranceY(data.end)
+                    });
+                    
+                    document.getElementById("mapLocationsCount").innerText = data.ordered_locations.length;
+                    document.getElementById("mapCurrentPoint").innerText = `0/${mapPoints.length-1}`;
+                    currentMapPointIndex = 0;
+                    
+                    createMapChart(mapPoints, legs, data.current_location);
+                });
+        }
+
+        function formatEntranceName(name) {
+            if (!name) return "START";
+            if (name === "M2") return "ENTRANCE_2";
+            if (name === "C2") return "ENTRANCE_1";
+            if (name === "D2") return "ENTRANCE_1";
+            return name;
+        }
+
+        function getEntranceX(name) {
+            if (name === "M2" || name === "ENTRANCE_2") return 10;
+            return 0.5;
+        }
+
+        function getEntranceY(name) {
+            return 1;
+        }
+
+        function getLocationX(sector, number) {
+            const sectorMap = { 'A': 1, 'B': 3, 'C': 5, 'D': 7, 'E': 9 };
+            const baseX = sectorMap[sector] || 1;
+            const offset = ((number % 10) / 10) * 0.8;
+            return baseX + offset;
+        }
+
+        function getLocationY(sector, number) {
+            const block = Math.floor((number - 1) / 10) + 1;
+            const baseY = { 'A': 2, 'B': 24, 'C': 46, 'D': 68, 'E': 90 };
+            return (baseY[sector] || 2) + (block - 1) * 1;
+        }
+
+        function createMapChart(points, legs, currentLocation) {
+            const canvas = document.getElementById('warehouseMap');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            if (mapChart) {
+                mapChart.destroy();
+            }
+            
+            const pointColors = points.map(p => {
+                if (p.type === 'entrance') return '#ef4444';
+                if (p.isCurrent) return '#f59e0b';
+                return '#3b82f6';
+            });
+            
+            mapChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Tačke rute',
+                        data: points.map((p, i) => ({ x: p.x, y: p.y })),
+                        backgroundColor: pointColors,
+                        borderColor: 'white',
+                        borderWidth: 2,
+                        pointRadius: points.map(p => p.type === 'entrance' ? 16 : 14),
+                        pointHoverRadius: 18,
+                        pointStyle: points.map(p => p.type === 'entrance' ? 'rectRounded' : 'circle')
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { left: 30, right: 30, top: 30, bottom: 30 }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const point = points[context.dataIndex];
+                                    return `${point.name}${point.isCurrent ? ' (trenutno)' : ''}`;
+                                }
+                            }
+                        },
+                        legend: { display: false },
+                        annotation: { annotations: {} }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'X (metri) - Sektori A, B, C, D, E',
+                                color: '#94a3b8',
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            grid: { 
+                                color: 'rgba(148, 163, 184, 0.08)',
+                                lineWidth: 0.3,
+                                tickLength: 3
+                            },
+                            min: -1,
+                            max: 11,
+                            ticks: {
+                                stepSize: 2,
+                                callback: function(val) {
+                                    if (val === 1) return 'A';
+                                    if (val === 3) return 'B';
+                                    if (val === 5) return 'C';
+                                    if (val === 7) return 'D';
+                                    if (val === 9) return 'E';
+                                    if (val === 0.5) return 'ULAZ';
+                                    if (val === 10) return 'IZLAZ';
+                                    return '';
+                                }
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Y (metri) - Redovi',
+                                color: '#94a3b8',
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            grid: { 
+                                color: 'rgba(148, 163, 184, 0.08)',
+                                lineWidth: 0.3,
+                                tickLength: 3
+                            },
+                            min: 0,
+                            max: 110,
+                            ticks: {
+                                stepSize: 30,
+                                callback: function(val) {
+                                    if (val === 2) return 'Red 2';
+                                    if (val === 24) return 'Red 24';
+                                    if (val === 46) return 'Red 46';
+                                    if (val === 68) return 'Red 68';
+                                    if (val === 90) return 'Red 90';
+                                    if (val === 109) return 'Red 109';
+                                    return '';
+                                }
+                            },
+                            reverse: false
+                        }
+                    }
+                }
+            });
+            
+            if (mapChart) {
+                const annotations = {};
+                for (let i = 0; i < points.length - 1; i++) {
+                    annotations[`line${i}`] = {
+                        type: 'line',
+                        xMin: points[i].x,
+                        xMax: points[i + 1].x,
+                        yMin: points[i].y,
+                        yMax: points[i + 1].y,
+                        borderColor: i === currentMapPointIndex ? '#10b981' : '#94a3b8',
+                        borderWidth: i === currentMapPointIndex ? 5 : 3,
+                        borderDash: i === currentMapPointIndex ? [] : [8, 5],
+                        label: {
+                            display: i === currentMapPointIndex,
+                            content: `${Math.round(getDistance(points[i], points[i + 1]) * 10) / 10} m`,
+                            position: 'center',
+                            backgroundColor: 'rgba(16, 185, 129, 0.95)',
+                            color: 'white',
+                            font: { size: 12, weight: 'bold' },
+                            padding: { x: 8, y: 4 }
+                        }
+                    };
+                }
+                
+                mapChart.options.plugins.annotation = { annotations };
+                mapChart.update();
+            }
+        }
+
+        function getDistance(p1, p2) {
+            return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+        }
+
+        // ==================== ZOOM MAPE ====================
+        function zoomMapIn() {
+            mapZoomLevel = Math.min(mapZoomLevel + 0.2, 2.0);
+            applyMapZoom();
+        }
+
+        function zoomMapOut() {
+            mapZoomLevel = Math.max(mapZoomLevel - 0.2, 0.6);
+            applyMapZoom();
+        }
+
+        function resetMapZoom() {
+            mapZoomLevel = 1.0;
+            applyMapZoom();
+        }
+
+        function applyMapZoom() {
+            const canvas = document.getElementById('warehouseMap');
+            if (!canvas) return;
+            
+            canvas.style.transform = `scale(${mapZoomLevel})`;
+            canvas.style.transformOrigin = 'top left';
+            
+            const container = canvas.parentElement;
+            container.style.height = `${700 * mapZoomLevel}px`;
+        }
+
+        // ==================== NAVIGACIJA KROZ MAPU ====================
+        function previousMapPoint() {
+            if (!mapPoints || mapPoints.length === 0) {
+                alert("Prvo startuj task i otvori grafičku mapu!");
+                return;
+            }
+            if (currentMapPointIndex > 0) {
+                currentMapPointIndex--;
+                document.getElementById("mapCurrentPoint").innerText = `${currentMapPointIndex}/${mapPoints.length-1}`;
+                drawWarehouseMap();
+            }
+        }
+
+        function nextMapPoint() {
+            if (!mapPoints || mapPoints.length === 0) {
+                alert("Prvo startuj task i otvori grafičku mapu!");
+                return;
+            }
+            if (currentMapPointIndex < mapPoints.length - 2) {
+                currentMapPointIndex++;
+                document.getElementById("mapCurrentPoint").innerText = `${currentMapPointIndex}/${mapPoints.length-1}`;
+                drawWarehouseMap();
+            }
+        }
+
+        function debugMapPoints() {
+            console.log("=== MAP DEBUG ===");
+            console.log("mapPoints:", mapPoints);
+            console.log("currentMapPointIndex:", currentMapPointIndex);
+            console.log("Ukupno tačaka:", mapPoints?.length);
+            console.log("Trenutni segment:", currentMapPointIndex);
+            console.log("=================");
+            alert("Proveri konzolu (F12)");
+        }
+
+        // ==================== FUNKCIJE ZA DOPUNU - ISPRAVLJENE ====================
+        async function dopuni(sku, required, picked) {
+            console.log("dopuni pozvana sa:", {sku, required, picked});
+            
+            const fali = required - (picked || 0);
+            const dodatno = prompt(`📦 Koliko još za SKU ${sku}? (max ${fali})`, fali);
+            if (!dodatno) return;
+            
+            const novo = (picked || 0) + parseInt(dodatno);
+            if (novo > required || novo < 0) {
+                alert('❌ Neispravna količina');
+                return;
+            }
+            
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}/update`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        sku: sku,
+                        action: 'dopuna',
+                        qty_picked: novo,
+                        note: `Dopuna +${dodatno}`
+                    })
+                });
+                
+                const data = await res.json();
+                console.log("Odgovor na DOPUNU:", data);
+                
+                if (!res.ok) {
+                    alert('❌ Greška: ' + (data.detail || 'Nepoznata greška'));
+                    return;
+                }
+                
+                // Sačekaj malo da se podaci ažuriraju na serveru
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Ponovo učitaj sveže podatke i osveži prikaz
+                await renderTask();
+                
+                if (novo === required) {
+                    alert(`✅ Stavka ${sku} je kompletirana i prebačena u UZETO!`);
+                } else {
+                    alert(`✅ Uspešno dodato ${dodatno} komada! Preostalo: ${required - novo}`);
+                }
+                
+            } catch (e) {
+                alert('❌ Greška: ' + e.message);
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function kompletno(sku, required) {
+            console.log("kompletno pozvana sa:", {sku, required});
+            
+            if (!confirm(`✅ Kompletiraj SKU ${sku}?`)) return;
+            
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}/update`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        sku: sku,
+                        action: 'dopuna',
+                        qty_picked: required,
+                        note: 'Kompletirano naknadno'
+                    })
+                });
+                
+                const data = await res.json();
+                console.log("Odgovor na KOMPLETNO:", data);
+                
+                if (!res.ok) {
+                    alert('❌ Greška: ' + (data.detail || 'Nepoznata greška'));
+                    return;
+                }
+                
+                // Sačekaj malo da se podaci ažuriraju na serveru
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Ponovo učitaj sveže podatke i osveži prikaz
+                await renderTask();
+                
+                alert(`✅ Artikal ${sku} je kompletiran i prebačen u UZETO!`);
+                
+            } catch (e) {
+                alert('❌ Greška: ' + e.message);
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // ==================== IZVEŠTAJ SA DUGMADIMA ZA DOPUNU ====================
+        function buildReport(data) {
+            const repMissing = document.getElementById("repMissing");
+            const repTaken = document.getElementById("repTaken");
+            const repPending = document.getElementById("repPending");
+            
+            repMissing.innerHTML = "";
+            repTaken.innerHTML = "";
+            repPending.innerHTML = "";
+
+            let cntPending = 0, cntPartial = 0, cntTaken = 0, cntOos = 0, cntProb = 0, cntSkip = 0;
+
+            const rows = [];
+            for (const loc of data.ordered_locations || []) {
+                const arr = data.items_by_loc[loc] || [];
+                for (const it of arr) {
+                    rows.push({ loc, ...it });
+                    if (it.status === "pending") cntPending++;
+                    else if (it.status === "partial") cntPartial++;
+                    else if (it.status === "taken") cntTaken++;
+                    else if (it.status === "oos") cntOos++;
+                    else if (it.status === "problem") cntProb++;
+                    else if (it.status === "skipped") cntSkip++;
+                }
+            }
+
+            // ===== PROBLEM / NEMA - SA DUGMADIMA ZA DOPUNU =====
+            const miss = rows.filter(r => ["oos", "problem", "skipped"].includes(r.status));
+            
+            if (!miss.length) {
+                repMissing.innerHTML = `<div><span class="badge badge-green">✅ OK</span> Nema “Nema/Problem” stavki.</div>`;
+            } else {
+                for (const r of miss) {
+                    let details = "";
+                    let fali = r.qty_required - (r.qty_picked || 0);
+                    
+                    if (r.status === "problem" && r.qty_picked > 0) {
+                        details = `<div style="font-size:12px; margin-top:4px; color:#b45309">
+                                        ✅ Uzeto: ${r.qty_picked} / ${r.qty_required} • ❌ Fali: ${fali}
+                                    </div>`;
+                    }
+                    if (r.status === "oos") {
+                        details = `<div style="font-size:12px; margin-top:4px; color:#b45309">
+                                        ❌ Fali svih ${r.qty_required}
+                                    </div>`;
+                        fali = r.qty_required;
+                    }
+                    if (r.status === "skipped") {
+                        details = `<div style="font-size:12px; margin-top:4px; color:#64748b">
+                                        ⏭️ Preskočeno • Fali svih ${r.qty_required}
+                                    </div>`;
+                        fali = r.qty_required;
+                    }
+                    if (r.note) {
+                        details += `<div class="note">💬 ${escapeHtml(r.note)}</div>`;
+                    }
+                    
+                    // DUGMAD ZA DOPUNU - uvek se prikazuju ako fali > 0
+                    let dugmad = '';
+                    if (fali > 0) {
+                        dugmad = `
+                            <div style="display:flex; gap:10px; margin-top:10px;">
+                                <button class="btn btn-purple" onclick="dopuni('${r.sku}', ${r.qty_required}, ${r.qty_picked || 0})">
+                                    📦 DOPUNI (još ${fali})
+                                </button>
+                                <button class="btn btn-primary" onclick="kompletno('${r.sku}', ${r.qty_required})">
+                                    ✅ KOMPLETNO
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        dugmad = `<div style="margin-top:8px"><span class="badge badge-green">🎯 Kompletno</span></div>`;
+                    }
+                    
+                    repMissing.innerHTML += `
+                        <div style="border: 2px solid #d9534f; padding: 15px; margin: 10px 0px; border-radius: 8px; background: #fff5f5;">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                ${statusBadge(r.status)}
+                                <strong>${r.loc}</strong> — 
+                                <strong>${r.sku}</strong>
+                            </div>
+                            <div style="margin-bottom:10px;">
+                                ${details}
+                            </div>
+                            ${dugmad}
+                        </div>
+                    `;
+                }
+            }
+
+            // ===== UZETO =====
+            const taken = rows.filter(r => r.status === "taken");
+            if (!taken.length) {
+                repTaken.innerHTML = `<li class="muted" style="padding:12px; text-align:center">📭 Još ništa nije potvrđeno kao “Uzeto”.</li>`;
+            } else {
+                for (const r of taken) {
+                    repTaken.innerHTML += `<li style="display:flex; align-items:center; gap:8px; padding:10px; background:#f8fafc; border-radius:8px; margin-bottom:4px;">
+                        ${statusBadge(r.status)} 
+                        <span class="mono">${r.loc}</span> — 
+                        <span class="mono">${r.sku}</span>
+                        <span style="font-size:12px; color:#0a7; margin-left:auto; font-weight:600;">x${r.qty_required}</span>
+                    </li>`;
+                }
+            }
+
+            // ===== PENDING / PARTIAL =====
+            const pend = rows.filter(r => ["pending", "partial"].includes(r.status));
+            
+            if (!pend.length) {
+                repPending.innerHTML = `<li style="padding:12px; text-align:center; background:#f1f5f9; border-radius:8px;">
+                    <span class="badge badge-green">🏁 ZAVRŠENO</span> Nema pending/partial stavki.
+                </li>`;
+            } else {
+                for (const r of pend) {
+                    let details = "";
+                    if (r.status === "partial" && r.qty_picked > 0) {
+                        details = `<div style="font-size:12px; margin-top:4px; color:#f0ad4e">
+                                        ✅ Uzeto: ${r.qty_picked} / ${r.qty_required} • ❌ Fali: ${r.qty_missing}
+                                    </div>`;
+                    }
+                    if (r.note) {
+                        details += `<div class="note">💬 ${escapeHtml(r.note)}</div>`;
+                    }
+                    
+                    repPending.innerHTML += `<li style="padding:12px; background:#f8fafc; border-radius:8px; margin-bottom:4px;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                            ${statusBadge(r.status)} 
+                            <span class="mono">${r.loc}</span> — 
+                            <span class="mono">${r.sku}</span>
+                        </div>
+                        ${details}
+                    </li>`;
+                }
+            }
+
+            document.getElementById("reportCounts").innerHTML =
+                `✅ ${cntTaken} | ❌ ${cntOos} | 🔧 ${cntProb} | ⚠️ ${cntPartial} | ⏳ ${cntPending} | ⏭️ ${cntSkip}`;
+
+            document.getElementById("reportMeta").innerHTML =
+                `<span class="mono">Mod: ${data.mode}</span> • 🚪 ${data.start} → ${data.end}`;
+        }
+
+        async function renderTask() {
+            if (!SESSION_ID) return;
+
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}`);
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    setStatus("❌ Greška: " + (data.detail || JSON.stringify(data)), true);
+                    return;
+                }
+
+                const curLoc = data.current_location;
+                document.getElementById("curLoc").innerHTML = curLoc ? 
+                    `<span style="background:var(--primary); color:white; padding:4px 16px; border-radius:999px">${curLoc}</span>` : 
+                    `<span style="background:#64748b; color:white; padding:4px 16px; border-radius:999px">ZAVRŠENO ✅</span>`;
+
+                const p = data.progress || {};
+                document.getElementById("progressPill").innerHTML =
+                    `📦 ${p.done_items || 0}/${p.total_items || 0} stavki | 📍 ${p.done_locations || 0}/${p.total_locations || 0} lokacija`;
+                
+                document.getElementById("progressPercent").innerHTML = `📊 ${p.progress_percent || 0}%`;
+                
+                if (p.total_qty > 0) {
+                    document.getElementById("progressBarContainer").style.display = "block";
+                    document.getElementById("progressBarFill").style.width = `${p.progress_percent || 0}%`;
+                }
+
+                document.getElementById("routeInfo").innerHTML =
+                    `<span class="mono">${data.mode}</span> | 🚪 ${data.start} → ${data.end} | 📏 ${data.distance_m} m`;
+
+                const tbody = document.querySelector("#itemsTable tbody");
+                tbody.innerHTML = "";
+
+                if (!curLoc) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px">
+                        <span style="font-size:24px">🏁</span><br>
+                        <b>Task završen!</b><br>
+                        <span class="muted">Sve stavke procesuirane</span>
+                    </td></tr>`;
+                    document.getElementById("skipAllBtn").style.display = "none";
+                    buildReport(data);
+                    buildRoutePanel(data);
+                    return;
+                }
+
+                const items = data.items_by_loc[curLoc] || [];
+                const hasPartial = items.some(it => it.status === "partial");
+                document.getElementById("skipAllBtn").style.display = hasPartial ? "inline-flex" : "none";
+
+                if (!items.length) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="padding:16px; text-align:center">Nema stavki na ovoj lokaciji</td></tr>`;
+                } else {
+                    for (const it of items) {
+                        const tr = document.createElement("tr");
+                        if (it.status !== "pending" && it.status !== "partial") tr.classList.add("doneRow");
+
+                        const noteHtml = it.note ? `<div class="note">💬 ${escapeHtml(it.note)}</div>` : "";
+                        const qtyInfo = it.qty_picked > 0
+                            ? `<div style="font-size:12px; color:#0a7;">✅ Uzeto: ${it.qty_picked} • Fali: ${it.qty_missing}</div>`
+                            : "";
+
+                        let actionButtons = "";
+                        if (it.status === "pending" || it.status === "partial") {
+                            actionButtons = `
+                                <div style="display:flex; gap:4px; flex-wrap:wrap">
+                                    <button class="btn btn-ok" style="padding:6px 12px; font-size:12px" onclick="takeFull('${it.sku}', ${it.qty_required})">✅ Uzeto (sve)</button>
+                                    <button class="btn btn-warn" style="padding:6px 12px; font-size:12px" onclick="setOutOfStock('${it.sku}')">❌ Nema</button>
+                                    <button class="btn btn-bad" style="padding:6px 12px; font-size:12px" onclick="setProblem('${it.sku}', ${it.qty_required})">🔧 Problem</button>
+                                    <button class="btn btn-skip" style="padding:6px 12px; font-size:12px" onclick="skipItem('${it.sku}')">⏭️ Preskoči</button>
+                                </div>
+                            `;
+                        } else {
+                            actionButtons = `<span class="badge badge-gray">✔️ Završeno</span>`;
+                        }
+
+                        tr.innerHTML = `
+                            <td>
+                                <span class="mono" style="font-size:14px">${it.sku}</span>
+                                ${noteHtml}
+                            </td>
+                            <td>
+                                <span style="font-weight:600">${it.qty_required}</span>
+                                ${qtyInfo}
+                            </td>
+                            <td>${statusBadge(it.status)}</td>
+                            <td>${actionButtons}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+                }
+
+                buildReport(data);
+                buildRoutePanel(data);
+                
+                // Osveži mapu ako je otvorena
+                if (document.getElementById("routeMapContainer") && 
+                    document.getElementById("routeMapContainer").style.display === "block") {
+                    setTimeout(() => drawWarehouseMap(), 100);
+                }
+                
+            } catch (err) {
+                setStatus("❌ Greška pri renderovanju: " + err.message, true);
+                console.error(err);
+            }
+        }
+
+        // ==================== AKCIJE ====================
+        async function takeFull(sku, qtyRequired) {
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        sku, 
+                        action: "take", 
+                        qty_picked: qtyRequired,
+                        note: "Uzeto u potpunosti" 
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    alert("❌ Greška: " + (data.detail || JSON.stringify(data)));
+                    return;
+                }
+                await renderTask();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function setOutOfStock(sku) {
+            let note = prompt("❌ Komentar za NEMA (opciono):");
+            if (note === null) return;
+            
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        sku, 
+                        action: "oos", 
+                        note: note || "Nema na lokaciji" 
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    alert("❌ Greška: " + (data.detail || JSON.stringify(data)));
+                    return;
+                }
+                await renderTask();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function setProblem(sku, qtyRequired) {
+            const ans = prompt(`🔧 Koliko komada si USPEO da uzmeš za SKU ${sku}? (0-${qtyRequired})`, "0");
+            if (ans === null) return;
+            
+            const picked = parseInt(ans, 10);
+            if (Number.isNaN(picked) || picked < 0 || picked > qtyRequired) {
+                alert("❌ Neispravna količina.");
+                return;
+            }
+
+            let note = prompt("💬 Komentar za PROBLEM (opciono):");
+            if (note === null) note = "";
+
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        sku, 
+                        action: "problem", 
+                        qty_picked: picked,
+                        note: note || "Problem sa artiklom" 
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    alert("❌ Greška: " + (data.detail || JSON.stringify(data)));
+                    return;
+                }
+                await renderTask();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function skipItem(sku) {
+            if (!confirm(`⏭️ Preskoči SKU ${sku}? (Označiće se kao NEMA)`)) return;
+            
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        sku, 
+                        action: "skip", 
+                        note: "Preskočeno od strane korisnika" 
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    alert("❌ Greška: " + (data.detail || JSON.stringify(data)));
+                    return;
+                }
+                await renderTask();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function skipAllOnLocation() {
+            if (!confirm("⚠️ Preskoči SVE preostale stavke na ovoj lokaciji? (Označiće se kao NEMA)")) return;
+            
+            setLoading(true);
+            try {
+                const res = await fetch(`${API}/task/${SESSION_ID}`);
+                const data = await res.json();
+                const curLoc = data.current_location;
+                const items = data.items_by_loc[curLoc] || [];
+                
+                for (const it of items) {
+                    if (it.status === "pending" || it.status === "partial") {
+                        await fetch(`${API}/task/${SESSION_ID}/update`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ 
+                                sku: it.sku, 
+                                action: "skip", 
+                                note: "Masovni skip" 
+                            })
+                        });
+                    }
+                }
+                await renderTask();
+                alert("✅ Sve stavke na lokaciji su preskočene.");
+            } catch (err) {
+                alert("❌ Greška: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function exportReport() {
+            if (!SESSION_ID) return;
+            
+            try {
+                const res = await fetch(`${API}/export-report/${SESSION_ID}`);
+                const data = await res.json();
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `picking-report-${SESSION_ID.substring(0,8)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                setStatus("✅ Izveštaj preuzet");
+            } catch (err) {
+                setStatus("❌ Greška pri exportu: " + err.message, true);
+            }
+        }
+
+        async function debugTask() {
+            if (!SESSION_ID) {
+                alert("Nema aktivne sesije");
+                return;
+            }
+            const res = await fetch(`${API}/task/${SESSION_ID}`);
+            const data = await res.json();
+            console.log("=== DEBUG INFO ===");
+            console.log("Session ID:", SESSION_ID);
+            console.log("Current location:", data.current_location);
+            console.log("Route legs:", data.route_legs);
+            console.log("Ordered locations:", data.ordered_locations);
+            console.log("Items on current location:", data.items_by_loc[data.current_location]);
+            console.log("===================");
+            alert("Debug info ispisan u konzolu (F12)");
+        }
+
+        // ==================== EKSPORT FUNKCIJA U GLOBALNI SCOPE ====================
+        window.takeFull = takeFull;
+        window.setOutOfStock = setOutOfStock;
+        window.setProblem = setProblem;
+        window.skipItem = skipItem;
+        window.skipAllOnLocation = skipAllOnLocation;
+        window.startTask = startTask;
+        window.refreshTask = refreshTask;
+        window.clearSession = clearSession;
+        window.exportReport = exportReport;
+        window.debugTask = debugTask;
+        window.handleExcelUpload = handleExcelUpload;
+        window.downloadSampleExcel = downloadSampleExcel;
+        window.clearItems = clearItems;
+        window.switchRouteTab = switchRouteTab;
+        window.drawWarehouseMap = drawWarehouseMap;
+        window.zoomMapIn = zoomMapIn;
+        window.zoomMapOut = zoomMapOut;
+        window.resetMapZoom = resetMapZoom;
+        window.previousMapPoint = previousMapPoint;
+        window.nextMapPoint = nextMapPoint;
+        window.debugMapPoints = debugMapPoints;
+        window.dopuni = dopuni;
+        window.kompletno = kompletno;
+
+        console.log("Funkcije registrovane:", {
+            dopuni: typeof dopuni,
+            kompletno: typeof kompletno
+        });
+    </script>
+</body>
+</html>

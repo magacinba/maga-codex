@@ -1,0 +1,891 @@
+from __future__ import annotations
+
+import os
+import re
+import math
+import uuid
+from datetime import datetime
+from typing import List, Tuple, Dict, Optional, Any
+
+import pandas as pd
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+
+APP_TITLE = "Warehouse Routing + Picking (Phase 2)"
+ROUTING_XLSX = os.path.join(os.path.dirname(__file__), "MAG_ROUTING_DATA_v2.xlsx")
+
+app = FastAPI(title=APP_TITLE)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+LOC_RE = re.compile(r"^([A-Z])\s*([0-9]+)$")
+SKU_RE = re.compile(r"^[0-9]{6}$")
+
+
+def parse_location(s: str) -> Tuple[str, int]:
+    s = s.strip().upper()
+    m = LOC_RE.match(s)
+    if not m:
+        raise ValueError(f"Neispravna lokacija: {s}")
+    return m.group(1), int(m.group(2))
+
+
+def sector_rank(sec: str) -> int:
+    return {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4}.get(sec, 99)
+
+
+# ----------------------------
+# Warehouse map from Excel
+# ----------------------------
+class WarehouseMap:
+    def __init__(self, xlsx_path: str):
+        self.xlsx_path = xlsx_path
+
+        self.grid = pd.read_excel(xlsx_path, sheet_name="GRID_CELLS")
+        self.locs = pd.read_excel(xlsx_path, sheet_name="LOCATIONS")
+        self.ent = pd.read_excel(xlsx_path, sheet_name="ENTRANCES")
+        self.params = pd.read_excel(xlsx_path, sheet_name="PARAMS")
+
+        self.drawer_w = float(self.params.loc[0, "drawer_width_m"]) if "drawer_width_m" in self.params.columns else 0.5
+        self.aisle_w = float(self.params.loc[0, "aisle_width_m"]) if "aisle_width_m" in self.params.columns else 1.0
+
+        self.cell_by_rc: Dict[Tuple[int, int], dict] = {}
+        for _, r in self.grid.iterrows():
+            rc = (int(r["row"]), int(r["col"]))
+            self.cell_by_rc[rc] = {
+                "row": int(r["row"]),
+                "col": int(r["col"]),
+                "cell_type": str(r["cell_type"]),
+                "x_m": float(r["x_m"]),
+                "y_m": float(r["y_m"]),
+                "w_m": float(r["w_m"]),
+                "h_m": float(r["h_m"]),
+                "value": None if pd.isna(r.get("value", None)) else str(r.get("value")),
+            }
+
+        self.aisle_nodes: List[Tuple[int, int]] = [rc for rc, info in self.cell_by_rc.items() if info["cell_type"] == "aisle"]
+        self.aisle_index: Dict[Tuple[int, int], int] = {rc: i for i, rc in enumerate(self.aisle_nodes)}
+
+        self.adj: List[List[Tuple[int, float]]] = [[] for _ in self.aisle_nodes]
+        for rc in self.aisle_nodes:
+            i = self.aisle_index[rc]
+            r0, c0 = rc
+            for nr, nc in [(r0 - 1, c0), (r0 + 1, c0), (r0, c0 - 1), (r0, c0 + 1)]:
+                nrc = (nr, nc)
+                if nrc in self.aisle_index:
+                    j = self.aisle_index[nrc]
+                    w = self._dist_cells(rc, nrc)
+                    self.adj[i].append((j, w))
+
+        self.loc_to_block_rc: Dict[str, Tuple[int, int]] = {}
+        for _, r in self.locs.iterrows():
+            loc = str(r["location"]).strip().upper()
+            self.loc_to_block_rc[loc] = (int(r["row"]), int(r["col"]))
+
+        self.entrances: Dict[str, Tuple[int, int]] = {}
+        for _, r in self.ent.iterrows():
+            name = str(r["cell"]).strip().upper()
+            mapped = str(r["mapped_cell"]).strip().upper()
+            rc = self._cellref_to_rc(mapped)
+            if rc not in self.aisle_index:
+                rc = self._nearest_aisle_to_cellref(mapped)
+            self.entrances[name] = rc
+
+        self.dist_matrix = self._all_pairs_shortest_paths()
+
+    def _cellref_to_rc(self, cellref: str) -> Tuple[int, int]:
+        m = re.match(r"^([A-Z]+)([0-9]+)$", cellref.strip().upper())
+        if not m:
+            raise ValueError(f"Neispravan cell ref: {cellref}")
+        col_letters = m.group(1)
+        row = int(m.group(2))
+        col = 0
+        for ch in col_letters:
+            col = col * 26 + (ord(ch) - ord("A") + 1)
+        return (row, col)
+
+    def _nearest_aisle_to_cellref(self, cellref: str) -> Tuple[int, int]:
+        target_rc = self._cellref_to_rc(cellref)
+        if target_rc in self.cell_by_rc:
+            tx, ty = self.cell_by_rc[target_rc]["x_m"], self.cell_by_rc[target_rc]["y_m"]
+        else:
+            tx, ty = 0.0, 0.0
+
+        best_rc: Optional[Tuple[int, int]] = None
+        best_d: Optional[float] = None
+        for rc in self.aisle_nodes:
+            x, y = self.cell_by_rc[rc]["x_m"], self.cell_by_rc[rc]["y_m"]
+            d = abs(x - tx) + abs(y - ty)
+            if best_d is None or d < best_d:
+                best_d = d
+                best_rc = rc
+        if best_rc is None:
+            raise ValueError("Nema aisle ćelija u mapi.")
+        return best_rc
+
+    def _dist_cells(self, rc1: Tuple[int, int], rc2: Tuple[int, int]) -> float:
+        a = self.cell_by_rc[rc1]
+        b = self.cell_by_rc[rc2]
+        return abs(a["x_m"] - b["x_m"]) + abs(a["y_m"] - b["y_m"])
+
+    def _all_pairs_shortest_paths(self) -> List[List[float]]:
+        import heapq
+        n = len(self.aisle_nodes)
+        INF = 10**18
+        dist_all = [[INF] * n for _ in range(n)]
+        for s in range(n):
+            dist = [INF] * n
+            dist[s] = 0.0
+            pq: List[Tuple[float, int]] = [(0.0, s)]
+            while pq:
+                d, u = heapq.heappop(pq)
+                if d != dist[u]:
+                    continue
+                for v, w in self.adj[u]:
+                    nd = d + w
+                    if nd < dist[v]:
+                        dist[v] = nd
+                        heapq.heappush(pq, (nd, v))
+            dist_all[s] = dist
+        return dist_all
+
+    def _block_adjacent_aisles(self, block_rc: Tuple[int, int]) -> List[int]:
+        r, c = block_rc
+        candidates: List[int] = []
+        for nr, nc in [(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)]:
+            nrc = (nr, nc)
+            if nrc in self.aisle_index:
+                candidates.append(self.aisle_index[nrc])
+        if candidates:
+            return candidates
+
+        if block_rc in self.cell_by_rc:
+            bx, by = self.cell_by_rc[block_rc]["x_m"], self.cell_by_rc[block_rc]["y_m"]
+        else:
+            bx, by = 0.0, 0.0
+
+        best_i: Optional[int] = None
+        best_d: Optional[float] = None
+        for rc in self.aisle_nodes:
+            ax, ay = self.cell_by_rc[rc]["x_m"], self.cell_by_rc[rc]["y_m"]
+            d = abs(ax - bx) + abs(ay - by)
+            if best_d is None or d < best_d:
+                best_d = d
+                best_i = self.aisle_index[rc]
+        return [best_i] if best_i is not None else []
+
+    def distance_between_locations(self, loc_a: str, loc_b: str) -> float:
+        loc_a = loc_a.strip().upper()
+        loc_b = loc_b.strip().upper()
+        if loc_a == loc_b:
+            return 0.0
+
+        if loc_a not in self.loc_to_block_rc or loc_b not in self.loc_to_block_rc:
+            raise ValueError(f"Lokacija nije u mapi: {loc_a} ili {loc_b}")
+
+        a_block = self.loc_to_block_rc[loc_a]
+        b_block = self.loc_to_block_rc[loc_b]
+        a_adj = self._block_adjacent_aisles(a_block)
+        b_adj = self._block_adjacent_aisles(b_block)
+
+        best = math.inf
+        for ai in a_adj:
+            for bi in b_adj:
+                d = self.dist_matrix[ai][bi]
+                if d < best:
+                    best = d
+
+        if best == math.inf:
+            raise ValueError(f"Nema puta između {loc_a} i {loc_b} kroz prolaze.")
+        return float(best)
+
+    def distance_entrance_to_location(self, entrance_cell: str, loc: str) -> float:
+        entrance_cell = entrance_cell.strip().upper()
+        loc = loc.strip().upper()
+        if entrance_cell not in self.entrances:
+            raise ValueError(f"Ulaz nije definisan: {entrance_cell}")
+        if loc not in self.loc_to_block_rc:
+            raise ValueError(f"Lokacija nije u mapi: {loc}")
+
+        e_rc = self.entrances[entrance_cell]
+        e_i = self.aisle_index[e_rc]
+        block_rc = self.loc_to_block_rc[loc]
+        adj = self._block_adjacent_aisles(block_rc)
+        best = min(self.dist_matrix[e_i][ai] for ai in adj)
+        return float(best)
+
+    def distance_location_to_entrance(self, loc: str, entrance_cell: str) -> float:
+        return self.distance_entrance_to_location(entrance_cell, loc)
+
+
+    # ----------------------------
+    # Path reconstruction (for drawing)
+    # ----------------------------
+    def _dijkstra_path(self, s: int, t: int) -> List[int]:
+        """Return list of aisle node indices from s to t inclusive."""
+        import heapq
+        n = len(self.aisle_nodes)
+        INF = 10**18
+        dist = [INF] * n
+        prev: List[Optional[int]] = [None] * n
+        dist[s] = 0.0
+        pq: List[Tuple[float, int]] = [(0.0, s)]
+        while pq:
+            d, u = heapq.heappop(pq)
+            if d != dist[u]:
+                continue
+            if u == t:
+                break
+            for v, w in self.adj[u]:
+                nd = d + w
+                if nd < dist[v]:
+                    dist[v] = nd
+                    prev[v] = u
+                    heapq.heappush(pq, (nd, v))
+        if dist[t] >= INF:
+            raise ValueError("Nema puta kroz prolaze (aisles).")
+        # reconstruct
+        path: List[int] = []
+        cur: Optional[int] = t
+        while cur is not None:
+            path.append(cur)
+            if cur == s:
+                break
+            cur = prev[cur]
+        path.reverse()
+        return path
+
+    def _best_path_between_adj(self, a_adj: List[int], b_adj: List[int]) -> Tuple[float, List[int]]:
+        best_d = math.inf
+        best_path: List[int] = []
+        for ai in a_adj:
+            for bi in b_adj:
+                d = self.dist_matrix[ai][bi]
+                if d < best_d:
+                    best_d = d
+                    best_path = self._dijkstra_path(ai, bi)
+        if best_d == math.inf or not best_path:
+            raise ValueError("Nema puta između tačaka.")
+        return float(best_d), best_path
+
+    def _path_points_for_aisle_indices(self, idx_path: List[int]) -> List[Tuple[float, float]]:
+        pts: List[Tuple[float, float]] = []
+        for i in idx_path:
+            rc = self.aisle_nodes[i]
+            info = self.cell_by_rc[rc]
+            pts.append((float(info["x_m"]), float(info["y_m"])))
+        return pts
+
+    def path_between_locations(self, loc_a: str, loc_b: str) -> List[Tuple[float, float]]:
+        loc_a = loc_a.strip().upper()
+        loc_b = loc_b.strip().upper()
+        if loc_a == loc_b:
+            return []
+        if loc_a not in self.loc_to_block_rc or loc_b not in self.loc_to_block_rc:
+            raise ValueError(f"Lokacija nije u mapi: {loc_a} ili {loc_b}")
+        a_block = self.loc_to_block_rc[loc_a]
+        b_block = self.loc_to_block_rc[loc_b]
+        a_adj = self._block_adjacent_aisles(a_block)
+        b_adj = self._block_adjacent_aisles(b_block)
+        _, idx_path = self._best_path_between_adj(a_adj, b_adj)
+        return self._path_points_for_aisle_indices(idx_path)
+
+    def path_entrance_to_location(self, entrance_cell: str, loc: str) -> List[Tuple[float, float]]:
+        entrance_cell = entrance_cell.strip().upper()
+        loc = loc.strip().upper()
+        if entrance_cell not in self.entrances:
+            raise ValueError(f"Ulaz nije definisan: {entrance_cell}")
+        if loc not in self.loc_to_block_rc:
+            raise ValueError(f"Lokacija nije u mapi: {loc}")
+        e_rc = self.entrances[entrance_cell]
+        e_i = self.aisle_index[e_rc]
+        b_block = self.loc_to_block_rc[loc]
+        b_adj = self._block_adjacent_aisles(b_block)
+        best_d = math.inf
+        best_path: List[int] = []
+        for bi in b_adj:
+            d = self.dist_matrix[e_i][bi]
+            if d < best_d:
+                best_d = d
+                best_path = self._dijkstra_path(e_i, bi)
+        if best_d == math.inf or not best_path:
+            raise ValueError("Nema puta od ulaza do lokacije.")
+        return self._path_points_for_aisle_indices(best_path)
+
+    def path_location_to_entrance(self, loc: str, entrance_cell: str) -> List[Tuple[float, float]]:
+        entrance_cell = entrance_cell.strip().upper()
+        loc = loc.strip().upper()
+        if entrance_cell not in self.entrances:
+            raise ValueError(f"Ulaz nije definisan: {entrance_cell}")
+        if loc not in self.loc_to_block_rc:
+            raise ValueError(f"Lokacija nije u mapi: {loc}")
+        e_rc = self.entrances[entrance_cell]
+        e_i = self.aisle_index[e_rc]
+        a_block = self.loc_to_block_rc[loc]
+        a_adj = self._block_adjacent_aisles(a_block)
+        best_d = math.inf
+        best_path: List[int] = []
+        for ai in a_adj:
+            d = self.dist_matrix[ai][e_i]
+            if d < best_d:
+                best_d = d
+                best_path = self._dijkstra_path(ai, e_i)
+        if best_d == math.inf or not best_path:
+            raise ValueError("Nema puta od lokacije do izlaza.")
+        return self._path_points_for_aisle_indices(best_path)
+
+    def map_export(self) -> Dict[str, Any]:
+        # export minimal data for drawing (aisles + blocks)
+        cells = []
+        minx=miny=math.inf
+        maxx=maxy=-math.inf
+        for rc, info in self.cell_by_rc.items():
+            ct = info["cell_type"]
+            if ct not in ("aisle","block"):
+                continue
+            x,y,w,h = float(info["x_m"]), float(info["y_m"]), float(info["w_m"]), float(info["h_m"])
+            minx=min(minx,x); miny=min(miny,y)
+            maxx=max(maxx,x+w); maxy=max(maxy,y+h)
+            cells.append({"row":info["row"],"col":info["col"],"cell_type":ct,"x_m":x,"y_m":y,"w_m":w,"h_m":h,"value":info.get("value")})
+        loc_blocks = {}
+        for loc, rc in self.loc_to_block_rc.items():
+            if rc in self.cell_by_rc:
+                i = self.cell_by_rc[rc]
+                loc_blocks[loc] = {"x_m": float(i["x_m"]), "y_m": float(i["y_m"]), "w_m": float(i["w_m"]), "h_m": float(i["h_m"])}
+        entrances = {}
+        for name, rc in self.entrances.items():
+            i = self.cell_by_rc[rc]
+            entrances[name] = {"x_m": float(i["x_m"]), "y_m": float(i["y_m"])}
+        return {
+            "bbox": {"min_x": minx, "min_y": miny, "max_x": maxx, "max_y": maxy},
+            "cells": cells,
+            "locations": loc_blocks,
+            "entrances": entrances
+        }
+
+
+WAREHOUSE = WarehouseMap(ROUTING_XLSX)
+
+
+
+@app.get("/map")
+def get_map():
+    return WAREHOUSE.map_export()
+
+
+def route_sector_then_within(locations: List[str]) -> List[str]:
+    locs = [l.strip().upper() for l in locations if l.strip()]
+    locs.sort(key=lambda x: (sector_rank(parse_location(x)[0]), parse_location(x)[1]))
+    return locs
+
+
+def best_entrance_combo_for_path(path: List[str]) -> Tuple[str, str, float]:
+    entrances = list(WAREHOUSE.entrances.keys())
+    if not entrances:
+        raise ValueError("Nema definisanih ulaza (ENTRANCES).")
+    if not path:
+        return (entrances[0], entrances[0], 0.0)
+
+    best: Optional[Tuple[str, str, float]] = None
+    for s in entrances:
+        for e in entrances:
+            dist = 0.0
+            dist += WAREHOUSE.distance_entrance_to_location(s, path[0])
+            for i in range(len(path) - 1):
+                dist += WAREHOUSE.distance_between_locations(path[i], path[i + 1])
+            dist += WAREHOUSE.distance_location_to_entrance(path[-1], e)
+            if best is None or dist < best[2]:
+                best = (s, e, dist)
+    assert best is not None
+    return best
+
+
+def route_optimal_multistart(locations: List[str]) -> List[str]:
+    locs = [l.strip().upper() for l in locations if l.strip()]
+    if len(locs) <= 2:
+        return locs
+
+    entrances = list(WAREHOUSE.entrances.keys())
+
+    def entrance_distance_to_loc(loc: str) -> float:
+        return min(WAREHOUSE.distance_entrance_to_location(en, loc) for en in entrances)
+
+    ranked = sorted(locs, key=entrance_distance_to_loc)
+    K = min(8, len(ranked))
+
+    def nn_path(start_loc: str) -> List[str]:
+        remaining = locs[:]
+        remaining.remove(start_loc)
+        path = [start_loc]
+        while remaining:
+            last = path[-1]
+            j = min(range(len(remaining)), key=lambda k: WAREHOUSE.distance_between_locations(last, remaining[k]))
+            path.append(remaining.pop(j))
+        return path
+
+    def two_opt(path: List[str]) -> List[str]:
+        def inner_len(p: List[str]) -> float:
+            s = 0.0
+            for i in range(len(p) - 1):
+                s += WAREHOUSE.distance_between_locations(p[i], p[i + 1])
+            return s
+
+        best = path
+        best_len = inner_len(best)
+        improved = True
+        while improved:
+            improved = False
+            for i in range(1, len(best) - 2):
+                for k in range(i + 1, len(best) - 1):
+                    cand = best[:i] + list(reversed(best[i:k + 1])) + best[k + 1:]
+                    cand_len = inner_len(cand)
+                    if cand_len + 1e-9 < best_len:
+                        best = cand
+                        best_len = cand_len
+                        improved = True
+        return best
+
+    best_path: Optional[List[str]] = None
+    best_cost: Optional[float] = None
+
+    for start_loc in ranked[:K]:
+        p = nn_path(start_loc)
+        p = two_opt(p)
+        _, _, total = best_entrance_combo_for_path(p)
+        if best_cost is None or total < best_cost:
+            best_cost = total
+            best_path = p
+
+    assert best_path is not None
+    return best_path
+
+
+def compute_route(locations: List[str], mode: str) -> List[str]:
+    mode = (mode or "").strip().lower()
+    if mode == "sector":
+        return route_sector_then_within(locations)
+    if mode == "optimal":
+        return route_optimal_multistart(locations)
+    return route_sector_then_within(locations)
+
+
+def build_route_legs(path: List[str], start: str, end: str) -> Dict[str, Any]:
+    legs = []
+    total = 0.0
+    if not path:
+        return {"legs": [], "total_m": 0.0}
+
+    # start -> first
+    d0 = WAREHOUSE.distance_entrance_to_location(start, path[0])
+    poly0 = WAREHOUSE.path_entrance_to_location(start, path[0])
+    legs.append({"from": start, "to": path[0], "dist_m": round(d0, 2), "polyline": poly0})
+    total += d0
+
+    # between locations
+    for i in range(len(path) - 1):
+        d = WAREHOUSE.distance_between_locations(path[i], path[i + 1])
+        poly = WAREHOUSE.path_between_locations(path[i], path[i + 1])
+        legs.append({"from": path[i], "to": path[i + 1], "dist_m": round(d, 2), "polyline": poly})
+        total += d
+
+    # last -> end
+    dlast = WAREHOUSE.distance_location_to_entrance(path[-1], end)
+    polylast = WAREHOUSE.path_location_to_entrance(path[-1], end)
+    legs.append({"from": path[-1], "to": end, "dist_m": round(dlast, 2), "polyline": polylast})
+    total += dlast
+
+    return {"legs": legs, "total_m": round(total, 2)}
+
+
+# ----------------------------
+# Phase 2: Picking sessions (no barcode)
+# ----------------------------
+class PickItem(BaseModel):
+    sku: str = Field(..., description="6 cifara")
+    qty: int = Field(..., ge=1)
+    location: str
+
+
+class StartTaskRequest(BaseModel):
+    items: List[PickItem]
+    mode: str = "optimal"
+
+
+class UpdateItemRequest(BaseModel):
+    sku: str
+    action: str  # "take" | "oos" | "problem"
+    qty_picked: Optional[int] = None  # only for "take"
+    note: Optional[str] = None
+
+
+SESSIONS: Dict[str, dict] = {}
+
+
+def _validate_item(it: PickItem) -> None:
+    if not SKU_RE.match(it.sku.strip()):
+        raise ValueError(f"SKU mora imati 6 cifara: {it.sku}")
+    parse_location(it.location)
+
+
+def _group_items(items: List[PickItem]) -> Dict[str, List[dict]]:
+    grouped: Dict[str, List[dict]] = {}
+    for it in items:
+        loc = it.location.strip().upper()
+        sku = it.sku.strip()
+        req_qty = int(it.qty)
+        grouped.setdefault(loc, []).append(
+            {
+                "sku": sku,
+                "qty_required": req_qty,
+                "qty_picked": 0,
+                "qty_missing": req_qty,
+                "status": "pending",  # pending | partial | taken | oos | problem
+                "note": None,
+                "updated_at": None,
+            }
+        )
+    return grouped
+
+
+def _item_done(it: dict) -> bool:
+    return it["status"] in ("taken", "oos", "problem")
+
+
+def _location_done(arr: List[dict]) -> bool:
+    return bool(arr) and all(_item_done(x) for x in arr)
+
+
+def _session_progress(sess: dict) -> Dict[str, Any]:
+    total_items = 0
+    done_items = 0
+    for _, arr in sess["items_by_loc"].items():
+        for it in arr:
+            total_items += 1
+            if _item_done(it):
+                done_items += 1
+
+    total_locs = len(sess["ordered_locations"])
+    done_locs = 0
+    for loc in sess["ordered_locations"]:
+        arr = sess["items_by_loc"].get(loc, [])
+        if _location_done(arr):
+            done_locs += 1
+
+    return {
+        "done_items": done_items,
+        "total_items": total_items,
+        "done_locations": done_locs,
+        "total_locations": total_locs,
+        "current_index": sess["current_index"],
+    }
+
+
+def _advance_if_done(sess: dict) -> None:
+    while sess["current_index"] < len(sess["ordered_locations"]):
+        loc = sess["ordered_locations"][sess["current_index"]]
+        arr = sess["items_by_loc"].get(loc, [])
+        if _location_done(arr):
+            sess["current_index"] += 1
+            continue
+        break
+
+
+@app.post("/task/start")
+def start_task(req: StartTaskRequest):
+    if not req.items:
+        raise HTTPException(status_code=400, detail="items je prazno.")
+
+    items: List[PickItem] = []
+    for it in req.items:
+        try:
+            _validate_item(it)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        loc = it.location.strip().upper()
+        if loc not in WAREHOUSE.loc_to_block_rc:
+            raise HTTPException(status_code=400, detail=f"Lokacija nije u mapi: {loc}")
+        items.append(it)
+
+    items_by_loc = _group_items(items)
+    unique_locs = list(items_by_loc.keys())
+
+    ordered = compute_route(unique_locs, req.mode)
+    start, end, dist = best_entrance_combo_for_path(ordered)
+
+    session_id = str(uuid.uuid4())
+    sess = {
+        "id": session_id,
+        "created_at": datetime.utcnow().isoformat(),
+        "mode": req.mode,
+        "start": start,
+        "end": end,
+        "distance_m": float(dist),
+        "ordered_locations": ordered,
+        "items_by_loc": items_by_loc,
+        "current_index": 0,
+    }
+    _advance_if_done(sess)
+    SESSIONS[session_id] = sess
+
+    cur = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
+    legs = build_route_legs(ordered, start, end)
+
+    return {
+        "session_id": session_id,
+        "mode": req.mode,
+        "start": start,
+        "end": end,
+        "ordered_locations": ordered,
+        "distance_m": round(float(dist), 2),
+        "current_location": cur,
+        "progress": _session_progress(sess),
+        "items_by_loc": sess["items_by_loc"],
+        "route_legs": legs,
+    }
+
+
+@app.get("/task/{session_id}")
+def get_task(session_id: str):
+    sess = SESSIONS.get(session_id)
+    if not sess:
+        raise HTTPException(status_code=404, detail="Session not found")
+    _advance_if_done(sess)
+    cur = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
+    legs = build_route_legs(sess["ordered_locations"], sess["start"], sess["end"])
+    return {
+        "session_id": session_id,
+        "mode": sess["mode"],
+        "start": sess["start"],
+        "end": sess["end"],
+        "distance_m": round(float(sess["distance_m"]), 2),
+        "ordered_locations": sess["ordered_locations"],
+        "current_location": cur,
+        "items_by_loc": sess["items_by_loc"],
+        "progress": _session_progress(sess),
+        "route_legs": legs,
+    }
+
+
+@app.post("/task/{session_id}/update")
+def update_item(session_id: str, req: UpdateItemRequest):
+    sess = SESSIONS.get(session_id)
+    if not sess:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    _advance_if_done(sess)
+    if sess["current_index"] >= len(sess["ordered_locations"]):
+        return {"ok": True, "done": True, "message": "Sve završeno.", "task": get_task(session_id)}
+
+    cur_loc = sess["ordered_locations"][sess["current_index"]]
+    sku = req.sku.strip()
+
+    if not SKU_RE.match(sku):
+        raise HTTPException(status_code=400, detail="SKU mora imati 6 cifara.")
+
+    action = (req.action or "").strip().lower()
+    if action not in ["take", "oos", "problem"]:
+        raise HTTPException(status_code=400, detail="action mora biti: take | oos | problem")
+
+    note = req.note.strip() if req.note else None
+
+    arr = sess["items_by_loc"].get(cur_loc, [])
+    for it in arr:
+        if it["sku"] == sku:
+            now = datetime.utcnow().isoformat()
+
+            if action == "take":
+                if req.qty_picked is None:
+                    raise HTTPException(status_code=400, detail="qty_picked je obavezan za action=take")
+                picked = int(req.qty_picked)
+                if picked < 0 or picked > int(it["qty_required"]):
+                    raise HTTPException(status_code=400, detail="qty_picked mora biti između 0 i qty_required")
+
+                it["qty_picked"] = picked
+                it["qty_missing"] = int(it["qty_required"]) - picked
+                if it["qty_missing"] == 0:
+                    it["status"] = "taken"
+                else:
+                    it["status"] = "partial"  # nije završeno dok ne odlučiš šta sa ostatkom
+                it["note"] = note
+                it["updated_at"] = now
+
+            elif action == "oos":
+                # zatvaramo stavku kao oos (ako je nešto uzeo pre, ostaje qty_picked)
+                it["status"] = "oos"
+                it["note"] = note
+                it["updated_at"] = now
+
+            elif action == "problem":
+                it["status"] = "problem"
+                it["note"] = note
+                it["updated_at"] = now
+
+            break
+    else:
+        raise HTTPException(status_code=400, detail=f"SKU {sku} ne postoji na lokaciji {cur_loc}.")
+
+    # ako je partial, lokacija neće preći dalje dok ne klikneš OOS/Problem (ili popraviš take na pun qty)
+    _advance_if_done(sess)
+    cur2 = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
+
+    return {
+        "ok": True,
+        "done": cur2 is None,
+        "current_location": cur2,
+        "progress": _session_progress(sess),
+        "task": get_task(session_id),
+    }
+# ============================
+# MAP EXPORT + DEBUG ENDPOINTS
+# ============================
+
+def _point_for_node(name: str) -> dict:
+    """
+    Returns a point {x_m, y_m} for:
+      - entrances: "ENTRANCE_1", "ENTRANCE_2" ...
+      - locations: "A581", "C1", "D52" ...
+    """
+    # Entrance?
+    try:
+        ent = WAREHOUSE.ent
+        hit = ent[ent["name"].astype(str) == str(name)]
+        if not hit.empty:
+            r = hit.iloc[0]
+            return {"x_m": float(r["x_m"]), "y_m": float(r["y_m"])}
+    except Exception:
+        pass
+
+    # Location -> use LOCATIONS mapping (row/col) -> lookup cell center in cell_by_rc
+    try:
+        locs = WAREHOUSE.locs
+        hit = locs[locs["location"].astype(str) == str(name)]
+        if not hit.empty:
+            r = hit.iloc[0]
+            rc = (int(r["row"]), int(r["col"]))
+            cell = WAREHOUSE.cell_by_rc.get(rc)
+            if cell:
+                return {"x_m": float(cell["x_m"]), "y_m": float(cell["y_m"])}
+            # fallback on loc x/y
+            return {"x_m": float(r["x_m"]), "y_m": float(r["y_m"])}
+    except Exception:
+        pass
+
+    return {"x_m": 0.0, "y_m": 0.0}
+
+
+def map_export() -> dict:
+    """
+    Schema expected by index_with_map.html:
+      {
+        "bbox": {"min_x":..,"min_y":..,"max_x":..,"max_y":..},
+        "cells":[{x_m,y_m,w_m,h_m,cell_type,value,row,col},...],
+        "locations": { "A581": {x_m,y_m,w_m,h_m}, ... },
+        "entrances": { "ENTRANCE_1": {x_m,y_m}, ... }
+      }
+    """
+    cells = []
+    xs, ys, xe, ye = [], [], [], []
+
+    # cells from grid
+    for rc, cell in WAREHOUSE.cell_by_rc.items():
+        c = {
+            "row": int(cell["row"]),
+            "col": int(cell["col"]),
+            "cell_type": str(cell["cell_type"]),
+            "value": cell.get("value"),
+            "x_m": float(cell["x_m"]),
+            "y_m": float(cell["y_m"]),
+            "w_m": float(cell["w_m"]),
+            "h_m": float(cell["h_m"]),
+        }
+        cells.append(c)
+        xs.append(c["x_m"]); ys.append(c["y_m"])
+        xe.append(c["x_m"] + c["w_m"]); ye.append(c["y_m"] + c["h_m"])
+
+    bbox = {
+        "min_x": float(min(xs)) if xs else 0.0,
+        "min_y": float(min(ys)) if ys else 0.0,
+        "max_x": float(max(xe)) if xe else 1.0,
+        "max_y": float(max(ye)) if ye else 1.0,
+    }
+
+    # entrances
+    entrances = {}
+    try:
+        for _, r in WAREHOUSE.ent.iterrows():
+            entrances[str(r["name"])] = {"x_m": float(r["x_m"]), "y_m": float(r["y_m"])}
+    except Exception:
+        pass
+
+    # locations -> highlight rectangle = the block cell rect where that location lives
+    locations = {}
+    try:
+        for _, r in WAREHOUSE.locs.iterrows():
+            loc = str(r["location"])
+            rc = (int(r["row"]), int(r["col"]))
+            cell = WAREHOUSE.cell_by_rc.get(rc)
+            if cell:
+                locations[loc] = {
+                    "x_m": float(cell["x_m"]),
+                    "y_m": float(cell["y_m"]),
+                    "w_m": float(cell["w_m"]),
+                    "h_m": float(cell["h_m"]),
+                }
+            else:
+                # fallback: small marker-like rect around loc x/y
+                locations[loc] = {"x_m": float(r["x_m"]), "y_m": float(r["y_m"]), "w_m": 0.2, "h_m": 0.2}
+    except Exception:
+        pass
+
+    return {"bbox": bbox, "cells": cells, "locations": locations, "entrances": entrances}
+
+
+# --- override: build_route_legs WITH polyline (2-point per leg) ---
+def build_route_legs(path: list[str], start: str, end: str) -> dict:
+    legs = []
+    total = 0.0
+    if not path:
+        return {"legs": [], "total_m": 0.0}
+
+    # start -> first
+    d0 = WAREHOUSE.distance_entrance_to_location(start, path[0])
+    p_from = _point_for_node(start)
+    p_to = _point_for_node(path[0])
+    legs.append({"from": start, "to": path[0], "dist_m": round(d0, 2), "polyline": [[p_from["x_m"], p_from["y_m"]],[p_to["x_m"], p_to["y_m"]]]})
+    total += d0
+
+    # between locations
+    for i in range(len(path) - 1):
+        a, b = path[i], path[i + 1]
+        d = WAREHOUSE.distance_between_locations(a, b)
+        p_from = _point_for_node(a)
+        p_to = _point_for_node(b)
+        legs.append({"from": a, "to": b, "dist_m": round(d, 2), "polyline": [[p_from["x_m"], p_from["y_m"]],[p_to["x_m"], p_to["y_m"]]]})
+        total += d
+
+    # last -> end
+    dlast = WAREHOUSE.distance_location_to_entrance(path[-1], end)
+    p_from = _point_for_node(path[-1])
+    p_to = _point_for_node(end)
+    legs.append({"from": path[-1], "to": end, "dist_m": round(dlast, 2), "polyline": [[p_from["x_m"], p_from["y_m"]],[p_to["x_m"], p_to["y_m"]]]})
+    total += dlast
+
+    return {"legs": legs, "total_m": round(total, 2)}
+
+
+@app.get("/map")
+def get_map():
+    return map_export()
+
+
+@app.get("/__debug")
+def __debug():
+    return {"file": __file__, "routes": [getattr(r, "path", str(r)) for r in app.routes]}
