@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
 import re
@@ -35,22 +35,22 @@ SKU_RE = re.compile(r"^[0-9]{6}$")
 # Persistent sessions
 # ----------------------------
 def load_sessions() -> Dict[str, dict]:
-    """Učitava sesije iz JSON fajla ako postoji."""
+    """Uitava sesije iz JSON fajla ako postoji."""
     if os.path.exists(SESSION_DB):
         try:
             with open(SESSION_DB, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            print(f"⚠️ Greška pri učitavanju sesija: {e}")
+            print(f" Greka pri uitavanju sesija: {e}")
     return {}
 
 def save_sessions() -> None:
-    """Čuva sve sesije u JSON fajl."""
+    """uva sve sesije u JSON fajl."""
     try:
         with open(SESSION_DB, "w", encoding="utf-8") as f:
             json.dump(WAVE_SESSIONS, f, indent=2, default=str)
     except Exception as e:
-        print(f"⚠️ Greška pri čuvanju sesija: {e}")
+        print(f" Greka pri uvanju sesija: {e}")
 
 # ----------------------------
 # Logging
@@ -97,7 +97,7 @@ class WarehouseMap:
             self.ent = pd.read_excel(xlsx_path, sheet_name="ENTRANCES")
             self.params = pd.read_excel(xlsx_path, sheet_name="PARAMS")
         except Exception as e:
-            print(f"⚠️ GREŠKA pri učitavanju Excel fajla: {e}")
+            print(f" GREKA pri uitavanju Excel fajla: {e}")
             print("Kreiram fallback mapu...")
             self._create_fallback_map()
             return
@@ -152,10 +152,10 @@ class WarehouseMap:
             self.entrances[name] = rc
 
         self.dist_matrix = self._all_pairs_shortest_paths()
-        print(f"✅ Učitan magacin: {len(self.aisle_nodes)} prolaza, {len(self.loc_to_block_rc)} lokacija")
+        print(f" Uitan magacin: {len(self.aisle_nodes)} prolaza, {len(self.loc_to_block_rc)} lokacija")
 
     def _create_fallback_map(self):
-        print("🏗️ Kreiram fallback mapu za testiranje...")
+        print(" Kreiram fallback mapu za testiranje...")
         self.drawer_w = 0.5
         self.aisle_w = 1.0
         self.block_depth = 0.5
@@ -202,7 +202,7 @@ class WarehouseMap:
                 best_d = d
                 best_rc = rc
         if best_rc is None:
-            raise ValueError("Nema aisle ćelija u mapi.")
+            raise ValueError("Nema aisle elija u mapi.")
         return best_rc
 
     def _dist_cells(self, rc1: Tuple[int, int], rc2: Tuple[int, int]) -> float:
@@ -282,7 +282,7 @@ class WarehouseMap:
                     best = d
 
         if best == math.inf:
-            raise ValueError(f"Nema puta između {loc_a} i {loc_b} kroz prolaze.")
+            raise ValueError(f"Nema puta izmeu {loc_a} i {loc_b} kroz prolaze.")
         return float(best) + self.block_depth
 
     def distance_entrance_to_location(self, entrance_cell: str, loc: str) -> float:
@@ -317,7 +317,7 @@ class WarehouseMap:
 try:
     WAREHOUSE = WarehouseMap(ROUTING_XLSX)
 except Exception as e:
-    print(f"❌ Ne mogu da učitan magacin: {e}")
+    print(f" Ne mogu da uitan magacin: {e}")
     print("Koristim fallback instancu...")
     WAREHOUSE = WarehouseMap.__new__(WarehouseMap)
     WAREHOUSE._create_fallback_map()
@@ -442,11 +442,11 @@ def best_entrance_combo_for_path(path: List[str]) -> Tuple[str, str, float]:
                 if best is None or dist < best[2]:
                     best = (s, e, dist)
             except Exception as err:
-                log_action("ROUTE", f"Greška u distanci: {err}", {"start": s, "end": e})
+                log_action("ROUTE", f"Greka u distanci: {err}", {"start": s, "end": e})
                 continue
                 
     if best is None:
-        raise ValueError("Ne mogu da izračunam rutu - proveri ulaze i lokacije")
+        raise ValueError("Ne mogu da izraunam rutu - proveri ulaze i lokacije")
     return best
 
 
@@ -503,10 +503,10 @@ class WaveUpdateRequest(BaseModel):
     action: str
     qty_picked: Optional[int] = None
     note: Optional[str] = None
-    location: Optional[str] = None  # opciona lokacija za ručni unos
+    location: Optional[str] = None  # opciona lokacija za runi unos
 
 
-# Učitavanje sesija iz fajla pri startu
+# Uitavanje sesija iz fajla pri startu
 WAVE_SESSIONS: Dict[str, dict] = load_sessions()
 
 
@@ -539,7 +539,7 @@ def _group_items_by_location(items: List[dict]) -> Dict[str, List[dict]]:
 
 def _item_done(it: dict) -> bool:
     # SAMO "taken" se smatra gotovim za potrebe napretka
-    return it["status"] == "taken"
+    return it["status"] in {"taken", "oos", "problem"}
 
 
 def _location_done(arr: List[dict]) -> bool:
@@ -609,12 +609,12 @@ def start_wave(req: StartWaveRequest):
     if not req.items:
         raise HTTPException(status_code=400, detail="Nema stavki.")
     
-    # Grupiši po faktutama
-    invoices = list(set(it.invoice for it in req.items))
+    # Grupii po faktutama
+    invoices = list(dict.fromkeys(it.invoice for it in req.items))
     print(f"Fakture ({len(invoices)}): {invoices}")
     
     if len(invoices) > 6:
-        raise HTTPException(status_code=400, detail=f"Previše faktura! Maksimalno 6, ima ih {len(invoices)}")
+        raise HTTPException(status_code=400, detail=f"Previe faktura! Maksimalno 6, ima ih {len(invoices)}")
     
     # Pripremi sve stavke
     all_items = []
@@ -631,7 +631,7 @@ def start_wave(req: StartWaveRequest):
             "invoice": it.invoice
         })
     
-    # Grupiši po lokacijama za rutu
+    # Grupii po lokacijama za rutu
     items_by_loc = _group_items_by_location(all_items)
     unique_locs = list(items_by_loc.keys())
     print(f"Lokacije za rutu ({len(unique_locs)}): {unique_locs}")
@@ -668,7 +668,7 @@ def start_wave(req: StartWaveRequest):
     }
     
     WAVE_SESSIONS[session_id] = sess
-    save_sessions()  # 🔁 čuvamo odmah
+    save_sessions()  #  uvamo odmah
     _advance_if_done(sess)
     
     cur = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
@@ -732,7 +732,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
     
     # Odredi na kojoj lokaciji radimo
     if req.action == "dopuna":
-        # Za dopunu ne proveravamo lokaciju - tražićemo po celoj sesiji
+        # Za dopunu ne proveravamo lokaciju - traiemo po celoj sesiji
         target_loc = None
     elif req.location:
         target_loc = req.location.strip().upper()
@@ -740,7 +740,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
             raise HTTPException(status_code=400, detail="Lokacija ne postoji u ovoj sesiji.")
     else:
         if sess["current_index"] >= len(sess["ordered_locations"]):
-            return {"ok": True, "done": True, "message": "Sve završeno."}
+            return {"ok": True, "done": True, "message": "Sve zavreno."}
         target_loc = sess["ordered_locations"][sess["current_index"]]
 
     sku = req.sku.strip()
@@ -755,13 +755,13 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
     note = req.note.strip() if req.note else None
     now = datetime.utcnow().isoformat()
 
-    # Pronađi artikal
+    # Pronai artikal
     found = False
     target_it = None
     target_loc_found = None
     
     if action == "dopuna":
-        # Za dopunu, pretraži sve lokacije
+        # Za dopunu, pretrai sve lokacije
         for loc, items in sess["items_by_loc"].items():
             for it in items:
                 if it["sku"] == sku and it["invoice"] == req.invoice:
@@ -775,7 +775,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
         if not found:
             raise HTTPException(status_code=400, detail=f"SKU {sku} za fakturu {req.invoice} ne postoji ni na jednoj lokaciji.")
     else:
-        # Za ostale akcije, traži samo na target_loc
+        # Za ostale akcije, trai samo na target_loc
         arr = sess["items_by_loc"].get(target_loc, [])
         for it in arr:
             if it["sku"] == sku and it["invoice"] == req.invoice:
@@ -797,7 +797,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
         picked = int(req.qty_picked)
         
         if picked < 0 or picked > int(it["qty_required"]):
-            raise HTTPException(status_code=400, detail=f"qty_picked mora biti između 0 i {it['qty_required']}")
+            raise HTTPException(status_code=400, detail=f"qty_picked mora biti izmeu 0 i {it['qty_required']}")
 
         it["qty_picked"] = picked
         it["qty_missing"] = int(it["qty_required"]) - picked
@@ -817,7 +817,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
         it["updated_at"] = now
         log_action("WAVE_UPDATE", f"OOS {sku} {req.invoice}@{target_loc}", {"note": note})
         
-        # Pomeri na sledeću lokaciju (samo ako radimo na trenutnoj)
+        # Pomeri na sledeu lokaciju (samo ako radimo na trenutnoj)
         if not req.location and sess["current_index"] < len(sess["ordered_locations"]) - 1:
             sess["current_index"] += 1
 
@@ -830,7 +830,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
         it["updated_at"] = now
         log_action("WAVE_UPDATE", f"PROBLEM {sku} {req.invoice}@{target_loc}", {"picked": req.qty_picked, "note": note})
         
-        # Pomeri na sledeću lokaciju (samo ako radimo na trenutnoj)
+        # Pomeri na sledeu lokaciju (samo ako radimo na trenutnoj)
         if not req.location and sess["current_index"] < len(sess["ordered_locations"]) - 1:
             sess["current_index"] += 1
         
@@ -839,15 +839,15 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
         it["status"] = "taken"
         it["qty_picked"] = it["qty_required"]
         it["qty_missing"] = 0
-        it["note"] = (it["note"] or "") + " | " + (note or "Dopunjeno do pune količine")
+        it["note"] = (it["note"] or "") + " | " + (note or "Dopunjeno do pune koliine")
         it["updated_at"] = now
         log_action("WAVE_UPDATE", f"DOPUNA (kompletno) {sku} {req.invoice}@{target_loc}")
 
-    # Ažuriramo current_index samo ako radimo na trenutnoj lokaciji
+    # Auriramo current_index samo ako radimo na trenutnoj lokaciji
     if not req.location and action != "dopuna":
         _advance_if_done(sess)
     
-    save_sessions()  # 🔁 čuvamo posle svake izmene
+    save_sessions()  #  uvamo posle svake izmene
     
     cur2 = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
 
@@ -862,7 +862,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
 # ==================== NOVA RUTA ZA KOORDINATE ====================
 @app.get("/warehouse/coordinates")
 def get_coordinates():
-    """Vraća koordinate svih lokacija u magacinu"""
+    """Vraa koordinate svih lokacija u magacinu"""
     coords = []
     for loc, (row, col) in WAREHOUSE.loc_to_block_rc.items():
         if loc in WAREHOUSE.loc_coords:
@@ -884,3 +884,4 @@ def wave_debug():
         "warehouse_locations": len(WAREHOUSE.loc_to_block_rc),
         "active_sessions": len(WAVE_SESSIONS),
     }
+

@@ -1,0 +1,7 @@
+﻿__pycache__/
+*.pyc
+wave.log
+wave_sessions.json
+backup-*/
+backup-*.zip
+.venv/
