@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import os
 import re
@@ -407,6 +407,9 @@ def route_optimal_multistart(locations: List[str], max_starts: int = 8) -> List[
         return path
 
     def two_opt(path: List[str]) -> List[str]:
+        # Za veoma velike rute preskacemo 2-opt da ne blokira start.
+        if len(path) > 120:
+            return path
         def inner_len(p: List[str]) -> float:
             s = 0.0
             for i in range(len(p) - 1):
@@ -474,12 +477,16 @@ def best_entrance_combo_for_path(path: List[str]) -> Tuple[str, str, float]:
 
 def compute_route(locations: List[str], mode: str) -> List[str]:
     mode = (mode or "").strip().lower()
+    locs = [l.strip().upper() for l in locations if l.strip()]
+    if len(locs) > 120 and mode not in ["sector", "hybrid"]:
+        log_action("ROUTE", "Previse lokacija za optimal; koristim hybrid", {"count": len(locs)})
+        return route_hybrid(locs, max_cluster_size=25)
     if mode == "sector":
-        return route_sector_then_within(locations)
+        return route_sector_then_within(locs)
     elif mode == "hybrid":
-        return route_hybrid(locations)
+        return route_hybrid(locs)
     else:
-        return route_optimal_multistart(locations)
+        return route_optimal_multistart(locs)
 
 
 def build_route_legs(path: List[str], start: str, end: str) -> Dict[str, Any]:
@@ -899,6 +906,10 @@ def wave_debug():
         "warehouse_locations": len(WAREHOUSE.loc_to_block_rc),
         "active_sessions": len(WAVE_SESSIONS),
     }
+
+
+
+
 
 
 
