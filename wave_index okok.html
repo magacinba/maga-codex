@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wave Picking â€˘ 6 kutija na kolicima</title>
+    <title>Wave Picking - 6 kutija na kolicima</title>
     <!-- SheetJS za Excel import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -246,7 +246,7 @@
     </style>
 </head>
 <body>
-    <h2> Wave Picking â€˘ 6 kutija na kolicima</h2>
+    <h2> Wave Picking - 6 kutija na kolicima</h2>
 
     <!-- Sekcija za skeniranje i Excel upload -->
     <div class="card">
@@ -259,11 +259,11 @@
         
         <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:15px;" id="scannedInvoices"></div>
         
-        <!-- INFO O ULAZIMA/IZLAZIMA I NAÄŚINU RUTIRANJA -->
+        <!-- INFO O ULAZIMA/IZLAZIMA I NAsINU RUTIRANJA -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600"> Ulazi/Izlazi:</span>
+                    <span style="font-weight:600">Ulazi/Izlazi:</span>
                 </div>
                 <div style="display:flex; gap:16px; flex-wrap:wrap">
                     <div><span class="badge badge-blue">ENTRANCE_1</span> Levo</div>
@@ -273,11 +273,11 @@
             
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600">? NaÄŤin rutiranja:</span>
+                    <span style="font-weight:600"> Nacin rutiranja:</span>
                 </div>
                 <select id="routingMode" style="padding:10px; width:100%; border-radius:8px; border:2px solid var(--border); background:white; font-weight:500">
-                    <option value="optimal" selected>? Optimalno (najkraÄ‡a putanja)</option>
-                    <option value="sector"> Po sektorima (Aâ€şBâ€şCâ€şDâ€şE)</option>
+                    <option value="optimal" selected> Optimalno (najkraca putanja)</option>
+                    <option value="sector"> Po sektorima (A->B->C->D->E)</option>
                 </select>
             </div>
         </div>
@@ -287,14 +287,14 @@
             <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:24px;"></span>
-                    <span style="font-weight:600;">UÄŤitaj fakture iz Excel-a:</span>
+                    <span style="font-weight:600;">Ucitaj fakture iz Excel-a:</span>
                 </div>
                 
                 <input type="file" id="excelUpload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(this)">
                 
                 <div style="display:flex; gap:10px;">
                     <button class="btn" onclick="document.getElementById('excelUpload').click()" style="background:var(--primary); color:white;">
-                         Izaberi fajl
+                        Izaberi fajl
                     </button>
                     <button class="btn" onclick="downloadSampleExcel()" style="background:#8b5cf6; color:white;">
                          Uzorak fajla
@@ -305,23 +305,23 @@
             </div>
             
             <div class="muted" style="margin-top:10px; font-size:12px;">
-                 Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
+                Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
             </div>
         </div>
         
         <div style="display:flex; gap:10px; align-items:center; margin-top:15px;">
             <button class="btn btn-primary" id="startWaveBtn" onclick="startWave()" disabled style="font-size:18px; padding:15px 30px;">
-                 KREÄ†EMO SA PAKOVANJEM
+                 KRECEMO SA PAKOVANJEM
             </button>
-            <button class="btn" onclick="clearScanned()">? ObriĹˇi sve</button>
+            <button class="btn" onclick="clearScanned()"> Obrisi sve</button>
             <button class="btn" onclick="debugWave()"> Debug</button>
-			<button class="btn" onclick="showMap()">? Mapa</button>
+			<button class="btn" onclick="showMap()"> Mapa</button>
         </div>
     </div>
 
     <div id="loadingIndicator" style="display:none; text-align:center; padding:20px">
         <div class="spinner" style="width:32px; height:32px;"></div>
-        <div style="margin-top:8px">UÄŤitavanje...</div>
+        <div style="margin-top:8px">Ucitavanje...</div>
     </div>
 
     <!-- Glavni grid - pojavljuje se nakon starta -->
@@ -332,7 +332,7 @@
                 <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
                     <div class="big"> Trenutna lokacija: <span id="curLoc" style="color:var(--primary);">-</span></div>
                     <div id="currentBoxInfo" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <!-- OVDE Ä†E SE PRIKAZATI KUTIJE U ISTOM REDU -->
+                        <!-- OVDE E SE PRIKAZATI KUTIJE U ISTOM REDU -->
                     </div>
                 </div>
                 <div class="pill" id="progressPill">0/0</div>
@@ -382,7 +382,7 @@
                 
                 <div style="margin-top:8px; padding:8px; background:white; border-radius:8px;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span style="font-size:12px; color:var(--dark);"> PreÄ‘eno:</span>
+                        <span style="font-size:12px; color:var(--dark);"> Predjeno:</span>
                         <span style="font-weight:600;" id="totalDistanceStat">0 m</span>
                     </div>
                 </div>
@@ -397,7 +397,7 @@
             </div>
             
             <div style="margin-top:20px;">
-                <div class="big" style="font-size:18px;"> IzveĹˇtaj</div>
+                <div class="big" style="font-size:18px;"> Izvetaj</div>
                 <div id="reportMini" style="margin-top:10px; max-height:200px; overflow-y:auto;"></div>
             </div>
         </div>
@@ -405,7 +405,7 @@
 
     <script>
         // ==================== KONFIGURACIJA ====================
-        const API = localStorage.getItem("API_BASE_URL") || ((window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") ? "http://127.0.0.1:8000" : "https://maga-codex.onrender.com");
+        const API = "http://127.0.0.1:8000";
         let SESSION_ID = null;
         let LOADING = false;
         let scannedInvoices = [];
@@ -429,10 +429,10 @@
 
         function statusBadge(st) {
             const badges = {
-                "pending": `<span class="badge badge-gray">? PENDING</span>`,
+                "pending": `<span class="badge badge-gray"> PENDING</span>`,
                 "partial": `<span class="badge badge-orange"> PARTIAL</span>`,
-                "taken": `<span class="badge badge-green">? UZETO</span>`,
-                "oos": `<span class="badge badge-orange">? NEMA</span>`,
+                "taken": `<span class="badge badge-green"> UZETO</span>`,
+                "oos": `<span class="badge badge-orange">s NEMA</span>`,
                 "problem": `<span class="badge badge-red"> PROBLEM</span>`
             };
             return badges[st] || `<span class="badge badge-gray">${st}</span>`;
@@ -493,11 +493,11 @@
                         this.value = "";
                         document.getElementById("startWaveBtn").disabled = false;
                     } else {
-                        alert("? Faktura veÄ‡ skenirana!");
+                        alert("s Faktura ve skenirana!");
                         this.value = "";
                     }
                 } else if (scannedInvoices.length >= 6) {
-                    alert("? Maksimalno 6 faktura!");
+                    alert("s Maksimalno 6 faktura!");
                 }
             }
         });
@@ -511,9 +511,9 @@
                 const div = document.createElement('div');
                 div.className = 'invoice-pill';
                 div.innerHTML = `
-                    ? ${inv} 
+                     ${inv} 
                     <span style="background:var(--primary); color:white; padding:2px 10px; border-radius:20px;">Kutija ${boxNum}</span>
-                    <span style="cursor:pointer; margin-left:5px;" onclick="removeInvoice('${inv}')">?</span>
+                    <span style="cursor:pointer; margin-left:5px;" onclick="removeInvoice('${inv}')">s</span>
                 `;
                 container.appendChild(div);
             });
@@ -541,7 +541,7 @@
             if (!file) return;
             
             setLoading(true);
-            document.getElementById("uploadStatus").innerHTML = `? UÄŤitavam ${file.name}...`;
+            document.getElementById("uploadStatus").innerHTML = ` Ucitavam ${file.name}...`;
             
             try {
                 let data = [];
@@ -562,12 +562,12 @@
                 const invoices = [...new Set(data.map(row => row.faktura))];
                 
                 if (invoices.length === 0) {
-                    alert("? Nema validnih podataka u fajlu!");
+                    alert("Nema validnih podataka u fajlu!");
                     return;
                 }
                 
                 if (invoices.length > 6) {
-                    alert(`? PreviĹˇe faktura! Maksimalno 6, a u fajlu ih ima ${invoices.length}`);
+                    alert(`s Previe faktura! Maksimalno 6, a u fajlu ih ima ${invoices.length}`);
                     return;
                 }
                 
@@ -575,15 +575,15 @@
                 updateScannedList();
                 
                 document.getElementById("uploadStatus").innerHTML = 
-                    `? UÄŤitano ${data.length} stavki, ${invoices.length} faktura`;
+                    ` Ucitano ${data.length} stavki, ${invoices.length} faktura`;
                 
                 document.getElementById("startWaveBtn").disabled = false;
                 
-                console.log("UÄŤitane stavke:", data);
-                console.log("PronaÄ‘ene fakture:", invoices);
+                console.log("Ucitane stavke:", data);
+                console.log("Pronadjene fakture:", invoices);
                 
             } catch (err) {
-                document.getElementById("uploadStatus").innerHTML = `? GreĹˇka: ${err.message}`;
+                document.getElementById("uploadStatus").innerHTML = `Greska: ${err.message}`;
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -611,7 +611,7 @@
             
             if (fakturaIdx === -1 || lokacijaIdx === -1 || skuIdx === -1 || kolicinaIdx === -1) {
                 console.error("Indeksi:", {fakturaIdx, lokacijaIdx, skuIdx, kolicinaIdx});
-                throw new Error("Fajl mora sadrĹľati kolone: broj fak, lokacija, sku, kolicina");
+                throw new Error("Fajl mora sadrati kolone: broj fak, lokacija, sku, kolicina");
             }
             
             const result = [];
@@ -678,10 +678,10 @@
             const colors = {
                 1: '#3b82f6', // plava
                 2: '#22c55e', // zelena
-                3: '#eab308', // Ĺľuta
-                4: '#f97316', // narandĹľasta
+                3: '#eab308', // uta
+                4: '#f97316', // narandasta
                 5: '#ef4444', // crvena
-                6: '#a855f7'  // ljubiÄŤasta
+                6: '#a855f7'  // ljubiasta
             };
             return colors[box] || '#64748b';
         }
@@ -703,7 +703,7 @@
                 return;
             }
             
-            // GrupiĹˇi stavke po kutijama (samo one koje ÄŤekaju)
+            // Grupii stavke po kutijama (samo one koje ekaju)
             const boxesMap = new Map();
             
             items.forEach(it => {
@@ -717,7 +717,7 @@
             });
             
             if (boxesMap.size === 0) {
-                infoDiv.innerHTML = '<span style="color:#0a7; font-weight:500;">? Sve obraÄ‘eno</span>';
+                infoDiv.innerHTML = '<span style="color:#0a7; font-weight:500;"> Sve obraeno</span>';
                 return;
             }
             
@@ -766,7 +766,7 @@
                     <div class="${boxClass}" style="border-color: ${boxColor}; cursor: pointer;" onclick="showBoxDetails(${i})">
                         <div class="box-number" style="color: ${boxColor};"> Kutija ${i}</div>
                         ${invoice ? `<div class="invoice-pill" style="margin-bottom:10px; background:${boxColor}; color:white;"> ${invoice}</div>` : 
-                                    `<div class="muted" style="margin-bottom:10px;">? slobodna</div>`}
+                                    `<div class="muted" style="margin-bottom:10px;"> slobodna</div>`}
                         ${invoice ? `
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                                 <span>${boxProgress.done}/${boxProgress.total}</span>
@@ -789,7 +789,7 @@
 
             const curLoc = data.current_location;
             if (!curLoc) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px"> Task zavrĹˇen!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px"> Task zavren!</td></tr>`;
                 return;
             }
 
@@ -803,9 +803,9 @@
                 if (it.status === "pending" || it.status === "partial") {
                     actionButtons = `
                         <button class="btn btn-success" style="padding:4px 8px; font-size:11px" 
-                                onclick="takeItem('${it.sku}', '${it.invoice}', ${it.qty_required})">? Uzeto</button>
+                                onclick="takeItem('${it.sku}', '${it.invoice}', ${it.qty_required})"> Uzeto</button>
                         <button class="btn btn-warning" style="padding:4px 8px; font-size:11px" 
-                                onclick="setOOS('${it.sku}', '${it.invoice}')">? Nema</button>
+                                onclick="setOOS('${it.sku}', '${it.invoice}')">Nema</button>
                         <button class="btn btn-danger" style="padding:4px 8px; font-size:11px" 
                                 onclick="setProblem('${it.sku}', '${it.invoice}', ${it.qty_required})"> Problem</button>
                     `;
@@ -817,7 +817,7 @@
                     <td><span class="invoice-pill"> ${it.invoice}</span></td>
                     <td><span style="display:inline-block; background:${getBoxColor(it.box)}; color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Kutija ${it.box}</span></td>
                     <td>${statusBadge(it.status)}</td>
-                    <td>${actionButtons || '<span class="badge badge-gray"> ZavrĹˇeno</span>'}</td>
+                    <td>${actionButtons || '<span class="badge badge-gray"> Zavrseno</span>'}</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -861,12 +861,12 @@
             }
 
             if (taken.length > 0) {
-                container.innerHTML += '<div style="margin:10px 0;"><span class="badge badge-green">? UZETO</span></div>';
+                container.innerHTML += '<div style="margin:10px 0;"><span class="badge badge-green"> UZETO</span></div>';
                 taken.slice(0, 5).forEach(it => {
                     container.innerHTML += `<div>${it.sku} (Kutija ${it.box}) -  ${it.invoice}</div>`;
                 });
                 if (taken.length > 5) {
-                    container.innerHTML += `<div class="muted">+ joĹˇ ${taken.length - 5}</div>`;
+                    container.innerHTML += `<div class="muted">+ jo ${taken.length - 5}</div>`;
                 }
             }
         }
@@ -878,7 +878,7 @@
                 return;
             }
             
-            // PronaÄ‘i fakturu za ovu kutiju
+            // Pronadji fakturu za ovu kutiju
             let invoice = null;
             for (const [inv, box] of Object.entries(waveData.box_assignment || {})) {
                 if (box === boxNum) {
@@ -913,17 +913,15 @@
             
             // Napravi poruku za prikaz
             let message = ` KUTIJA ${boxNum} - ${invoice}\n`;
-            message += `Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦
-
-`;
+            message += `\n\n`;
             
             let ukupno = 0;
             let uzeto = 0;
             
             boxItems.forEach((it, index) => {
-                const statusIcon = it.status === "taken" ? "?" : 
+                const statusIcon = it.status === "taken" ? "" : 
                                   (it.status === "problem" ? "" : 
-                                  (it.status === "oos" ? "?" : "?"));
+                                  (it.status === "oos" ? "s" : ""));
                 message += `${index+1}. ${statusIcon} ${it.sku}\n`;
                 message += `    ${it.location || it.locationName}\n`;
                 message += `    ${it.qty_picked || 0}/${it.qty_required}`;
@@ -938,43 +936,19 @@
                 uzeto += it.qty_picked || 0;
             });
             
-            message += `Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦\n`;
+            message += `\n`;
             message += `UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
             
             alert(message);
         }
 
-        // ==================== RENDER WAVE LIGHT ====================
-function renderWaveLight(data) {
-    waveData = data;
-
-    document.getElementById("curLoc").innerText = data.current_location || "ZAVRĹ ENO";
-    document.getElementById("routeInfo").innerHTML =
-        `${data.mode} |  ${data.start} â€ş ${data.end} |  ${data.distance_m}m`;
-
-    document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
-
-    const p = data.progress || {};
-    document.getElementById("progressPill").innerHTML =
-        ` ${p.done_items || 0}/${p.total_items || 0} stavki`;
-    document.getElementById("progressPercent").innerHTML = ` ${p.progress_percent || 0}%`;
-
-    renderBoxes(data);
-    renderItemsTable(data);
-    updateCurrentBoxInfo(data);
-    updateStats();
-
-    if (!data.current_location) {
-        stopTimer();
-    }
-}
-// ==================== RENDER WAVE ====================
+        // ==================== RENDER WAVE ====================
         async function renderWave(data) {
-            waveData = data;  // SaÄŤuvaj podatke globalno za prikaz detalja kutije
+            waveData = data;  // Sauvaj podatke globalno za prikaz detalja kutije
             
-            document.getElementById("curLoc").innerText = data.current_location || "ZAVRĹ ENO";
+            document.getElementById("curLoc").innerText = data.current_location || "ZAVRENO";
             document.getElementById("routeInfo").innerHTML = 
-                `${data.mode} |  ${data.start} â€ş ${data.end} |  ${data.distance_m}m`;
+                `${data.mode} | Z ${data.start}  ${data.end} |  ${data.distance_m}m`;
             
             document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
             
@@ -990,10 +964,10 @@ function renderWaveLight(data) {
             // Prikaz kutije za trenutnu lokaciju
             updateCurrentBoxInfo(data);
             
-            // AĹľuriraj statistiku
+            // Auriraj statistiku
             updateStats();
             
-            // Zaustavi tajmer ako je wave zavrĹˇen
+            // Zaustavi tajmer ako je wave zavren
             if (!data.current_location) {
                 stopTimer();
             }
@@ -1001,7 +975,7 @@ function renderWaveLight(data) {
 		// ==================== FUNKCIJA ZA PRIKAZ MAPE SA RUTOM ====================
 async function showMap() {
     if (uploadedItems.length === 0) {
-        alert("Prvo uÄŤitaj Excel fajl sa lokacijama!");
+        alert("Prvo ucitaj Excel fajl sa lokacijama!");
         return;
     }
 
@@ -1018,13 +992,13 @@ async function showMap() {
             lokacijeZaPosetu.includes(lok.location)
         );
 
-        // PronaÄ‘i trenutnu lokaciju (ako je wave pokrenut)
+        // Pronadji trenutnu lokaciju (ako je wave pokrenut)
         let trenutnaLokacija = null;
         if (waveData && waveData.current_location) {
             trenutnaLokacija = waveData.current_location;
         }
 
-        // IzraÄŤunaj granice mape
+        // Izraunaj granice mape
         const minX = Math.min(...sveLokacije.map(l => l.x)) - 1;
         const maxX = Math.max(...sveLokacije.map(l => l.x)) + 1;
         const minY = Math.min(...sveLokacije.map(l => l.y)) - 1;
@@ -1114,7 +1088,7 @@ async function showMap() {
                     const trenutnaLokacija = ${JSON.stringify(trenutnaLokacija)};
                     const fakture = ${JSON.stringify(fakture)};
                     
-                    // PomoÄ‡na funkcija za boju fakture
+                    // Pomona funkcija za boju fakture
                     function getFakturaColor(lokacija) {
                         const item = uploadedItems.find(i => i.lokacija === lokacija);
                         if (!item) return '#94a3b8';
@@ -1176,7 +1150,7 @@ async function showMap() {
                             ctx.fillText(lok.location, x + 8, y - 5);
                         });
                         
-                        // Nacrtaj liniju rute (ako ima viĹˇe od 1 lokacije)
+                        // Nacrtaj liniju rute (ako ima vie od 1 lokacije)
                         if (waveData && waveData.ordered_locations && waveData.ordered_locations.length > 1) {
                             const ruta = waveData.ordered_locations;
                             ctx.beginPath();
@@ -1215,7 +1189,7 @@ async function showMap() {
                             ctx.stroke();
                         });
                         
-                        // OznaÄŤi trenutnu lokaciju (trepÄ‡e)
+                        // Oznai trenutnu lokaciju (trepe)
                         if (trenutnaLokacija) {
                             const trenutna = sveLokacije.find(l => l.location === trenutnaLokacija);
                             if (trenutna) {
@@ -1268,7 +1242,7 @@ async function showMap() {
         `);
         
     } catch (err) {
-        alert("? GreĹˇka pri uÄŤitavanju mape: " + err.message);
+        alert("Greska pri ucitavanju mape: " + err.message);
         console.error(err);
     } finally {
         setLoading(false);
@@ -1278,22 +1252,22 @@ async function showMap() {
         // ==================== START WAVE ====================
         async function startWave() {
             if (scannedInvoices.length === 0) {
-                alert("? Nema skeniranih faktura!");
+                alert("Nema skeniranih faktura!");
                 return;
             }
 
             if (uploadedItems.length === 0) {
-                alert("? Nema uÄŤitanih stavki iz Excel fajla!");
+                alert("Nema ucitanih stavki iz Excel fajla!");
                 return;
             }
 
             setLoading(true);
             try {
                 const mode = document.getElementById("routingMode").value;
-                console.log("Ĺ aljem stavke u backend:", uploadedItems);
+                console.log("aljem stavke u backend:", uploadedItems);
                 console.log("Broj stavki:", uploadedItems.length);
                 console.log("Fakture:", [...new Set(uploadedItems.map(i => i.faktura))]);
-                console.log("NaÄŤin rutiranja:", mode);
+                console.log("Nain rutiranja:", mode);
                 
                 const itemsForBackend = uploadedItems
                     .filter(item => scannedInvoices.includes(item.faktura))
@@ -1316,8 +1290,8 @@ async function showMap() {
                 const data = await res.json();
                 
                 if (!res.ok) {
-                    alert("? GreĹˇka: " + (data.detail || JSON.stringify(data)));
-                    console.error("Detalji greĹˇke:", data);
+                    alert("Greska: " + (data.detail || JSON.stringify(data)));
+                    console.error("Detalji greke:", data);
                     return;
                 }
 
@@ -1330,125 +1304,27 @@ async function showMap() {
                 await renderWave(data);
                 
             } catch (err) {
-                alert("? MreĹľna greĹˇka: " + err.message);
+                alert("Mrezna greka: " + err.message);
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         }
 
-        // ==================== OPTIMISTIC UPDATE ====================
-function _isDoneStatus(s) {
-    return s === "taken" || s === "oos" || s === "problem";
-}
-
-function _isLocationDone(items) {
-    return Array.isArray(items) && items.length > 0 && items.every(it => _isDoneStatus(it.status));
-}
-
-function applyLocalUpdate(action, sku, invoice, required, picked, note) {
-    if (!waveData || !waveData.items_by_loc) return false;
-
-    let targetLoc = null;
-    let targetItem = null;
-
-    for (const [loc, items] of Object.entries(waveData.items_by_loc)) {
-        for (const it of items) {
-            if (it.sku === sku && it.invoice === invoice) {
-                targetLoc = loc;
-                targetItem = it;
-                break;
-            }
-        }
-        if (targetItem) break;
-    }
-
-    if (!targetItem) return false;
-
-    const oldStatus = targetItem.status;
-    const oldPicked = targetItem.qty_picked || 0;
-    const oldDone = _isDoneStatus(oldStatus);
-    const oldLocDone = _isLocationDone(waveData.items_by_loc[targetLoc]);
-
-    if (action === "take") {
-        targetItem.qty_picked = required;
-        targetItem.qty_missing = (targetItem.qty_required || required) - required;
-        targetItem.status = targetItem.qty_missing === 0 ? "taken" : "partial";
-    } else if (action === "oos") {
-        targetItem.status = "oos";
-        targetItem.note = (targetItem.note || "") + (note ? (" | " + note) : " | OOS prijavljen");
-    } else if (action === "problem") {
-        targetItem.status = "problem";
-        if (typeof picked === "number") {
-            targetItem.qty_picked = picked;
-            targetItem.qty_missing = (targetItem.qty_required || required) - picked;
-        }
-        targetItem.note = (targetItem.note || "") + (note ? (" | " + note) : " | Problem prijavljen");
-    } else if (action === "dopuna") {
-        targetItem.status = "taken";
-        targetItem.qty_picked = targetItem.qty_required || required;
-        targetItem.qty_missing = 0;
-        targetItem.note = (targetItem.note || "") + (note ? (" | " + note) : " | Dopunjeno do pune kolicine");
-    }
-
-    targetItem.updated_at = new Date().toISOString();
-
-    if (waveData.progress) {
-        const newPicked = targetItem.qty_picked || 0;
-        if (typeof waveData.progress.picked_qty === "number") {
-            waveData.progress.picked_qty += (newPicked - oldPicked);
-        }
-        const newDone = _isDoneStatus(targetItem.status);
-        if (typeof waveData.progress.done_items === "number") {
-            waveData.progress.done_items += (newDone ? 1 : 0) - (oldDone ? 1 : 0);
-        }
-        if (waveData.progress.boxes && targetItem.invoice && waveData.progress.boxes[targetItem.invoice]) {
-            if (newDone !== oldDone) {
-                waveData.progress.boxes[targetItem.invoice].done += newDone ? 1 : -1;
-            }
-        }
-    }
-
-    const newLocDone = _isLocationDone(waveData.items_by_loc[targetLoc]);
-    if (waveData.progress && typeof waveData.progress.done_locations === "number") {
-        if (!oldLocDone && newLocDone) waveData.progress.done_locations += 1;
-    }
-
-    if (waveData.ordered_locations && waveData.progress && typeof waveData.progress.current_index === "number") {
-        let idx = waveData.progress.current_index;
-        while (idx < waveData.ordered_locations.length) {
-            const loc = waveData.ordered_locations[idx];
-            const items = waveData.items_by_loc[loc] || [];
-            if (_isLocationDone(items)) idx++;
-            else break;
-        }
-        waveData.progress.current_index = idx;
-        waveData.current_location = idx < waveData.ordered_locations.length ? waveData.ordered_locations[idx] : null;
-    }
-
-    return true;
-}
-// ==================== AKCIJE ====================
+        // ==================== AKCIJE ====================
         async function takeItem(sku, invoice, required) {
-            if (applyLocalUpdate("take", sku, invoice, required, required, null)) {
-                await renderWaveLight(waveData);
-            }
             setLoading(true);
             try {
-                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({sku, invoice, action: "take", qty_picked: required})
+                    body: JSON.stringify({
+                        sku, invoice, action: "take", qty_picked: required
+                    })
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || "GreĹˇka");
-                if (data.wave) {
-                    await renderWaveLight(data.wave);
-                } else {
-                    await refreshWave();
-                }
+                await refreshWave();
             } catch (err) {
-                alert("? GreĹˇka: " + err.message);
+                alert("Greska: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1457,26 +1333,17 @@ function applyLocalUpdate(action, sku, invoice, required, picked, note) {
         async function setOOS(sku, invoice) {
             const note = prompt("Komentar za NEMA:");
             if (note === null) return;
-
-            if (applyLocalUpdate("oos", sku, invoice, null, null, note)) {
-                await renderWaveLight(waveData);
-            }
+            
             setLoading(true);
             try {
-                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({sku, invoice, action: "oos", note})
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || "GreĹˇka");
-                if (data.wave) {
-                    await renderWaveLight(data.wave);
-                } else {
-                    await refreshWave();
-                }
+                await refreshWave();
             } catch (err) {
-                alert("? GreĹˇka: " + err.message);
+                alert("Greska: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1487,26 +1354,17 @@ function applyLocalUpdate(action, sku, invoice, required, picked, note) {
             if (isNaN(picked)) return;
             
             const note = prompt("Komentar:");
-
-            if (applyLocalUpdate("problem", sku, invoice, required, picked, note)) {
-                await renderWaveLight(waveData);
-            }
+            
             setLoading(true);
             try {
-                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({sku, invoice, action: "problem", qty_picked: picked, note})
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || "GreĹˇka");
-                if (data.wave) {
-                    await renderWaveLight(data.wave);
-                } else {
-                    await refreshWave();
-                }
+                await refreshWave();
             } catch (err) {
-                alert("? GreĹˇka: " + err.message);
+                alert("Greska: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1515,19 +1373,15 @@ function applyLocalUpdate(action, sku, invoice, required, picked, note) {
         async function dopuni(sku, invoice, required, picked) {
             const fali = required - (picked || 0);
             
-            // Ako nema Ĺˇta da se dopuni
+            // Ako nema ta da se dopuni
             if (fali <= 0) {
-                alert("? Ova stavka je veÄ‡ kompletna!");
+                alert(" Ova stavka je ve kompletna!");
                 return;
             }
             
             // Pitanje za dopunu - pokazuje koliko fali
             if (!confirm(`Da li si dopunio SKU ${sku} sa preostalih ${fali} komada?`)) {
                 return;
-            }
-
-            if (applyLocalUpdate("dopuna", sku, invoice, required, required, `Dopunjeno do pune kolicine (dodato ${fali})`)) {
-                await renderWaveLight(waveData);
             }
             
             setLoading(true);
@@ -1539,20 +1393,21 @@ function applyLocalUpdate(action, sku, invoice, required, picked, note) {
                         sku: sku,
                         invoice: invoice,
                         action: "dopuna",
-                        qty_picked: required,
-                        note: `Dopunjeno do pune kolicine (dodato ${fali})`
+                        qty_picked: required,  // aljemo punu koliinu
+                        note: `Dopunjeno do pune koliine (dodato ${fali})`
                     })
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || "GreĹˇka pri dopuni");
-                if (data.wave) {
-                    await renderWaveLight(data.wave);
-                } else {
-                    await refreshWave();
+                
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "Greska pri dopuni");
                 }
-                alert(`? Stavka ${sku} je kompletirana!`);
+                
+                await refreshWave();
+                alert(` Stavka ${sku} je kompletirana!`);
+                
             } catch (err) {
-                alert("? GreĹˇka: " + err.message);
+                alert("Greska: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1560,26 +1415,17 @@ function applyLocalUpdate(action, sku, invoice, required, picked, note) {
 
         async function kompletiraj(sku, invoice, required) {
             if (!confirm(`Kompletiraj SKU ${sku}?`)) return;
-
-            if (applyLocalUpdate("dopuna", sku, invoice, required, required, null)) {
-                await renderWaveLight(waveData);
-            }
+            
             setLoading(true);
             try {
-                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({sku, invoice, action: "dopuna", qty_picked: required})
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || "GreĹˇka");
-                if (data.wave) {
-                    await renderWaveLight(data.wave);
-                } else {
-                    await refreshWave();
-                }
+                await refreshWave();
             } catch (err) {
-                alert("? GreĹˇka: " + err.message);
+                alert("Greska: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1625,16 +1471,3 @@ function applyLocalUpdate(action, sku, invoice, required, picked, note) {
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
