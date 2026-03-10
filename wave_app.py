@@ -6,6 +6,7 @@ import math
 import uuid
 import json
 import heapq
+import threading
 from datetime import datetime
 from typing import List, Tuple, Dict, Optional, Any
 
@@ -51,6 +52,27 @@ def save_sessions() -> None:
             json.dump(WAVE_SESSIONS, f, indent=2, default=str)
     except Exception as e:
         print(f" Greka pri uvanju sesija: {e}")
+# Debounced save to reduce per-click latency
+_save_lock = threading.Lock()
+_save_timer: Optional[threading.Timer] = None
+
+def save_sessions_debounced(delay_s: float = 1.0) -> None:
+    global _save_timer
+    with _save_lock:
+        if _save_timer and _save_timer.is_alive():
+            return
+
+        def _flush():
+            global _save_timer
+            try:
+                save_sessions()
+            finally:
+                with _save_lock:
+                    _save_timer = None
+
+        _save_timer = threading.Timer(delay_s, _flush)
+        _save_timer.daemon = True
+        _save_timer.start()
 
 # ----------------------------
 # Logging
@@ -847,7 +869,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
     if not req.location and action != "dopuna":
         _advance_if_done(sess)
     
-    save_sessions()  #  uvamo posle svake izmene
+    save_sessions_debounced()  #  uvamo posle svake izmene
     
     cur2 = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
 
@@ -877,6 +899,10 @@ def wave_debug():
         "warehouse_locations": len(WAREHOUSE.loc_to_block_rc),
         "active_sessions": len(WAVE_SESSIONS),
     }
+
+
+
+
 
 
 
