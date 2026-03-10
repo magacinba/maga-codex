@@ -10,3 +10,7 @@
   from = "/app"
   to = "/wave_index%20okok.html"
   status = 200
+[[headers]]
+  for = "/wave_index*"
+  [headers.values]
+    Content-Type = "text/html; charset=UTF-8"
