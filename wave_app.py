@@ -482,6 +482,25 @@ def build_route_legs(path: List[str], start: str, end: str) -> Dict[str, Any]:
     return {"legs": legs, "total_m": round(total, 2)}
 
 
+# Reusable response builder to avoid extra /wave/{id} round-trips
+def _build_wave_response(sess: dict) -> Dict[str, Any]:
+    _advance_if_done(sess)
+    cur = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
+    legs = build_route_legs(sess["ordered_locations"], sess["start"], sess["end"])
+    progress = _session_progress(sess)
+    return {
+        "session_id": sess["id"],
+        "mode": sess["mode"],
+        "start": sess["start"],
+        "end": sess["end"],
+        "distance_m": round(float(sess["distance_m"]), 2),
+        "ordered_locations": sess["ordered_locations"],
+        "current_location": cur,
+        "items_by_loc": sess["items_by_loc"],
+        "box_assignment": sess["box_assignment"],
+        "progress": progress,
+        "route_legs": legs,
+    }
 # ----------------------------
 # Wave Picking Modeli
 # ----------------------------
@@ -700,25 +719,8 @@ def get_wave(session_id: str):
     if not sess:
         log_action("WAVE_GET", f"Sesija ne postoji: {session_id}")
         raise HTTPException(status_code=404, detail="Session not found")
-    
-    _advance_if_done(sess)
-    cur = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
-    legs = build_route_legs(sess["ordered_locations"], sess["start"], sess["end"])
-    progress = _session_progress(sess)
-    
-    return {
-        "session_id": session_id,
-        "mode": sess["mode"],
-        "start": sess["start"],
-        "end": sess["end"],
-        "distance_m": round(float(sess["distance_m"]), 2),
-        "ordered_locations": sess["ordered_locations"],
-        "current_location": cur,
-        "items_by_loc": sess["items_by_loc"],
-        "box_assignment": sess["box_assignment"],
-        "progress": progress,
-        "route_legs": legs,
-    }
+
+    return _build_wave_response(sess)
 
 
 @app.post("/wave/{session_id}/update")
@@ -851,14 +853,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
     
     cur2 = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
 
-    return {
-        "ok": True,
-        "done": cur2 is None,
-        "current_location": cur2,
-        "progress": _session_progress(sess),
-    }
-
-
+    return {"ok": True, "done": cur2 is None, "current_location": cur2, "progress": _session_progress(sess), "wave": _build_wave_response(sess)}
 # ==================== NOVA RUTA ZA KOORDINATE ====================
 @app.get("/warehouse/coordinates")
 def get_coordinates():
@@ -884,4 +879,13 @@ def wave_debug():
         "warehouse_locations": len(WAREHOUSE.loc_to_block_rc),
         "active_sessions": len(WAVE_SESSIONS),
     }
+
+
+
+
+
+
+
+
+
 

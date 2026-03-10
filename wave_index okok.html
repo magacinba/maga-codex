@@ -913,7 +913,9 @@
             
             // Napravi poruku za prikaz
             let message = `📦 KUTIJA ${boxNum} - ${invoice}\n`;
-            message += `──────────────────\n\n`;
+            message += `──────────────────
+
+`;
             
             let ukupno = 0;
             let uzeto = 0;
@@ -1315,14 +1317,18 @@ async function showMap() {
         async function takeItem(sku, invoice, required) {
             setLoading(true);
             try {
-                await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({
-                        sku, invoice, action: "take", qty_picked: required
-                    })
+                    body: JSON.stringify({sku, invoice, action: "take", qty_picked: required})
                 });
-                await refreshWave();
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Greška");
+                if (data.wave) {
+                    await renderWave(data.wave);
+                } else {
+                    await refreshWave();
+                }
             } catch (err) {
                 alert("❌ Greška: " + err.message);
             } finally {
@@ -1336,12 +1342,18 @@ async function showMap() {
             
             setLoading(true);
             try {
-                await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({sku, invoice, action: "oos", note})
                 });
-                await refreshWave();
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Greška");
+                if (data.wave) {
+                    await renderWave(data.wave);
+                } else {
+                    await refreshWave();
+                }
             } catch (err) {
                 alert("❌ Greška: " + err.message);
             } finally {
@@ -1357,12 +1369,18 @@ async function showMap() {
             
             setLoading(true);
             try {
-                await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({sku, invoice, action: "problem", qty_picked: picked, note})
                 });
-                await refreshWave();
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Greška");
+                if (data.wave) {
+                    await renderWave(data.wave);
+                } else {
+                    await refreshWave();
+                }
             } catch (err) {
                 alert("❌ Greška: " + err.message);
             } finally {
@@ -1393,19 +1411,18 @@ async function showMap() {
                         sku: sku,
                         invoice: invoice,
                         action: "dopuna",
-                        qty_picked: required,  // Šaljemo punu količinu
-                        note: `Dopunjeno do pune količine (dodato ${fali})`
+                        qty_picked: required,
+                        note: `Dopunjeno do pune kolicine (dodato ${fali})`
                     })
                 });
-                
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.detail || "Greška pri dopuni");
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Greška pri dopuni");
+                if (data.wave) {
+                    await renderWave(data.wave);
+                } else {
+                    await refreshWave();
                 }
-                
-                await refreshWave();
                 alert(`✅ Stavka ${sku} je kompletirana!`);
-                
             } catch (err) {
                 alert("❌ Greška: " + err.message);
             } finally {
@@ -1418,12 +1435,18 @@ async function showMap() {
             
             setLoading(true);
             try {
-                await fetch(`${API}/wave/${SESSION_ID}/update`, {
+                const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({sku, invoice, action: "dopuna", qty_picked: required})
                 });
-                await refreshWave();
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Greška");
+                if (data.wave) {
+                    await renderWave(data.wave);
+                } else {
+                    await refreshWave();
+                }
             } catch (err) {
                 alert("❌ Greška: " + err.message);
             } finally {
@@ -1471,5 +1494,9 @@ async function showMap() {
     </script>
 </body>
 </html>
+
+
+
+
 
 
