@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wave Picking - 6 kutija na kolicima</title>
+    <title>Wave Picking • 6 kutija na kolicima</title>
     <!-- SheetJS za Excel import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -246,12 +246,12 @@
     </style>
 </head>
 <body>
-    <h2>Wave Picking - 6 kutija na kolicima</h2>
+    <h2>?? Wave Picking • 6 kutija na kolicima</h2>
 
     <!-- Sekcija za skeniranje i Excel upload -->
     <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div class="big">Skeniraj fakture (max 6)</div>
+            <div class="big">?? Skeniraj fakture (max 6)</div>
             <div class="badge badge-blue" id="scanCounter">0/6</div>
         </div>
         
@@ -263,7 +263,7 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600">Ulazi/Izlazi:</span>
+                    <span style="font-weight:600">?? Ulazi/Izlazi:</span>
                 </div>
                 <div style="display:flex; gap:16px; flex-wrap:wrap">
                     <div><span class="badge badge-blue">ENTRANCE_1</span> Levo</div>
@@ -273,12 +273,12 @@
             
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600">Naèin rutiranja:</span>
+                    <span style="font-weight:600">??? Naèin rutiranja:</span>
                 </div>
                 <select id="routingMode" style="padding:10px; width:100%; border-radius:8px; border:2px solid var(--border); background:white; font-weight:500">
                     <option value="optimal" selected>? Optimalno (najkraæa putanja)</option>
-                    <option value="tsp">Najkraæa (OR-Tools, sporije)</option>
-                    <option value="sector">Po sektorima (A->B->C->D->E)</option>
+                    <option value="tsp">?? Najkraæa (OR-Tools, sporije)</option>
+                    <option value="sector">?? Po sektorima (A›B›C›D›E)</option>
                 </select>
             </div>
         </div>
@@ -287,7 +287,7 @@
         <div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:12px; border:2px dashed var(--border)">
             <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:24px;"></span>
+                    <span style="font-size:24px;">??</span>
                     <span style="font-weight:600;">Uèitaj fakture iz Excel-a:</span>
                 </div>
                 
@@ -295,10 +295,10 @@
                 
                 <div style="display:flex; gap:10px;">
                     <button class="btn" onclick="document.getElementById('excelUpload').click()" style="background:var(--primary); color:white;">
-                        Izaberi fajl
+                        ?? Izaberi fajl
                     </button>
                     <button class="btn" onclick="downloadSampleExcel()" style="background:#8b5cf6; color:white;">
-                        Uzorak fajla
+                        ?? Uzorak fajla
                     </button>
                 </div>
                 
@@ -306,17 +306,17 @@
             </div>
             
             <div class="muted" style="margin-top:10px; font-size:12px;">
-                Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
+                ?? Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
             </div>
         </div>
         
         <div style="display:flex; gap:10px; align-items:center; margin-top:15px;">
             <button class="btn btn-primary" id="startWaveBtn" onclick="startWave()" disabled style="font-size:18px; padding:15px 30px;">
-                KREÆEMO SA PAKOVANJEM
+                ?? KREÆEMO SA PAKOVANJEM
             </button>
-            <button class="btn" onclick="clearScanned()">Obriši sve</button>
-            <button class="btn" onclick="debugWave()">Debug</button>
-			<button class="btn" onclick="showMap()">Mapa</button>
+            <button class="btn" onclick="clearScanned()">??? Obriši sve</button>
+            <button class="btn" onclick="debugWave()">?? Debug</button>
+			<button class="btn" onclick="showMap()">??? Mapa</button>
         </div>
     </div>
 
@@ -331,7 +331,7 @@
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
-                    <div class="big">Trenutna lokacija: <span id="curLoc" style="color:var(--primary);">-</span></div>
+                    <div class="big">?? Trenutna lokacija: <span id="curLoc" style="color:var(--primary);">-</span></div>
                     <div id="currentBoxInfo" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                         <!-- OVDE ÆE SE PRIKAZATI KUTIJE U ISTOM REDU -->
                     </div>
@@ -348,12 +348,12 @@
                 <table id="itemsTable">
                     <thead style="background:#f8fafc; position:sticky; top:0">
                         <tr>
-                            <th>SKU</th>
-                            <th>Kol</th>
-                            <th>Faktura</th>
-                            <th>Kutija</th>
-                            <th>Status</th>
-                            <th>Akcija</th>
+                            <th>?? SKU</th>
+                            <th>?? Kol</th>
+                            <th>?? Faktura</th>
+                            <th>?? Kutija</th>
+                            <th>?? Status</th>
+                            <th>?? Akcija</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -366,31 +366,31 @@
             <!-- STATISTIKA DEO -->
             <div style="margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:12px; border:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div class="big" style="font-size:18px;">Statistika</div>
+                    <div class="big" style="font-size:18px;">?? Statistika</div>
                     <span class="badge badge-blue" id="timerDisplay">00:00</span>
                 </div>
                 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div style="padding:8px; background:white; border-radius:8px;">
-                        <div style="font-size:12px; color:var(--dark);">Artikli/sat</div>
+                        <div style="font-size:12px; color:var(--dark);">?? Artikli/sat</div>
                         <div style="font-size:18px; font-weight:700;" id="itemsPerHour">0</div>
                     </div>
                     <div style="padding:8px; background:white; border-radius:8px;">
-                        <div style="font-size:12px; color:var(--dark);">Vreme po lok.</div>
+                        <div style="font-size:12px; color:var(--dark);">?? Vreme po lok.</div>
                         <div style="font-size:18px; font-weight:700;" id="avgTimePerLoc">0s</div>
                     </div>
                 </div>
                 
                 <div style="margin-top:8px; padding:8px; background:white; border-radius:8px;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span style="font-size:12px; color:var(--dark);">Preðeno:</span>
+                        <span style="font-size:12px; color:var(--dark);">?? Preðeno:</span>
                         <span style="font-weight:600;" id="totalDistanceStat">0 m</span>
                     </div>
                 </div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <div class="big">Kutije na kolicima</div>
+                <div class="big">?? Kutije na kolicima</div>
                 <div class="badge badge-blue" id="totalDistanceDisplay">- m</div>
             </div>
             <div id="boxesContainer" class="boxes-grid">
@@ -398,7 +398,7 @@
             </div>
             
             <div style="margin-top:20px;">
-                <div class="big" style="font-size:18px;">Izveštaj</div>
+                <div class="big" style="font-size:18px;">?? Izveštaj</div>
                 <div id="reportMini" style="margin-top:10px; max-height:200px; overflow-y:auto;"></div>
             </div>
         </div>
@@ -431,10 +431,10 @@
         function statusBadge(st) {
             const badges = {
                 "pending": `<span class="badge badge-gray">? PENDING</span>`,
-                "partial": `<span class="badge badge-orange">PARTIAL</span>`,
+                "partial": `<span class="badge badge-orange">?? PARTIAL</span>`,
                 "taken": `<span class="badge badge-green">? UZETO</span>`,
                 "oos": `<span class="badge badge-orange">? NEMA</span>`,
-                "problem": `<span class="badge badge-red">PROBLEM</span>`
+                "problem": `<span class="badge badge-red">?? PROBLEM</span>`
             };
             return badges[st] || `<span class="badge badge-gray">${st}</span>`;
         }
@@ -671,7 +671,7 @@
             a.click();
             URL.revokeObjectURL(url);
             
-            document.getElementById("uploadStatus").innerHTML = "Uzorak fajla preuzet";
+            document.getElementById("uploadStatus").innerHTML = "?? Uzorak fajla preuzet";
         }
 
         // ==================== BOJE ZA KUTIJE ====================
@@ -729,7 +729,7 @@
                 const itemList = items.map(it => `${it.sku} (${it.qty})`).join(', ');
                 const bgColor = getBoxColor(box);
 				const skuList = items.map(it => it.sku).join(', ');
-				html += `<span style="display:inline-block; background:${bgColor}; color:white; padding:6px 16px; border-radius:25px; font-size:16px; font-weight:600; margin-right:8px; cursor:help; box-shadow:0 2px 4px rgba(0,0,0,0.1);" title="SKU: ${itemList}">Kutija ${box} - ${skuList}</span>`;
+				html += `<span style="display:inline-block; background:${bgColor}; color:white; padding:6px 16px; border-radius:25px; font-size:16px; font-weight:600; margin-right:8px; cursor:help; box-shadow:0 2px 4px rgba(0,0,0,0.1);" title="SKU: ${itemList}">?? Kutija ${box} - ${skuList}</span>`;
                 
             });
             
@@ -765,8 +765,8 @@
 
                 const boxHtml = `
                     <div class="${boxClass}" style="border-color: ${boxColor}; cursor: pointer;" onclick="showBoxDetails(${i})">
-                        <div class="box-number" style="color: ${boxColor};">Kutija ${i}</div>
-                        ${invoice ? `<div class="invoice-pill" style="margin-bottom:10px; background:${boxColor}; color:white;">${invoice}</div>` : 
+                        <div class="box-number" style="color: ${boxColor};">?? Kutija ${i}</div>
+                        ${invoice ? `<div class="invoice-pill" style="margin-bottom:10px; background:${boxColor}; color:white;">?? ${invoice}</div>` : 
                                     `<div class="muted" style="margin-bottom:10px;">? slobodna</div>`}
                         ${invoice ? `
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -790,7 +790,7 @@
 
             const curLoc = data.current_location;
             if (!curLoc) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px">Task završen!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px">?? Task završen!</td></tr>`;
                 return;
             }
 
@@ -808,17 +808,17 @@
                         <button class="btn btn-warning" style="padding:4px 8px; font-size:11px" 
                                 onclick="setOOS('${it.sku}', '${it.invoice}')">? Nema</button>
                         <button class="btn btn-danger" style="padding:4px 8px; font-size:11px" 
-                                onclick="setProblem('${it.sku}', '${it.invoice}', ${it.qty_required})">Problem</button>
+                                onclick="setProblem('${it.sku}', '${it.invoice}', ${it.qty_required})">?? Problem</button>
                     `;
                 }
 
                 tr.innerHTML = `
                     <td><span class="mono">${it.sku}</span></td>
                     <td>${it.qty_required} ${it.qty_picked ? `(uzeto ${it.qty_picked})` : ''}</td>
-                    <td><span class="invoice-pill">${it.invoice}</span></td>
+                    <td><span class="invoice-pill">?? ${it.invoice}</span></td>
                     <td><span style="display:inline-block; background:${getBoxColor(it.box)}; color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Kutija ${it.box}</span></td>
                     <td>${statusBadge(it.status)}</td>
-                    <td>${actionButtons || '<span class="badge badge-gray">Završeno</span>'}</td>
+                    <td>${actionButtons || '<span class="badge badge-gray">?? Završeno</span>'}</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -843,17 +843,17 @@
             }
 
             if (problems.length > 0) {
-                container.innerHTML += '<div style="margin-bottom:10px;"><span class="badge badge-red">PROBLEM</span></div>';
+                container.innerHTML += '<div style="margin-bottom:10px;"><span class="badge badge-red">?? PROBLEM</span></div>';
                 problems.forEach(it => {
                     container.innerHTML += `
                         <div style="padding:8px; background:#fff5f5; border-radius:8px; margin-bottom:5px;">
                             <div><strong>${it.sku}</strong> (Kutija ${it.box})</div>
-                            <div>${it.invoice}</div>
+                            <div>?? ${it.invoice}</div>
                             <div class="muted">${it.note || ''}</div>
                             <div style="display:flex; gap:5px; margin-top:5px;">
                                 <button class="btn btn-purple" style="padding:4px 8px; font-size:11px" 
                                         onclick="dopuni('${it.sku}', '${it.invoice}', ${it.qty_required}, ${it.qty_picked || 0})">
-                                    DOPUNI
+                                    ?? DOPUNI
                                 </button>
                             </div>
                         </div>
@@ -864,7 +864,7 @@
             if (taken.length > 0) {
                 container.innerHTML += '<div style="margin:10px 0;"><span class="badge badge-green">? UZETO</span></div>';
                 taken.slice(0, 5).forEach(it => {
-                    container.innerHTML += `<div>${it.sku} (Kutija ${it.box}) - ${it.invoice}</div>`;
+                    container.innerHTML += `<div>${it.sku} (Kutija ${it.box}) - ?? ${it.invoice}</div>`;
                 });
                 if (taken.length > 5) {
                     container.innerHTML += `<div class="muted">+ još ${taken.length - 5}</div>`;
@@ -913,7 +913,7 @@
             }
             
             // Napravi poruku za prikaz
-            let message = `KUTIJA ${boxNum} - ${invoice}\n`;
+            let message = `?? KUTIJA ${boxNum} - ${invoice}\n`;
             message += `¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 `;
@@ -923,16 +923,16 @@
             
             boxItems.forEach((it, index) => {
                 const statusIcon = it.status === "taken" ? "?" : 
-                                  (it.status === "problem" ? "" : 
+                                  (it.status === "problem" ? "??" : 
                                   (it.status === "oos" ? "?" : "?"));
                 message += `${index+1}. ${statusIcon} ${it.sku}\n`;
-                message += `   ${it.location || it.locationName}\n`;
-                message += `   ${it.qty_picked || 0}/${it.qty_required}`;
+                message += `   ?? ${it.location || it.locationName}\n`;
+                message += `   ?? ${it.qty_picked || 0}/${it.qty_required}`;
                 if (it.status !== "taken" && it.qty_missing > 0) {
                     message += ` (fali ${it.qty_missing})`;
                 }
                 message += `\n`;
-                if (it.note) message += `   ${it.note}\n`;
+                if (it.note) message += `   ?? ${it.note}\n`;
                 message += `\n`;
                 
                 ukupno += it.qty_required;
@@ -951,14 +951,14 @@ function renderWaveLight(data) {
 
     document.getElementById("curLoc").innerText = data.current_location || "ZAVRŠENO";
     document.getElementById("routeInfo").innerHTML =
-        `${data.mode} | ${data.start} -> ${data.end} | ${data.distance_m}m`;
+        `${data.mode} | ?? ${data.start} › ${data.end} | ?? ${data.distance_m}m`;
 
     document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
 
     const p = data.progress || {};
     document.getElementById("progressPill").innerHTML =
-        `${p.done_items || 0}/${p.total_items || 0} stavki`;
-    document.getElementById("progressPercent").innerHTML = `${p.progress_percent || 0}%`;
+        `?? ${p.done_items || 0}/${p.total_items || 0} stavki`;
+    document.getElementById("progressPercent").innerHTML = `?? ${p.progress_percent || 0}%`;
 
     renderBoxes(data);
     renderItemsTable(data);
@@ -975,14 +975,14 @@ function renderWaveLight(data) {
             
             document.getElementById("curLoc").innerText = data.current_location || "ZAVRŠENO";
             document.getElementById("routeInfo").innerHTML = 
-                `${data.mode} | ${data.start} -> ${data.end} | ${data.distance_m}m`;
+                `${data.mode} | ?? ${data.start} › ${data.end} | ?? ${data.distance_m}m`;
             
             document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
             
             const p = data.progress || {};
             document.getElementById("progressPill").innerHTML = 
-                `${p.done_items || 0}/${p.total_items || 0} stavki`;
-            document.getElementById("progressPercent").innerHTML = `${p.progress_percent || 0}%`;
+                `?? ${p.done_items || 0}/${p.total_items || 0} stavki`;
+            document.getElementById("progressPercent").innerHTML = `?? ${p.progress_percent || 0}%`;
 
             renderBoxes(data);
             renderItemsTable(data);
@@ -1101,7 +1101,7 @@ async function showMap() {
                 </div>
                 <div class="info">
                     <div class="stats">
-                        <strong>Lokacije za posetu:</strong> ${filterLokacije.length}
+                        <strong>?? Lokacije za posetu:</strong> ${filterLokacije.length}
                     </div>
                     <div class="legend" id="legend"></div>
                 </div>
@@ -1626,7 +1626,6 @@ function applyLocalUpdate(action, sku, invoice, required, picked, note) {
     </script>
 </body>
 </html>
-
 
 
 
