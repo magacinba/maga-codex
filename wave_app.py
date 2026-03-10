@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import List, Tuple, Dict, Optional, Any
 
 import pandas as pd
+from ortools.constraint_solver import routing_enums_pb2, pywrapcp
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -447,6 +448,51 @@ def route_optimal_multistart(locations: List[str], max_starts: int = 8) -> List[
 
     return best_path or locs
 
+def route_tsp_ortools(locations: List[str], time_limit_s: int = 120) -> List[str]:
+    locs = [l.strip().upper() for l in locations if l.strip()]
+    if len(locs) <= 2:
+        return locs
+
+    n = len(locs)
+    dummy_idx = n
+
+    def dist(i: int, j: int) -> int:
+        if i == dummy_idx or j == dummy_idx:
+            return 0
+        return int(round(WAREHOUSE.distance_between_locations(locs[i], locs[j]) * 100))
+
+    manager = pywrapcp.RoutingIndexManager(n + 1, 1, dummy_idx)
+    routing = pywrapcp.RoutingModel(manager)
+
+    def cb(from_index: int, to_index: int) -> int:
+        i = manager.IndexToNode(from_index)
+        j = manager.IndexToNode(to_index)
+        return dist(i, j)
+
+    transit_cb = routing.RegisterTransitCallback(cb)
+    routing.SetArcCostEvaluatorOfAllVehicles(transit_cb)
+
+    search_params = pywrapcp.DefaultRoutingSearchParameters()
+    search_params.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+    search_params.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+    search_params.time_limit.seconds = int(time_limit_s)
+    search_params.log_search = False
+
+    solution = routing.SolveWithParameters(search_params)
+    if not solution:
+        log_action("ROUTE", "OR-Tools nema resenje, fallback", {"count": len(locs)})
+        return locs
+
+    order = []
+    index = routing.Start(0)
+    while not routing.IsEnd(index):
+        node = manager.IndexToNode(index)
+        if node != dummy_idx:
+            order.append(locs[node])
+        index = solution.Value(routing.NextVar(index))
+
+    return order
+
 
 def best_entrance_combo_for_path(path: List[str]) -> Tuple[str, str, float]:
     entrances = list(WAREHOUSE.entrances.keys())
@@ -478,9 +524,8 @@ def best_entrance_combo_for_path(path: List[str]) -> Tuple[str, str, float]:
 def compute_route(locations: List[str], mode: str) -> List[str]:
     mode = (mode or "").strip().lower()
     locs = [l.strip().upper() for l in locations if l.strip()]
-    if len(locs) > 120 and mode not in ["sector", "hybrid"]:
-        log_action("ROUTE", "Previse lokacija za optimal; koristim hybrid", {"count": len(locs)})
-        return route_hybrid(locs, max_cluster_size=25)
+    if mode == "tsp":
+        return route_tsp_ortools(locs)
     if mode == "sector":
         return route_sector_then_within(locs)
     elif mode == "hybrid":
@@ -906,6 +951,9 @@ def wave_debug():
         "warehouse_locations": len(WAREHOUSE.loc_to_block_rc),
         "active_sessions": len(WAVE_SESSIONS),
     }
+
+
+
 
 
 
