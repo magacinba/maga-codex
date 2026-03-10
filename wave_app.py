@@ -483,10 +483,9 @@ def build_route_legs(path: List[str], start: str, end: str) -> Dict[str, Any]:
 
 
 # Reusable response builder to avoid extra /wave/{id} round-trips
-def _build_wave_response(sess: dict) -> Dict[str, Any]:
+def _build_wave_response(sess: dict, include_route_legs: bool = True) -> Dict[str, Any]:
     _advance_if_done(sess)
     cur = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
-    legs = build_route_legs(sess["ordered_locations"], sess["start"], sess["end"])
     progress = _session_progress(sess)
     return {
         "session_id": sess["id"],
@@ -499,7 +498,7 @@ def _build_wave_response(sess: dict) -> Dict[str, Any]:
         "items_by_loc": sess["items_by_loc"],
         "box_assignment": sess["box_assignment"],
         "progress": progress,
-        "route_legs": legs,
+        
     }
 # ----------------------------
 # Wave Picking Modeli
@@ -691,7 +690,6 @@ def start_wave(req: StartWaveRequest):
     _advance_if_done(sess)
     
     cur = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
-    legs = build_route_legs(ordered, start, end)
     progress = _session_progress(sess)
     
     print(f"Session kreiran: {session_id}")
@@ -709,7 +707,7 @@ def start_wave(req: StartWaveRequest):
         "progress": progress,
         "items_by_loc": sess["items_by_loc"],
         "box_assignment": box_assignment,
-        "route_legs": legs,
+        
     }
 
 
@@ -853,7 +851,7 @@ def update_wave_item(session_id: str, req: WaveUpdateRequest):
     
     cur2 = sess["ordered_locations"][sess["current_index"]] if sess["current_index"] < len(sess["ordered_locations"]) else None
 
-    return {"ok": True, "done": cur2 is None, "current_location": cur2, "progress": _session_progress(sess), "wave": _build_wave_response(sess)}
+    return {"ok": True, "done": cur2 is None, "current_location": cur2, "progress": _session_progress(sess), "wave": _build_wave_response(sess, include_route_legs=False)}
 # ==================== NOVA RUTA ZA KOORDINATE ====================
 @app.get("/warehouse/coordinates")
 def get_coordinates():
@@ -879,6 +877,11 @@ def wave_debug():
         "warehouse_locations": len(WAREHOUSE.loc_to_block_rc),
         "active_sessions": len(WAVE_SESSIONS),
     }
+
+
+
+
+
 
 
 

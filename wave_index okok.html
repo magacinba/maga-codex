@@ -944,7 +944,31 @@
             alert(message);
         }
 
-        // ==================== RENDER WAVE ====================
+        // ==================== RENDER WAVE LIGHT ====================
+function renderWaveLight(data) {
+    waveData = data;
+
+    document.getElementById("curLoc").innerText = data.current_location || "ZAVRŠENO";
+    document.getElementById("routeInfo").innerHTML =
+        `${data.mode} | 🚪 ${data.start} → ${data.end} | 📏 ${data.distance_m}m`;
+
+    document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
+
+    const p = data.progress || {};
+    document.getElementById("progressPill").innerHTML =
+        `📦 ${p.done_items || 0}/${p.total_items || 0} stavki`;
+    document.getElementById("progressPercent").innerHTML = `📊 ${p.progress_percent || 0}%`;
+
+    renderBoxes(data);
+    renderItemsTable(data);
+    updateCurrentBoxInfo(data);
+    updateStats();
+
+    if (!data.current_location) {
+        stopTimer();
+    }
+}
+// ==================== RENDER WAVE ====================
         async function renderWave(data) {
             waveData = data;  // Sačuvaj podatke globalno za prikaz detalja kutije
             
@@ -1325,7 +1349,7 @@ async function showMap() {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || "Greška");
                 if (data.wave) {
-                    await renderWave(data.wave);
+                    await renderWaveLight(data.wave);
                 } else {
                     await refreshWave();
                 }
@@ -1350,7 +1374,7 @@ async function showMap() {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || "Greška");
                 if (data.wave) {
-                    await renderWave(data.wave);
+                    await renderWaveLight(data.wave);
                 } else {
                     await refreshWave();
                 }
@@ -1377,7 +1401,7 @@ async function showMap() {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || "Greška");
                 if (data.wave) {
-                    await renderWave(data.wave);
+                    await renderWaveLight(data.wave);
                 } else {
                     await refreshWave();
                 }
@@ -1418,7 +1442,7 @@ async function showMap() {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || "Greška pri dopuni");
                 if (data.wave) {
-                    await renderWave(data.wave);
+                    await renderWaveLight(data.wave);
                 } else {
                     await refreshWave();
                 }
@@ -1443,7 +1467,7 @@ async function showMap() {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || "Greška");
                 if (data.wave) {
-                    await renderWave(data.wave);
+                    await renderWaveLight(data.wave);
                 } else {
                     await refreshWave();
                 }
@@ -1494,6 +1518,8 @@ async function showMap() {
     </script>
 </body>
 </html>
+
+
 
 
 
