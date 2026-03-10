@@ -1337,8 +1337,102 @@ async function showMap() {
             }
         }
 
-        // ==================== AKCIJE ====================
+        // ==================== OPTIMISTIC UPDATE ====================
+function _isDoneStatus(s) {
+    return s === "taken" || s === "oos" || s === "problem";
+}
+
+function _isLocationDone(items) {
+    return Array.isArray(items) && items.length > 0 && items.every(it => _isDoneStatus(it.status));
+}
+
+function applyLocalUpdate(action, sku, invoice, required, picked, note) {
+    if (!waveData || !waveData.items_by_loc) return false;
+
+    let targetLoc = null;
+    let targetItem = null;
+
+    for (const [loc, items] of Object.entries(waveData.items_by_loc)) {
+        for (const it of items) {
+            if (it.sku === sku && it.invoice === invoice) {
+                targetLoc = loc;
+                targetItem = it;
+                break;
+            }
+        }
+        if (targetItem) break;
+    }
+
+    if (!targetItem) return false;
+
+    const oldStatus = targetItem.status;
+    const oldPicked = targetItem.qty_picked || 0;
+    const oldDone = _isDoneStatus(oldStatus);
+    const oldLocDone = _isLocationDone(waveData.items_by_loc[targetLoc]);
+
+    if (action === "take") {
+        targetItem.qty_picked = required;
+        targetItem.qty_missing = (targetItem.qty_required || required) - required;
+        targetItem.status = targetItem.qty_missing === 0 ? "taken" : "partial";
+    } else if (action === "oos") {
+        targetItem.status = "oos";
+        targetItem.note = (targetItem.note || "") + (note ? (" | " + note) : " | OOS prijavljen");
+    } else if (action === "problem") {
+        targetItem.status = "problem";
+        if (typeof picked === "number") {
+            targetItem.qty_picked = picked;
+            targetItem.qty_missing = (targetItem.qty_required || required) - picked;
+        }
+        targetItem.note = (targetItem.note || "") + (note ? (" | " + note) : " | Problem prijavljen");
+    } else if (action === "dopuna") {
+        targetItem.status = "taken";
+        targetItem.qty_picked = targetItem.qty_required || required;
+        targetItem.qty_missing = 0;
+        targetItem.note = (targetItem.note || "") + (note ? (" | " + note) : " | Dopunjeno do pune kolicine");
+    }
+
+    targetItem.updated_at = new Date().toISOString();
+
+    if (waveData.progress) {
+        const newPicked = targetItem.qty_picked || 0;
+        if (typeof waveData.progress.picked_qty === "number") {
+            waveData.progress.picked_qty += (newPicked - oldPicked);
+        }
+        const newDone = _isDoneStatus(targetItem.status);
+        if (typeof waveData.progress.done_items === "number") {
+            waveData.progress.done_items += (newDone ? 1 : 0) - (oldDone ? 1 : 0);
+        }
+        if (waveData.progress.boxes && targetItem.invoice && waveData.progress.boxes[targetItem.invoice]) {
+            if (newDone !== oldDone) {
+                waveData.progress.boxes[targetItem.invoice].done += newDone ? 1 : -1;
+            }
+        }
+    }
+
+    const newLocDone = _isLocationDone(waveData.items_by_loc[targetLoc]);
+    if (waveData.progress && typeof waveData.progress.done_locations === "number") {
+        if (!oldLocDone && newLocDone) waveData.progress.done_locations += 1;
+    }
+
+    if (waveData.ordered_locations && waveData.progress && typeof waveData.progress.current_index === "number") {
+        let idx = waveData.progress.current_index;
+        while (idx < waveData.ordered_locations.length) {
+            const loc = waveData.ordered_locations[idx];
+            const items = waveData.items_by_loc[loc] || [];
+            if (_isLocationDone(items)) idx++;
+            else break;
+        }
+        waveData.progress.current_index = idx;
+        waveData.current_location = idx < waveData.ordered_locations.length ? waveData.ordered_locations[idx] : null;
+    }
+
+    return true;
+}
+// ==================== AKCIJE ====================
         async function takeItem(sku, invoice, required) {
+            if (applyLocalUpdate("take", sku, invoice, required, required, null)) {
+                await renderWaveLight(waveData);
+            }
             setLoading(true);
             try {
                 const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
@@ -1363,7 +1457,10 @@ async function showMap() {
         async function setOOS(sku, invoice) {
             const note = prompt("Komentar za NEMA:");
             if (note === null) return;
-            
+
+            if (applyLocalUpdate("oos", sku, invoice, null, null, note)) {
+                await renderWaveLight(waveData);
+            }
             setLoading(true);
             try {
                 const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
@@ -1390,7 +1487,10 @@ async function showMap() {
             if (isNaN(picked)) return;
             
             const note = prompt("Komentar:");
-            
+
+            if (applyLocalUpdate("problem", sku, invoice, required, picked, note)) {
+                await renderWaveLight(waveData);
+            }
             setLoading(true);
             try {
                 const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
@@ -1425,6 +1525,10 @@ async function showMap() {
             if (!confirm(`Da li si dopunio SKU ${sku} sa preostalih ${fali} komada?`)) {
                 return;
             }
+
+            if (applyLocalUpdate("dopuna", sku, invoice, required, required, `Dopunjeno do pune kolicine (dodato ${fali})`)) {
+                await renderWaveLight(waveData);
+            }
             
             setLoading(true);
             try {
@@ -1456,7 +1560,10 @@ async function showMap() {
 
         async function kompletiraj(sku, invoice, required) {
             if (!confirm(`Kompletiraj SKU ${sku}?`)) return;
-            
+
+            if (applyLocalUpdate("dopuna", sku, invoice, required, required, null)) {
+                await renderWaveLight(waveData);
+            }
             setLoading(true);
             try {
                 const res = await fetch(`${API}/wave/${SESSION_ID}/update`, {
@@ -1518,6 +1625,10 @@ async function showMap() {
     </script>
 </body>
 </html>
+
+
+
+
 
 
 
