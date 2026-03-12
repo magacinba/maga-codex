@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wave Picking - 6 kutija na kolicima</title>
+    <title>Wave Picking &#8226; 6 kutija na kolicima</title>
     <!-- SheetJS za Excel import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -246,12 +246,12 @@
     </style>
 </head>
 <body>
-    <h2> Wave Picking - 6 kutija na kolicima</h2>
+    <h2>đźŹ­ Wave Picking &#8226; 6 kutija na kolicima</h2>
 
     <!-- Sekcija za skeniranje i Excel upload -->
     <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div class="big"> Skeniraj fakture (max 6)</div>
+            <div class="big">đź”Ť Skeniraj fakture (max 6)</div>
             <div class="badge badge-blue" id="scanCounter">0/6</div>
         </div>
         
@@ -259,11 +259,11 @@
         
         <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:15px;" id="scannedInvoices"></div>
         
-        <!-- INFO O ULAZIMA/IZLAZIMA I NAsINU RUTIRANJA -->
+        <!-- INFO O ULAZIMA/IZLAZIMA I NAÄŚINU RUTIRANJA -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600">Ulazi/Izlazi:</span>
+                    <span style="font-weight:600">đźšŞ Ulazi/Izlazi:</span>
                 </div>
                 <div style="display:flex; gap:16px; flex-wrap:wrap">
                     <div><span class="badge badge-blue">ENTRANCE_1</span> Levo</div>
@@ -273,11 +273,12 @@
             
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600"> Nacin rutiranja:</span>
+                    <span style="font-weight:600">đź—şď¸Ź NaÄŤin rutiranja:</span>
                 </div>
                 <select id="routingMode" style="padding:10px; width:100%; border-radius:8px; border:2px solid var(--border); background:white; font-weight:500">
-                    <option value="optimal" selected> Optimalno (najkraca putanja)</option>
-                    <option value="sector"> Po sektorima (A->B->C->D->E)</option>
+                    <option value="optimal" selected>âšˇ Optimalno (najkraÄ‡a putanja)</option>
+                    <option value="tsp">TSP (OR-Tools)</option>
+                    <option value="sector">đź“Ť Po sektorima (Aâ†’Bâ†’Câ†’Dâ†’E)</option>
                 </select>
             </div>
         </div>
@@ -286,8 +287,8 @@
         <div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:12px; border:2px dashed var(--border)">
             <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:24px;"></span>
-                    <span style="font-weight:600;">Ucitaj fakture iz Excel-a:</span>
+                    <span style="font-size:24px;">đź“Š</span>
+                    <span style="font-weight:600;">UÄŤitaj fakture iz Excel-a:</span>
                 </div>
                 
                 <input type="file" id="excelUpload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(this)">
@@ -297,7 +298,7 @@
                         Izaberi fajl
                     </button>
                     <button class="btn" onclick="downloadSampleExcel()" style="background:#8b5cf6; color:white;">
-                         Uzorak fajla
+                        đź“Ą Uzorak fajla
                     </button>
                 </div>
                 
@@ -305,23 +306,23 @@
             </div>
             
             <div class="muted" style="margin-top:10px; font-size:12px;">
-                Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
+                đź“Ś Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
             </div>
         </div>
         
         <div style="display:flex; gap:10px; align-items:center; margin-top:15px;">
             <button class="btn btn-primary" id="startWaveBtn" onclick="startWave()" disabled style="font-size:18px; padding:15px 30px;">
-                 KRECEMO SA PAKOVANJEM
+                đźš€ KREÄ†EMO SA PAKOVANJEM
             </button>
-            <button class="btn" onclick="clearScanned()"> Obrisi sve</button>
-            <button class="btn" onclick="debugWave()"> Debug</button>
-			<button class="btn" onclick="showMap()"> Mapa</button>
+            <button class="btn" onclick="clearScanned()">đź—‘ď¸Ź ObriĹˇi sve</button>
+            <button class="btn" onclick="debugWave()">đźž Debug</button>
+			<button class="btn" onclick="showMap()">đź—şď¸Ź Mapa</button>
         </div>
     </div>
 
     <div id="loadingIndicator" style="display:none; text-align:center; padding:20px">
         <div class="spinner" style="width:32px; height:32px;"></div>
-        <div style="margin-top:8px">Ucitavanje...</div>
+        <div style="margin-top:8px">UÄŤitavanje...</div>
     </div>
 
     <!-- Glavni grid - pojavljuje se nakon starta -->
@@ -330,14 +331,47 @@
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
-                    <div class="big"> Trenutna lokacija: <span id="curLoc" style="color:var(--primary);">-</span></div>
-                    <div id="currentBoxInfo" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <!-- OVDE E SE PRIKAZATI KUTIJE U ISTOM REDU -->
-                    </div>
+                    <div class="big">đź“Ť Trenutna lokacija: <span id="curLoc" style="color:var(--primary);">-</span></div>
+                    <div id="currentBoxInfo" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"></div>
                 </div>
                 <div class="pill" id="progressPill">0/0</div>
             </div>
-            
+
+            <!-- đź”Ą NOVI PANEL ZA PRIKAZ LOKACIJE I ARTIKALA đź”Ą -->
+            <div style="background:#f8fafc; border-radius:12px; padding:20px; margin-bottom:20px; border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; text-align:center; font-size:16px;">
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">LOKACIJA</span>
+                        <span style="font-weight:700; font-size:24px; color:var(--primary);" id="curLocBig">-</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">Ĺ IFRA</span>
+                        <span style="font-weight:700; font-size:24px; font-family:monospace;" id="curSku">-</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">KOLIÄŚINA</span>
+                        <span style="font-weight:700; font-size:24px; color:var(--success);" id="curQty">-</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">FAKTURA</span>
+                        <span style="font-weight:700; font-size:18px; background:#e2e8f0; padding:5px 10px; border-radius:20px;" id="curInvoice">-</span>
+                    </div>
+                </div>
+                
+                <!-- VELIKA DUGMAD ZA AKCIJU -->
+                <div style="display:flex; justify-content:center; gap:15px; margin-top:20px;">
+                    <button class="btn btn-success" style="flex:1; padding:15px; font-size:18px; font-weight:600;" onclick="takeCurrentItem()">
+                        âś… UZETO
+                    </button>
+                    <button class="btn btn-warning" style="flex:1; padding:15px; font-size:18px; font-weight:600;" onclick="oosCurrentItem()">
+                        âťŚ NEMA
+                    </button>
+                    <button class="btn btn-danger" style="flex:1; padding:15px; font-size:18px; font-weight:600;" onclick="problemCurrentItem()">
+                        đź”§ PROBLEM
+                    </button>
+                </div>
+            </div>
+
             <div style="margin-top:4px; display:flex; justify-content:space-between;">
                 <span class="muted" id="routeInfo"></span>
                 <span id="progressPercent" style="font-weight:600; color:var(--success)">0%</span>
@@ -347,12 +381,12 @@
                 <table id="itemsTable">
                     <thead style="background:#f8fafc; position:sticky; top:0">
                         <tr>
-                            <th> SKU</th>
-                            <th> Kol</th>
-                            <th> Faktura</th>
-                            <th> Kutija</th>
-                            <th> Status</th>
-                            <th> Akcija</th>
+                            <th>đź“¦ SKU</th>
+                            <th>đź“Š Kol</th>
+                            <th>đź“‹ Faktura</th>
+                            <th>đź“¦ Kutija</th>
+                            <th>đź”– Status</th>
+                            <th>đźŽŻ Akcija</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -365,31 +399,31 @@
             <!-- STATISTIKA DEO -->
             <div style="margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:12px; border:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div class="big" style="font-size:18px;"> Statistika</div>
+                    <div class="big" style="font-size:18px;">đź“Š Statistika</div>
                     <span class="badge badge-blue" id="timerDisplay">00:00</span>
                 </div>
                 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div style="padding:8px; background:white; border-radius:8px;">
-                        <div style="font-size:12px; color:var(--dark);"> Artikli/sat</div>
+                        <div style="font-size:12px; color:var(--dark);">đź“¦ Artikli/sat</div>
                         <div style="font-size:18px; font-weight:700;" id="itemsPerHour">0</div>
                     </div>
                     <div style="padding:8px; background:white; border-radius:8px;">
-                        <div style="font-size:12px; color:var(--dark);"> Vreme po lok.</div>
+                        <div style="font-size:12px; color:var(--dark);">âŹ±ď¸Ź Vreme po lok.</div>
                         <div style="font-size:18px; font-weight:700;" id="avgTimePerLoc">0s</div>
                     </div>
                 </div>
                 
                 <div style="margin-top:8px; padding:8px; background:white; border-radius:8px;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span style="font-size:12px; color:var(--dark);"> Predjeno:</span>
+                        <span style="font-size:12px; color:var(--dark);">đź“Ź PreÄ‘eno:</span>
                         <span style="font-weight:600;" id="totalDistanceStat">0 m</span>
                     </div>
                 </div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <div class="big"> Kutije na kolicima</div>
+                <div class="big">đź“¦ Kutije na kolicima</div>
                 <div class="badge badge-blue" id="totalDistanceDisplay">- m</div>
             </div>
             <div id="boxesContainer" class="boxes-grid">
@@ -397,7 +431,7 @@
             </div>
             
             <div style="margin-top:20px;">
-                <div class="big" style="font-size:18px;"> Izvetaj</div>
+                <div class="big" style="font-size:18px;">đź“‹ IzveĹˇtaj</div>
                 <div id="reportMini" style="margin-top:10px; max-height:200px; overflow-y:auto;"></div>
             </div>
         </div>
@@ -429,11 +463,11 @@
 
         function statusBadge(st) {
             const badges = {
-                "pending": `<span class="badge badge-gray"> PENDING</span>`,
-                "partial": `<span class="badge badge-orange"> PARTIAL</span>`,
-                "taken": `<span class="badge badge-green"> UZETO</span>`,
-                "oos": `<span class="badge badge-orange">s NEMA</span>`,
-                "problem": `<span class="badge badge-red"> PROBLEM</span>`
+                "pending": `<span class="badge badge-gray">âŹł PENDING</span>`,
+                "partial": `<span class="badge badge-orange">âš ď¸Ź PARTIAL</span>`,
+                "taken": `<span class="badge badge-green">âś… UZETO</span>`,
+                "oos": `<span class="badge badge-orange">âťŚ NEMA</span>`,
+                "problem": `<span class="badge badge-red">đź”§ PROBLEM</span>`
             };
             return badges[st] || `<span class="badge badge-gray">${st}</span>`;
         }
@@ -493,11 +527,11 @@
                         this.value = "";
                         document.getElementById("startWaveBtn").disabled = false;
                     } else {
-                        alert("s Faktura ve skenirana!");
+                        alert("âš ď¸Ź Faktura veÄ‡ skenirana!");
                         this.value = "";
                     }
                 } else if (scannedInvoices.length >= 6) {
-                    alert("s Maksimalno 6 faktura!");
+                    alert("âš ď¸Ź Maksimalno 6 faktura!");
                 }
             }
         });
@@ -511,9 +545,9 @@
                 const div = document.createElement('div');
                 div.className = 'invoice-pill';
                 div.innerHTML = `
-                     ${inv} 
+                    đź“‹ ${inv} 
                     <span style="background:var(--primary); color:white; padding:2px 10px; border-radius:20px;">Kutija ${boxNum}</span>
-                    <span style="cursor:pointer; margin-left:5px;" onclick="removeInvoice('${inv}')">s</span>
+                    <span style="cursor:pointer; margin-left:5px;" onclick="removeInvoice('${inv}')">âś•</span>
                 `;
                 container.appendChild(div);
             });
@@ -541,7 +575,7 @@
             if (!file) return;
             
             setLoading(true);
-            document.getElementById("uploadStatus").innerHTML = ` Ucitavam ${file.name}...`;
+            document.getElementById("uploadStatus").innerHTML = `âŹł UÄŤitavam ${file.name}...`;
             
             try {
                 let data = [];
@@ -567,7 +601,7 @@
                 }
                 
                 if (invoices.length > 6) {
-                    alert(`s Previe faktura! Maksimalno 6, a u fajlu ih ima ${invoices.length}`);
+                    alert(`âš ď¸Ź PreviĹˇe faktura! Maksimalno 6, a u fajlu ih ima ${invoices.length}`);
                     return;
                 }
                 
@@ -575,7 +609,7 @@
                 updateScannedList();
                 
                 document.getElementById("uploadStatus").innerHTML = 
-                    ` Ucitano ${data.length} stavki, ${invoices.length} faktura`;
+                    `âś… Ucitano ${data.length} stavki, ${invoices.length} faktura`;
                 
                 document.getElementById("startWaveBtn").disabled = false;
                 
@@ -583,7 +617,7 @@
                 console.log("Pronadjene fakture:", invoices);
                 
             } catch (err) {
-                document.getElementById("uploadStatus").innerHTML = `Greska: ${err.message}`;
+                document.getElementById("uploadStatus").innerHTML = `âťŚ GreĹˇka: ${err.message}`;
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -611,7 +645,7 @@
             
             if (fakturaIdx === -1 || lokacijaIdx === -1 || skuIdx === -1 || kolicinaIdx === -1) {
                 console.error("Indeksi:", {fakturaIdx, lokacijaIdx, skuIdx, kolicinaIdx});
-                throw new Error("Fajl mora sadrati kolone: broj fak, lokacija, sku, kolicina");
+                throw new Error("Fajl mora sadrĹľati kolone: broj fak, lokacija, sku, kolicina");
             }
             
             const result = [];
@@ -670,7 +704,7 @@
             a.click();
             URL.revokeObjectURL(url);
             
-            document.getElementById("uploadStatus").innerHTML = " Uzorak fajla preuzet";
+            document.getElementById("uploadStatus").innerHTML = "đź“Ą Uzorak fajla preuzet";
         }
 
         // ==================== BOJE ZA KUTIJE ====================
@@ -678,10 +712,10 @@
             const colors = {
                 1: '#3b82f6', // plava
                 2: '#22c55e', // zelena
-                3: '#eab308', // uta
-                4: '#f97316', // narandasta
+                3: '#eab308', // Ĺľuta
+                4: '#f97316', // narandĹľasta
                 5: '#ef4444', // crvena
-                6: '#a855f7'  // ljubiasta
+                6: '#a855f7'  // ljubiÄŤasta
             };
             return colors[box] || '#64748b';
         }
@@ -703,7 +737,7 @@
                 return;
             }
             
-            // Grupii stavke po kutijama (samo one koje ekaju)
+            // GrupiĹˇi stavke po kutijama (samo one koje ÄŤekaju)
             const boxesMap = new Map();
             
             items.forEach(it => {
@@ -717,7 +751,7 @@
             });
             
             if (boxesMap.size === 0) {
-                infoDiv.innerHTML = '<span style="color:#0a7; font-weight:500;"> Sve obraeno</span>';
+                infoDiv.innerHTML = '<span style="color:#0a7; font-weight:500;">âś… Sve obraÄ‘eno</span>';
                 return;
             }
             
@@ -728,11 +762,83 @@
                 const itemList = items.map(it => `${it.sku} (${it.qty})`).join(', ');
                 const bgColor = getBoxColor(box);
 				const skuList = items.map(it => it.sku).join(', ');
-				html += `<span style="display:inline-block; background:${bgColor}; color:white; padding:6px 16px; border-radius:25px; font-size:16px; font-weight:600; margin-right:8px; cursor:help; box-shadow:0 2px 4px rgba(0,0,0,0.1);" title="SKU: ${itemList}"> Kutija ${box} - ${skuList}</span>`;
+				html += `<span style="display:inline-block; background:${bgColor}; color:white; padding:6px 16px; border-radius:25px; font-size:16px; font-weight:600; margin-right:8px; cursor:help; box-shadow:0 2px 4px rgba(0,0,0,0.1);" title="SKU: ${itemList}">đź“¦ Kutija ${box} - ${skuList}</span>`;
                 
             });
             
             infoDiv.innerHTML = html;
+        }
+
+        // ==================== FUNKCIJE ZA NOVI PANEL ====================
+        function updateCurrentItemPanel() {
+            if (!waveData || !waveData.current_location) {
+                document.getElementById('curLocBig').textContent = '-';
+                document.getElementById('curSku').textContent = '-';
+                document.getElementById('curQty').textContent = '-';
+                document.getElementById('curInvoice').textContent = '-';
+                return;
+            }
+            
+            const curLoc = waveData.current_location;
+            const items = waveData.items_by_loc[curLoc] || [];
+            
+            // Uzmi prvu stavku koja nije zavrĹˇena (pending ili partial)
+            const activeItem = items.find(it => it.status === 'pending' || it.status === 'partial');
+            
+            if (activeItem) {
+                document.getElementById('curLocBig').textContent = curLoc;
+                document.getElementById('curSku').textContent = activeItem.sku;
+                document.getElementById('curQty').textContent = activeItem.qty_required - (activeItem.qty_picked || 0);
+                document.getElementById('curInvoice').textContent = activeItem.invoice;
+            } else {
+                document.getElementById('curLocBig').textContent = curLoc;
+                document.getElementById('curSku').textContent = '-';
+                document.getElementById('curQty').textContent = '-';
+                document.getElementById('curInvoice').textContent = '-';
+            }
+        }
+
+        // Funkcije za velika dugmad
+        function takeCurrentItem() {
+            const curLoc = waveData?.current_location;
+            if (!curLoc) return;
+            
+            const items = waveData.items_by_loc[curLoc] || [];
+            const activeItem = items.find(it => it.status === 'pending' || it.status === 'partial');
+            
+            if (activeItem) {
+                takeItem(activeItem.sku, activeItem.invoice, activeItem.qty_required);
+            } else {
+                alert('Nema aktivne stavke na ovoj lokaciji!');
+            }
+        }
+
+        function oosCurrentItem() {
+            const curLoc = waveData?.current_location;
+            if (!curLoc) return;
+            
+            const items = waveData.items_by_loc[curLoc] || [];
+            const activeItem = items.find(it => it.status === 'pending' || it.status === 'partial');
+            
+            if (activeItem) {
+                setOOS(activeItem.sku, activeItem.invoice);
+            } else {
+                alert('Nema aktivne stavke na ovoj lokaciji!');
+            }
+        }
+
+        function problemCurrentItem() {
+            const curLoc = waveData?.current_location;
+            if (!curLoc) return;
+            
+            const items = waveData.items_by_loc[curLoc] || [];
+            const activeItem = items.find(it => it.status === 'pending' || it.status === 'partial');
+            
+            if (activeItem) {
+                setProblem(activeItem.sku, activeItem.invoice, activeItem.qty_required);
+            } else {
+                alert('Nema aktivne stavke na ovoj lokaciji!');
+            }
         }
 
         // ==================== FUNKCIJE ZA RENDEROVANJE ====================
@@ -765,7 +871,7 @@
                 const boxHtml = `
                     <div class="${boxClass}" style="border-color: ${boxColor}; cursor: pointer;" onclick="showBoxDetails(${i})">
                         <div class="box-number" style="color: ${boxColor};"> Kutija ${i}</div>
-                        ${invoice ? `<div class="invoice-pill" style="margin-bottom:10px; background:${boxColor}; color:white;"> ${invoice}</div>` : 
+                        ${invoice ? `<div class="invoice-pill" style="margin-bottom:10px; background:${boxColor}; color:white;"> đź“‹ ${invoice}</div>` : 
                                     `<div class="muted" style="margin-bottom:10px;"> slobodna</div>`}
                         ${invoice ? `
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -789,7 +895,7 @@
 
             const curLoc = data.current_location;
             if (!curLoc) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px"> Task zavren!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px">đźŹ Task zavrĹˇen!</td></tr>`;
                 return;
             }
 
@@ -803,21 +909,21 @@
                 if (it.status === "pending" || it.status === "partial") {
                     actionButtons = `
                         <button class="btn btn-success" style="padding:4px 8px; font-size:11px" 
-                                onclick="takeItem('${it.sku}', '${it.invoice}', ${it.qty_required})"> Uzeto</button>
+                                onclick="takeItem('${it.sku}', '${it.invoice}', ${it.qty_required})">âś… Uzeto</button>
                         <button class="btn btn-warning" style="padding:4px 8px; font-size:11px" 
-                                onclick="setOOS('${it.sku}', '${it.invoice}')">Nema</button>
+                                onclick="setOOS('${it.sku}', '${it.invoice}')">âťŚ Nema</button>
                         <button class="btn btn-danger" style="padding:4px 8px; font-size:11px" 
-                                onclick="setProblem('${it.sku}', '${it.invoice}', ${it.qty_required})"> Problem</button>
+                                onclick="setProblem('${it.sku}', '${it.invoice}', ${it.qty_required})">đź”§ Problem</button>
                     `;
                 }
 
                 tr.innerHTML = `
                     <td><span class="mono">${it.sku}</span></td>
                     <td>${it.qty_required} ${it.qty_picked ? `(uzeto ${it.qty_picked})` : ''}</td>
-                    <td><span class="invoice-pill"> ${it.invoice}</span></td>
+                    <td><span class="invoice-pill">đź“‹ ${it.invoice}</span></td>
                     <td><span style="display:inline-block; background:${getBoxColor(it.box)}; color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Kutija ${it.box}</span></td>
                     <td>${statusBadge(it.status)}</td>
-                    <td>${actionButtons || '<span class="badge badge-gray"> Zavrseno</span>'}</td>
+                    <td>${actionButtons || '<span class="badge badge-gray">âś”ď¸Ź ZavrĹˇeno</span>'}</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -842,17 +948,17 @@
             }
 
             if (problems.length > 0) {
-                container.innerHTML += '<div style="margin-bottom:10px;"><span class="badge badge-red"> PROBLEM</span></div>';
+                container.innerHTML += '<div style="margin-bottom:10px;"><span class="badge badge-red">đź”§ PROBLEM</span></div>';
                 problems.forEach(it => {
                     container.innerHTML += `
                         <div style="padding:8px; background:#fff5f5; border-radius:8px; margin-bottom:5px;">
                             <div><strong>${it.sku}</strong> (Kutija ${it.box})</div>
-                            <div> ${it.invoice}</div>
+                            <div>đź“‹ ${it.invoice}</div>
                             <div class="muted">${it.note || ''}</div>
                             <div style="display:flex; gap:5px; margin-top:5px;">
                                 <button class="btn btn-purple" style="padding:4px 8px; font-size:11px" 
                                         onclick="dopuni('${it.sku}', '${it.invoice}', ${it.qty_required}, ${it.qty_picked || 0})">
-                                     DOPUNI
+                                     đź”„ DOPUNI
                                 </button>
                             </div>
                         </div>
@@ -861,12 +967,12 @@
             }
 
             if (taken.length > 0) {
-                container.innerHTML += '<div style="margin:10px 0;"><span class="badge badge-green"> UZETO</span></div>';
+                container.innerHTML += '<div style="margin:10px 0;"><span class="badge badge-green">âś… UZETO</span></div>';
                 taken.slice(0, 5).forEach(it => {
-                    container.innerHTML += `<div>${it.sku} (Kutija ${it.box}) -  ${it.invoice}</div>`;
+                    container.innerHTML += `<div>${it.sku} (Kutija ${it.box}) - đź“‹ ${it.invoice}</div>`;
                 });
                 if (taken.length > 5) {
-                    container.innerHTML += `<div class="muted">+ jo ${taken.length - 5}</div>`;
+                    container.innerHTML += `<div class="muted">+ joĹˇ ${taken.length - 5}</div>`;
                 }
             }
         }
@@ -912,24 +1018,24 @@
             }
             
             // Napravi poruku za prikaz
-            let message = ` KUTIJA ${boxNum} - ${invoice}\n`;
+            let message = `đź“¦ KUTIJA ${boxNum} - ${invoice}\n`;
             message += `\n\n`;
             
             let ukupno = 0;
             let uzeto = 0;
             
             boxItems.forEach((it, index) => {
-                const statusIcon = it.status === "taken" ? "" : 
-                                  (it.status === "problem" ? "" : 
-                                  (it.status === "oos" ? "s" : ""));
+                const statusIcon = it.status === "taken" ? "âś…" : 
+                                  (it.status === "problem" ? "đź”§" : 
+                                  (it.status === "oos" ? "âťŚ" : "âŹł"));
                 message += `${index+1}. ${statusIcon} ${it.sku}\n`;
-                message += `    ${it.location || it.locationName}\n`;
-                message += `    ${it.qty_picked || 0}/${it.qty_required}`;
+                message += `    đź“Ť ${it.location || it.locationName}\n`;
+                message += `    đź“Š ${it.qty_picked || 0}/${it.qty_required}`;
                 if (it.status !== "taken" && it.qty_missing > 0) {
                     message += ` (fali ${it.qty_missing})`;
                 }
                 message += `\n`;
-                if (it.note) message += `    ${it.note}\n`;
+                if (it.note) message += `    đź“ť ${it.note}\n`;
                 message += `\n`;
                 
                 ukupno += it.qty_required;
@@ -937,25 +1043,25 @@
             });
             
             message += `\n`;
-            message += `UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
+            message += `đź“Š UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
             
             alert(message);
         }
 
         // ==================== RENDER WAVE ====================
         async function renderWave(data) {
-            waveData = data;  // Sauvaj podatke globalno za prikaz detalja kutije
+            waveData = data;  // SaÄŤuvaj podatke globalno za prikaz detalja kutije
             
-            document.getElementById("curLoc").innerText = data.current_location || "ZAVRENO";
+            document.getElementById("curLoc").innerText = data.current_location || "ZAVRSENO";
             document.getElementById("routeInfo").innerHTML = 
-                `${data.mode} | Z ${data.start}  ${data.end} |  ${data.distance_m}m`;
-            
+                `${data.mode} | đźšŞ ${data.start} â†’ ${data.end} | đź“Ź ${data.distance_m}m`;
+
             document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
-            
+
             const p = data.progress || {};
             document.getElementById("progressPill").innerHTML = 
-                ` ${p.done_items || 0}/${p.total_items || 0} stavki`;
-            document.getElementById("progressPercent").innerHTML = ` ${p.progress_percent || 0}%`;
+                `đź“¦ ${p.done_items || 0}/${p.total_items || 0} stavki`;
+            document.getElementById("progressPercent").innerHTML = `đź“Š ${p.progress_percent || 0}%`;
 
             renderBoxes(data);
             renderItemsTable(data);
@@ -964,290 +1070,294 @@
             // Prikaz kutije za trenutnu lokaciju
             updateCurrentBoxInfo(data);
             
-            // Auriraj statistiku
+            // AĹľuriraj novi panel
+            updateCurrentItemPanel();
+            
+            // AĹľuriraj statistiku
             updateStats();
             
-            // Zaustavi tajmer ako je wave zavren
+            // Zaustavi tajmer ako je wave zavrĹˇen
             if (!data.current_location) {
                 stopTimer();
             }
         }
+		
 		// ==================== FUNKCIJA ZA PRIKAZ MAPE SA RUTOM ====================
-async function showMap() {
-    if (uploadedItems.length === 0) {
-        alert("Prvo ucitaj Excel fajl sa lokacijama!");
-        return;
-    }
+        async function showMap() {
+            if (uploadedItems.length === 0) {
+                alert("Prvo uÄŤitaj Excel fajl sa lokacijama!");
+                return;
+            }
 
-    setLoading(true);
-    
-    try {
-        // Dohvati koordinate svih lokacija iz backend-a
-        const res = await fetch(`${API}/warehouse/coordinates`);
-        const sveLokacije = await res.json();
-        
-        // Filtriraj samo one koje su u uploadedItems
-        const lokacijeZaPosetu = uploadedItems.map(item => item.lokacija);
-        const filterLokacije = sveLokacije.filter(lok => 
-            lokacijeZaPosetu.includes(lok.location)
-        );
+            setLoading(true);
+            
+            try {
+                // Dohvati koordinate svih lokacija iz backend-a
+                const res = await fetch(`${API}/warehouse/coordinates`);
+                const sveLokacije = await res.json();
+                
+                // Filtriraj samo one koje su u uploadedItems
+                const lokacijeZaPosetu = uploadedItems.map(item => item.lokacija);
+                const filterLokacije = sveLokacije.filter(lok => 
+                    lokacijeZaPosetu.includes(lok.location)
+                );
 
-        // Pronadji trenutnu lokaciju (ako je wave pokrenut)
-        let trenutnaLokacija = null;
-        if (waveData && waveData.current_location) {
-            trenutnaLokacija = waveData.current_location;
-        }
+                // Pronadji trenutnu lokaciju (ako je wave pokrenut)
+                let trenutnaLokacija = null;
+                if (waveData && waveData.current_location) {
+                    trenutnaLokacija = waveData.current_location;
+                }
 
-        // Izraunaj granice mape
-        const minX = Math.min(...sveLokacije.map(l => l.x)) - 1;
-        const maxX = Math.max(...sveLokacije.map(l => l.x)) + 1;
-        const minY = Math.min(...sveLokacije.map(l => l.y)) - 1;
-        const maxY = Math.max(...sveLokacije.map(l => l.y)) + 1;
-        
-        // Mapa faktura za boje
-        const fakture = [...new Set(uploadedItems.map(i => i.faktura))];
+                // IzraÄŤunaj granice mape
+                const minX = Math.min(...sveLokacije.map(l => l.x)) - 1;
+                const maxX = Math.max(...sveLokacije.map(l => l.x)) + 1;
+                const minY = Math.min(...sveLokacije.map(l => l.y)) - 1;
+                const maxY = Math.max(...sveLokacije.map(l => l.y)) + 1;
+                
+                // đź“‹ Fakture za boje
+                const fakture = [...new Set(uploadedItems.map(i => i.faktura))];
 
-        // Otvori prozor
-        const mapWindow = window.open("", "Mapa magacina", "width=900,height=700");
-        
-        mapWindow.document.write(`
-            <html>
-            <head>
-                <title>Mapa magacina - ruta</title>
-                <style>
-                    body { margin: 0; padding: 20px; background: #1e293b; font-family: Arial; }
-                    .canvas-container { 
-                        background: white; 
-                        border-radius: 16px; 
-                        padding: 20px; 
-                        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-                    }
-                    canvas { 
-                        width: 100%; 
-                        height: auto; 
-                        background: #f8fafc;
-                        border-radius: 8px;
-                    }
-                    .info {
-                        margin-top: 15px;
-                        color: white;
-                        display: flex;
-                        gap: 20px;
-                        flex-wrap: wrap;
-                    }
-                    .stats {
-                        background: #334155;
-                        padding: 10px 15px;
-                        border-radius: 8px;
-                    }
-                    .legend {
-                        display: flex;
-                        gap: 20px;
-                        flex-wrap: wrap;
-                        background: #334155;
-                        padding: 10px 15px;
-                        border-radius: 8px;
-                    }
-                    .legend-item {
-                        display: flex;
-                        align-items: center;
-                        gap: 5px;
-                    }
-                    .dot {
-                        width: 16px;
-                        height: 16px;
-                        border-radius: 50%;
-                    }
-                    .blink {
-                        animation: blink 1s infinite;
-                    }
-                    @keyframes blink {
-                        0% { opacity: 1; transform: scale(1); }
-                        50% { opacity: 0.6; transform: scale(1.2); }
-                        100% { opacity: 1; transform: scale(1); }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="canvas-container">
-                    <canvas id="mapCanvas" width="800" height="600"></canvas>
-                </div>
-                <div class="info">
-                    <div class="stats">
-                        <strong> Lokacije za posetu:</strong> ${filterLokacije.length}
-                    </div>
-                    <div class="legend" id="legend"></div>
-                </div>
-                <script>
-                    const canvas = document.getElementById('mapCanvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Podaci iz backend-a
-                    const sveLokacije = ${JSON.stringify(sveLokacije)};
-                    const lokacijeZaPosetu = ${JSON.stringify(filterLokacije)};
-                    const trenutnaLokacija = ${JSON.stringify(trenutnaLokacija)};
-                    const fakture = ${JSON.stringify(fakture)};
-                    
-                    // Pomona funkcija za boju fakture
-                    function getFakturaColor(lokacija) {
-                        const item = uploadedItems.find(i => i.lokacija === lokacija);
-                        if (!item) return '#94a3b8';
-                        const index = fakture.indexOf(item.faktura);
-                        const colors = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
-                        return index >= 0 ? colors[index % 6] : '#94a3b8';
-                    }
-                    
-                    // Transformacija koordinata u canvas
-                    const minX = ${minX};
-                    const maxX = ${maxX};
-                    const minY = ${minY};
-                    const maxY = ${maxY};
-                    
-                    function toCanvasX(x) {
-                        return ((x - minX) / (maxX - minX)) * 750 + 25;
-                    }
-                    
-                    function toCanvasY(y) {
-                        return ((maxY - y) / (maxY - minY)) * 550 + 25;
-                    }
-                    
-                    // Crtanje
-                    function drawMap() {
-                        ctx.clearRect(0, 0, 800, 600);
-                        
-                        // Nacrtaj grid (prolaze)
-                        ctx.strokeStyle = '#cbd5e1';
-                        ctx.lineWidth = 0.5;
-                        for (let i = 0; i <= 10; i++) {
-                            const x = toCanvasX(minX + (i/10) * (maxX - minX));
-                            ctx.beginPath();
-                            ctx.moveTo(x, 25);
-                            ctx.lineTo(x, 575);
-                            ctx.strokeStyle = '#e2e8f0';
-                            ctx.stroke();
+                // Otvori prozor
+                const mapWindow = window.open("", "Mapa magacina", "width=900,height=700");
+                
+                mapWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Mapa magacina - ruta</title>
+                        <style>
+                            body { margin: 0; padding: 20px; background: #1e293b; font-family: Arial; }
+                            .canvas-container { 
+                                background: white; 
+                                border-radius: 16px; 
+                                padding: 20px; 
+                                box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+                            }
+                            canvas { 
+                                width: 100%; 
+                                height: auto; 
+                                background: #f8fafc;
+                                border-radius: 8px;
+                            }
+                            .info {
+                                margin-top: 15px;
+                                color: white;
+                                display: flex;
+                                gap: 20px;
+                                flex-wrap: wrap;
+                            }
+                            .stats {
+                                background: #334155;
+                                padding: 10px 15px;
+                                border-radius: 8px;
+                            }
+                            .legend {
+                                display: flex;
+                                gap: 20px;
+                                flex-wrap: wrap;
+                                background: #334155;
+                                padding: 10px 15px;
+                                border-radius: 8px;
+                            }
+                            .legend-item {
+                                display: flex;
+                                align-items: center;
+                                gap: 5px;
+                            }
+                            .dot {
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                            }
+                            .blink {
+                                animation: blink 1s infinite;
+                            }
+                            @keyframes blink {
+                                0% { opacity: 1; transform: scale(1); }
+                                50% { opacity: 0.6; transform: scale(1.2); }
+                                100% { opacity: 1; transform: scale(1); }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="canvas-container">
+                            <canvas id="mapCanvas" width="800" height="600"></canvas>
+                        </div>
+                        <div class="info">
+                            <div class="stats">
+                                <strong>đź“Ť Lokacije za posetu:</strong> ${filterLokacije.length}
+                            </div>
+                            <div class="legend" id="legend"></div>
+                        </div>
+                        <script>
+                            const canvas = document.getElementById('mapCanvas');
+                            const ctx = canvas.getContext('2d');
                             
-                            const y = toCanvasY(minY + (i/10) * (maxY - minY));
-                            ctx.beginPath();
-                            ctx.moveTo(25, y);
-                            ctx.lineTo(775, y);
-                            ctx.stroke();
-                        }
-                        
-                        // Nacrtaj sve lokacije (sive)
-                        ctx.fillStyle = '#94a3b8';
-                        sveLokacije.forEach(lok => {
-                            const x = toCanvasX(lok.x);
-                            const y = toCanvasY(lok.y);
+                            // Podaci iz backend-a
+                            const sveLokacije = ${JSON.stringify(sveLokacije)};
+                            const lokacijeZaPosetu = ${JSON.stringify(filterLokacije)};
+                            const trenutnaLokacija = ${JSON.stringify(trenutnaLokacija)};
+                            const fakture = ${JSON.stringify(fakture)};
                             
-                            ctx.beginPath();
-                            ctx.arc(x, y, 4, 0, 2 * Math.PI);
-                            ctx.fillStyle = '#94a3b8';
-                            ctx.fill();
+                            // PomoÄ‡na funkcija za boju fakture
+                            function getFakturaColor(lokacija) {
+                                const item = uploadedItems.find(i => i.lokacija === lokacija);
+                                if (!item) return '#94a3b8';
+                                const index = fakture.indexOf(item.faktura);
+                                const colors = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
+                                return index >= 0 ? colors[index % 6] : '#94a3b8';
+                            }
                             
-                            // Oznaka lokacije (sitan tekst)
-                            ctx.font = '8px Arial';
-                            ctx.fillStyle = '#475569';
-                            ctx.fillText(lok.location, x + 8, y - 5);
-                        });
-                        
-                        // Nacrtaj liniju rute (ako ima vie od 1 lokacije)
-                        if (waveData && waveData.ordered_locations && waveData.ordered_locations.length > 1) {
-                            const ruta = waveData.ordered_locations;
-                            ctx.beginPath();
-                            ctx.strokeStyle = '#2563eb';
-                            ctx.lineWidth = 3;
-                            ctx.setLineDash([5, 3]);
+                            // Transformacija koordinata u canvas
+                            const minX = ${minX};
+                            const maxX = ${maxX};
+                            const minY = ${minY};
+                            const maxY = ${maxY};
                             
-                            for (let i = 0; i < ruta.length; i++) {
-                                const lok = sveLokacije.find(l => l.location === ruta[i]);
-                                if (!lok) continue;
-                                const x = toCanvasX(lok.x);
-                                const y = toCanvasY(lok.y);
+                            function toCanvasX(x) {
+                                return ((x - minX) / (maxX - minX)) * 750 + 25;
+                            }
+                            
+                            function toCanvasY(y) {
+                                return ((maxY - y) / (maxY - minY)) * 550 + 25;
+                            }
+                            
+                            // Crtanje
+                            function drawMap() {
+                                ctx.clearRect(0, 0, 800, 600);
                                 
-                                if (i === 0) {
-                                    ctx.moveTo(x, y);
-                                } else {
-                                    ctx.lineTo(x, y);
+                                // Nacrtaj grid (prolaze)
+                                ctx.strokeStyle = '#cbd5e1';
+                                ctx.lineWidth = 0.5;
+                                for (let i = 0; i <= 10; i++) {
+                                    const x = toCanvasX(minX + (i/10) * (maxX - minX));
+                                    ctx.beginPath();
+                                    ctx.moveTo(x, 25);
+                                    ctx.lineTo(x, 575);
+                                    ctx.strokeStyle = '#e2e8f0';
+                                    ctx.stroke();
+                                    
+                                    const y = toCanvasY(minY + (i/10) * (maxY - minY));
+                                    ctx.beginPath();
+                                    ctx.moveTo(25, y);
+                                    ctx.lineTo(775, y);
+                                    ctx.stroke();
+                                }
+                                
+                                // Nacrtaj sve lokacije (sive)
+                                ctx.fillStyle = '#94a3b8';
+                                sveLokacije.forEach(lok => {
+                                    const x = toCanvasX(lok.x);
+                                    const y = toCanvasY(lok.y);
+                                    
+                                    ctx.beginPath();
+                                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                                    ctx.fillStyle = '#94a3b8';
+                                    ctx.fill();
+                                    
+                                    // Oznaka lokacije (sitan tekst)
+                                    ctx.font = '8px Arial';
+                                    ctx.fillStyle = '#475569';
+                                    ctx.fillText(lok.location, x + 8, y - 5);
+                                });
+                                
+                                // Nacrtaj liniju rute (ako ima viĹˇe od 1 lokacije)
+                                if (waveData && waveData.ordered_locations && waveData.ordered_locations.length > 1) {
+                                    const ruta = waveData.ordered_locations;
+                                    ctx.beginPath();
+                                    ctx.strokeStyle = '#2563eb';
+                                    ctx.lineWidth = 3;
+                                    ctx.setLineDash([5, 3]);
+                                    
+                                    for (let i = 0; i < ruta.length; i++) {
+                                        const lok = sveLokacije.find(l => l.location === ruta[i]);
+                                        if (!lok) continue;
+                                        const x = toCanvasX(lok.x);
+                                        const y = toCanvasY(lok.y);
+                                        
+                                        if (i === 0) {
+                                            ctx.moveTo(x, y);
+                                        } else {
+                                            ctx.lineTo(x, y);
+                                        }
+                                    }
+                                    ctx.stroke();
+                                    ctx.setLineDash([]); // Vrati na punu liniju
+                                }
+                                
+                                // Nacrtaj lokacije za posetu (obojene)
+                                lokacijeZaPosetu.forEach(lok => {
+                                    const x = toCanvasX(lok.x);
+                                    const y = toCanvasY(lok.y);
+                                    const boja = getFakturaColor(lok.location);
+                                    
+                                    ctx.beginPath();
+                                    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                                    ctx.fillStyle = boja;
+                                    ctx.fill();
+                                    ctx.strokeStyle = 'white';
+                                    ctx.lineWidth = 2;
+                                    ctx.stroke();
+                                });
+                                
+                                // Oznaci trenutnu lokaciju (trepÄ‡e)
+                                if (trenutnaLokacija) {
+                                    const trenutna = sveLokacije.find(l => l.location === trenutnaLokacija);
+                                    if (trenutna) {
+                                        const x = toCanvasX(trenutna.x);
+                                        const y = toCanvasY(trenutna.y);
+                                        
+                                        ctx.beginPath();
+                                        ctx.arc(x, y, 14, 0, 2 * Math.PI);
+                                        ctx.strokeStyle = '#f97316';
+                                        ctx.lineWidth = 4;
+                                        ctx.stroke();
+                                        
+                                        ctx.beginPath();
+                                        ctx.arc(x, y, 18, 0, 2 * Math.PI);
+                                        ctx.strokeStyle = '#f97316';
+                                        ctx.lineWidth = 2;
+                                        ctx.setLineDash([5, 5]);
+                                        ctx.stroke();
+                                        ctx.setLineDash([]);
+                                    }
                                 }
                             }
-                            ctx.stroke();
-                            ctx.setLineDash([]); // Vrati na punu liniju
-                        }
-                        
-                        // Nacrtaj lokacije za posetu (obojene)
-                        lokacijeZaPosetu.forEach(lok => {
-                            const x = toCanvasX(lok.x);
-                            const y = toCanvasY(lok.y);
-                            const boja = getFakturaColor(lok.location);
                             
-                            ctx.beginPath();
-                            ctx.arc(x, y, 8, 0, 2 * Math.PI);
-                            ctx.fillStyle = boja;
-                            ctx.fill();
-                            ctx.strokeStyle = 'white';
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                        });
-                        
-                        // Oznai trenutnu lokaciju (trepe)
-                        if (trenutnaLokacija) {
-                            const trenutna = sveLokacije.find(l => l.location === trenutnaLokacija);
-                            if (trenutna) {
-                                const x = toCanvasX(trenutna.x);
-                                const y = toCanvasY(trenutna.y);
-                                
-                                ctx.beginPath();
-                                ctx.arc(x, y, 14, 0, 2 * Math.PI);
-                                ctx.strokeStyle = '#f97316';
-                                ctx.lineWidth = 4;
-                                ctx.stroke();
-                                
-                                ctx.beginPath();
-                                ctx.arc(x, y, 18, 0, 2 * Math.PI);
-                                ctx.strokeStyle = '#f97316';
-                                ctx.lineWidth = 2;
-                                ctx.setLineDash([5, 5]);
-                                ctx.stroke();
-                                ctx.setLineDash([]);
-                            }
-                        }
-                    }
-                    
-                    drawMap();
-                    
-                    // Legenda
-                    const legendDiv = document.getElementById('legend');
-                    fakture.forEach((faktura, index) => {
-                        const colors = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
-                        const boja = colors[index % 6];
-                        legendDiv.innerHTML += \`
-                            <div class="legend-item">
-                                <div class="dot" style="background: \${boja};"></div>
-                                <span>\${faktura}</span>
-                            </div>
-                        \`;
-                    });
-                    
-                    // Dodaj legendu za trenutnu lokaciju
-                    legendDiv.innerHTML += \`
-                        <div class="legend-item">
-                            <div class="dot" style="background: #f97316; animation: blink 1s infinite;"></div>
-                            <span>Trenutna lokacija</span>
-                        </div>
-                    \`;
-                    
-                <\/script>
-            </body>
-            </html>
-        `);
-        
-    } catch (err) {
-        alert("Greska pri ucitavanju mape: " + err.message);
-        console.error(err);
-    } finally {
-        setLoading(false);
-    }
-}
+                            drawMap();
+                            
+                            // Legenda
+                            const legendDiv = document.getElementById('legend');
+                            fakture.forEach((faktura, index) => {
+                                const colors = ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
+                                const boja = colors[index % 6];
+                                legendDiv.innerHTML += \`
+                                    <div class="legend-item">
+                                        <div class="dot" style="background: \${boja};"></div>
+                                        <span>\${faktura}</span>
+                                    </div>
+                                \`;
+                            });
+                            
+                            // Dodaj legendu za trenutnu lokaciju
+                            legendDiv.innerHTML += \`
+                                <div class="legend-item">
+                                    <div class="dot" style="background: #f97316; animation: blink 1s infinite;"></div>
+                                    <span>Trenutna lokacija</span>
+                                </div>
+                            \`;
+                            
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                
+            } catch (err) {
+                alert("GreĹˇka pri uÄŤitavanju mape: " + err.message);
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        }
 
         // ==================== START WAVE ====================
         async function startWave() {
@@ -1264,10 +1374,10 @@ async function showMap() {
             setLoading(true);
             try {
                 const mode = document.getElementById("routingMode").value;
-                console.log("aljem stavke u backend:", uploadedItems);
+                console.log("Ĺ aljem stavke u backend:", uploadedItems);
                 console.log("Broj stavki:", uploadedItems.length);
                 console.log("Fakture:", [...new Set(uploadedItems.map(i => i.faktura))]);
-                console.log("Nain rutiranja:", mode);
+                console.log("NaÄŤin rutiranja:", mode);
                 
                 const itemsForBackend = uploadedItems
                     .filter(item => scannedInvoices.includes(item.faktura))
@@ -1290,8 +1400,8 @@ async function showMap() {
                 const data = await res.json();
                 
                 if (!res.ok) {
-                    alert("Greska: " + (data.detail || JSON.stringify(data)));
-                    console.error("Detalji greke:", data);
+                    alert("GreĹˇka: " + (data.detail || JSON.stringify(data)));
+                    console.error("Detalji greĹˇke:", data);
                     return;
                 }
 
@@ -1304,7 +1414,7 @@ async function showMap() {
                 await renderWave(data);
                 
             } catch (err) {
-                alert("Mrezna greka: " + err.message);
+                alert("MreĹľna greĹˇka: " + err.message);
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -1324,7 +1434,7 @@ async function showMap() {
                 });
                 await refreshWave();
             } catch (err) {
-                alert("Greska: " + err.message);
+                alert("GreĹˇka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1343,7 +1453,7 @@ async function showMap() {
                 });
                 await refreshWave();
             } catch (err) {
-                alert("Greska: " + err.message);
+                alert("GreĹˇka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1364,7 +1474,7 @@ async function showMap() {
                 });
                 await refreshWave();
             } catch (err) {
-                alert("Greska: " + err.message);
+                alert("GreĹˇka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1373,9 +1483,9 @@ async function showMap() {
         async function dopuni(sku, invoice, required, picked) {
             const fali = required - (picked || 0);
             
-            // Ako nema ta da se dopuni
+            // Ako nema Ĺˇta da se dopuni
             if (fali <= 0) {
-                alert(" Ova stavka je ve kompletna!");
+                alert("âś… Ova stavka je veÄ‡ kompletna!");
                 return;
             }
             
@@ -1393,21 +1503,21 @@ async function showMap() {
                         sku: sku,
                         invoice: invoice,
                         action: "dopuna",
-                        qty_picked: required,  // aljemo punu koliinu
-                        note: `Dopunjeno do pune koliine (dodato ${fali})`
+                        qty_picked: required,  // Ĺˇaljemo punu koliÄŤinu
+                        note: `Dopunjeno do pune koliÄŤine (dodato ${fali})`
                     })
                 });
                 
                 if (!res.ok) {
                     const err = await res.json();
-                    throw new Error(err.detail || "Greska pri dopuni");
+                    throw new Error(err.detail || "GreĹˇka pri dopuni");
                 }
                 
                 await refreshWave();
-                alert(` Stavka ${sku} je kompletirana!`);
+                alert(`âś… Stavka ${sku} je kompletirana!`);
                 
             } catch (err) {
-                alert("Greska: " + err.message);
+                alert("GreĹˇka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1425,7 +1535,7 @@ async function showMap() {
                 });
                 await refreshWave();
             } catch (err) {
-                alert("Greska: " + err.message);
+                alert("GreĹˇka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1468,6 +1578,9 @@ async function showMap() {
         window.downloadSampleExcel = downloadSampleExcel;
         window.showBoxDetails = showBoxDetails;
 		window.showMap = showMap;
+        window.takeCurrentItem = takeCurrentItem;
+        window.oosCurrentItem = oosCurrentItem;
+        window.problemCurrentItem = problemCurrentItem;
     </script>
 </body>
 </html>
