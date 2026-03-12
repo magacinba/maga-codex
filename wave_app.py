@@ -11,7 +11,17 @@ from datetime import datetime
 from typing import List, Tuple, Dict, Optional, Any
 
 import pandas as pd
-from ortools.constraint_solver import routing_enums_pb2, pywrapcp
+# OR-Tools import sa jasnim fallback-om
+ORTOOLS_AVAILABLE = False
+try:
+    from ortools.constraint_solver import routing_enums_pb2, pywrapcp
+    ORTOOLS_AVAILABLE = True
+    print("OR-Tools uspesno uvezen")
+except ImportError as e:
+    print(f"OR-Tools nije instaliran: {e}")
+    print("Instaliraj sa: pip install ortools")
+except Exception as e:
+    print(f"Neocekivana greska pri uvozu OR-Tools: {e}")
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -389,64 +399,82 @@ def route_optimal_multistart(locations: List[str], max_starts: int = 8) -> List[
     if len(locs) <= 2:
         return locs
 
-    entrances = list(WAREHOUSE.entrances.keys())
+    try:
+        entrances = list(WAREHOUSE.entrances.keys())
 
-    def entrance_distance_to_loc(loc: str) -> float:
-        return min(WAREHOUSE.distance_entrance_to_location(en, loc) for en in entrances)
+        def entrance_distance_to_loc(loc: str) -> float:
+            try:
+                return min(WAREHOUSE.distance_entrance_to_location(en, loc) for en in entrances)
+            except Exception:
+                return 100.0
 
-    ranked = sorted(locs, key=entrance_distance_to_loc)
-    K = min(max_starts, len(ranked))
+        ranked = sorted(locs, key=entrance_distance_to_loc)
+        K = min(max_starts, len(ranked))
 
-    def nn_path(start_loc: str) -> List[str]:
-        remaining = locs[:]
-        remaining.remove(start_loc)
-        path = [start_loc]
-        while remaining:
-            last = path[-1]
-            j = min(range(len(remaining)), key=lambda k: WAREHOUSE.distance_between_locations(last, remaining[k]))
-            path.append(remaining.pop(j))
-        return path
-
-    def two_opt(path: List[str]) -> List[str]:
-        # Za veoma velike rute preskacemo 2-opt da ne blokira start.
-        if len(path) > 120:
+        def nn_path(start_loc: str) -> List[str]:
+            remaining = locs[:]
+            remaining.remove(start_loc)
+            path = [start_loc]
+            while remaining:
+                last = path[-1]
+                try:
+                    j = min(range(len(remaining)), key=lambda k: WAREHOUSE.distance_between_locations(last, remaining[k]))
+                except Exception:
+                    j = 0
+                path.append(remaining.pop(j))
             return path
-        def inner_len(p: List[str]) -> float:
-            s = 0.0
-            for i in range(len(p) - 1):
-                s += WAREHOUSE.distance_between_locations(p[i], p[i + 1])
-            return s
 
-        best = path
-        best_len = inner_len(best)
-        improved = True
-        while improved:
-            improved = False
-            for i in range(1, len(best) - 2):
-                for k in range(i + 1, len(best) - 1):
-                    cand = best[:i] + list(reversed(best[i:k + 1])) + best[k + 1:]
-                    cand_len = inner_len(cand)
-                    if cand_len + 1e-9 < best_len:
-                        best = cand
-                        best_len = cand_len
-                        improved = True
+        def two_opt(path: List[str]) -> List[str]:
+            # Za veoma velike rute preskacemo 2-opt da ne blokira start.
+            if len(path) > 120:
+                return path
+            def inner_len(p: List[str]) -> float:
+                s = 0.0
+                for i in range(len(p) - 1):
+                    try:
+                        s += WAREHOUSE.distance_between_locations(p[i], p[i + 1])
+                    except Exception:
+                        s += 10.0
+                return s
+
+            best = path
+            best_len = inner_len(best)
+            improved = True
+            while improved:
+                improved = False
+                for i in range(1, len(best) - 2):
+                    for k in range(i + 1, len(best) - 1):
+                        cand = best[:i] + list(reversed(best[i:k + 1])) + best[k + 1:]
+                        cand_len = inner_len(cand)
+                        if cand_len + 1e-9 < best_len:
+                            best = cand
+                            best_len = cand_len
+                            improved = True
+                            break
+                    if improved:
                         break
-                if improved:
-                    break
-        return best
+            return best
 
-    best_path = None
-    best_cost = None
+        best_path = None
+        best_cost = None
 
-    for start_loc in ranked[:K]:
-        p = nn_path(start_loc)
-        p = two_opt(p)
-        _, _, total = best_entrance_combo_for_path(p)
-        if best_cost is None or total < best_cost:
-            best_cost = total
-            best_path = p
+        for start_loc in ranked[:K]:
+            try:
+                p = nn_path(start_loc)
+                p = two_opt(p)
+                _, _, total = best_entrance_combo_for_path(p)
+                if best_cost is None or total < best_cost:
+                    best_cost = total
+                    best_path = p
+            except Exception as e:
+                print(f"Greska za start {start_loc}: {e}")
+                continue
 
-    return best_path or locs
+        return best_path or locs
+    except Exception as e:
+        print(f"Greska u optimal_multistart: {e}")
+        return locs
+
 
 def route_tsp_ortools(locations: List[str], time_limit_s: int = 120) -> List[str]:
     locs = [l.strip().upper() for l in locations if l.strip()]
@@ -494,6 +522,127 @@ def route_tsp_ortools(locations: List[str], time_limit_s: int = 120) -> List[str
     return order
 
 
+def route_with_ortools(locations: List[str], time_limit_seconds: int = 10) -> List[str]:
+    """
+    Koristi Google OR-Tools za pronalazenje najkrace putanje.
+    """
+    print("OR-Tools funkcija je pozvana")
+    print(f"ORTOOLS_AVAILABLE = {ORTOOLS_AVAILABLE}")
+    print(f"Broj lokacija: {len(locations)}")
+
+    locs = [l.strip().upper() for l in locations if l.strip()]
+
+    if len(locs) <= 3:
+        print("Premalo lokacija za OR-Tools")
+        return locs
+
+    if not ORTOOLS_AVAILABLE:
+        print("OR-Tools nije dostupan, koristim fallback")
+        return route_optimal_multistart(locs)
+
+    try:
+        print(f"OR-Tools je dostupan, pokusavam TSP za {len(locs)} lokacija...")
+
+        # Mapiranje lokacija -> indeksi
+        loc_to_index = {loc: i for i, loc in enumerate(locs)}
+        index_to_loc = {i: loc for i, loc in enumerate(locs)}
+
+        # Matrica udaljenosti
+        n = len(locs)
+        distance_matrix = [[0] * n for _ in range(n)]
+
+        print("Racunam matricu udaljenosti...")
+        for i, loc_i in enumerate(locs):
+            for j, loc_j in enumerate(locs):
+                if i != j:
+                    try:
+                        dist = WAREHOUSE.distance_between_locations(loc_i, loc_j)
+                        distance_matrix[i][j] = max(1, int(dist * 1000))
+                    except Exception as e:
+                        print(f"Greska pri racunanju distance {loc_i}->{loc_j}: {e}")
+                        distance_matrix[i][j] = 10000
+                else:
+                    distance_matrix[i][j] = 0
+
+        first_solution_strategies = [
+            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC,
+            routing_enums_pb2.FirstSolutionStrategy.SAVINGS,
+            routing_enums_pb2.FirstSolutionStrategy.SWEEP,
+            routing_enums_pb2.FirstSolutionStrategy.CHRISTOFIDES,
+        ]
+
+        strategy_names = {
+            routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC: "PATH_CHEAPEST_ARC",
+            routing_enums_pb2.FirstSolutionStrategy.SAVINGS: "SAVINGS",
+            routing_enums_pb2.FirstSolutionStrategy.SWEEP: "SWEEP",
+            routing_enums_pb2.FirstSolutionStrategy.CHRISTOFIDES: "CHRISTOFIDES",
+        }
+
+        best_route = None
+        best_distance = float("inf")
+
+        for strategy_idx, strategy in enumerate(first_solution_strategies):
+            strategy_name = strategy_names.get(strategy, "NEPOZNATA")
+            print(f"Pokrecem strategiju {strategy_idx + 1}: {strategy_name}")
+
+            try:
+                manager = pywrapcp.RoutingIndexManager(n, 1, 0)
+                routing = pywrapcp.RoutingModel(manager)
+
+                def distance_callback(from_index, to_index):
+                    from_node = manager.IndexToNode(from_index)
+                    to_node = manager.IndexToNode(to_index)
+                    return distance_matrix[from_node][to_node]
+
+                transit_callback_index = routing.RegisterTransitCallback(distance_callback)
+                routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+
+                search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+                search_parameters.first_solution_strategy = strategy
+                search_parameters.local_search_metaheuristic = (
+                    routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+                )
+                search_parameters.time_limit.seconds = max(2, time_limit_seconds // len(first_solution_strategies))
+                search_parameters.log_search = False
+
+                solution = routing.SolveWithParameters(search_parameters)
+
+                if solution:
+                    index = routing.Start(0)
+                    route = []
+                    while not routing.IsEnd(index):
+                        node = manager.IndexToNode(index)
+                        route.append(index_to_loc[node])
+                        index = solution.Value(routing.NextVar(index))
+
+                    total_dist = 0.0
+                    for i in range(len(route) - 1):
+                        try:
+                            total_dist += WAREHOUSE.distance_between_locations(route[i], route[i + 1])
+                        except Exception:
+                            total_dist += 10.0
+
+                    print(f"  Strategija {strategy_name} dala rutu od {total_dist:.1f}m")
+
+                    if total_dist < best_distance:
+                        best_distance = total_dist
+                        best_route = route
+                else:
+                    print(f"  Strategija {strategy_name} nije uspela")
+            except Exception as e:
+                print(f"  Greska u strategiji {strategy_name}: {e}")
+
+        if best_route:
+            print(f"OR-Tools pronasao rutu od {best_distance:.1f}m")
+            return best_route
+
+    except Exception as e:
+        print(f"OR-Tools neocekivana greska: {e}")
+
+    print("OR-Tools ne radi, koristim fallback algoritam")
+    return route_optimal_multistart(locs)
+
+
 def best_entrance_combo_for_path(path: List[str]) -> Tuple[str, str, float]:
     entrances = list(WAREHOUSE.entrances.keys())
     if not entrances:
@@ -524,14 +673,25 @@ def best_entrance_combo_for_path(path: List[str]) -> Tuple[str, str, float]:
 def compute_route(locations: List[str], mode: str) -> List[str]:
     mode = (mode or "").strip().lower()
     locs = [l.strip().upper() for l in locations if l.strip()]
-    if mode == "tsp":
-        return route_tsp_ortools(locs)
+    print(f"\ncompute_route: mode='{mode}', lokacija={len(locs)}")
+    print(f"ORTOOLS_AVAILABLE = {ORTOOLS_AVAILABLE}")
+
     if mode == "sector":
+        print("Koristim sector algoritam")
         return route_sector_then_within(locs)
     elif mode == "hybrid":
+        print("Koristim hybrid algoritam")
         return route_hybrid(locs)
-    else:
-        return route_optimal_multistart(locs)
+    elif mode == "ortools":
+        print("Koristim OR-Tools (eksplicitno)")
+        return route_with_ortools(locs)
+    else:  # "optimal"
+        if ORTOOLS_AVAILABLE and len(locs) > 5:
+            print("OR-Tools dostupan, koristim ga za optimal")
+            return route_with_ortools(locs)
+        else:
+            print("OR-Tools nije dostupan, koristim standardni")
+            return route_optimal_multistart(locs)
 
 
 def build_route_legs(path: List[str], start: str, end: str) -> Dict[str, Any]:
@@ -657,9 +817,9 @@ def _session_progress(sess: dict) -> Dict[str, Any]:
             inv = it["invoice"]
             if inv not in boxes_progress:
                 boxes_progress[inv] = {"total": 0, "done": 0}
-            boxes_progress[inv]["total"] += 1
-            if _item_done(it):
-                boxes_progress[inv]["done"] += 1
+            # progress po kolicini (ne po statusu)
+            boxes_progress[inv]["total"] += it["qty_required"]
+            boxes_progress[inv]["done"] += it["qty_picked"]
 
     total_locs = len(sess["ordered_locations"])
     done_locs = 0
@@ -951,6 +1111,15 @@ def wave_debug():
         "warehouse_locations": len(WAREHOUSE.loc_to_block_rc),
         "active_sessions": len(WAVE_SESSIONS),
     }
+
+
+
+
+
+
+
+
+
 
 
 
