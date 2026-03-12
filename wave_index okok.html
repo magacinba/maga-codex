@@ -246,12 +246,12 @@
     </style>
 </head>
 <body>
-    <h2>đźŹ­ Wave Picking &#8226; 6 kutija na kolicima</h2>
+    <h2> Wave Picking &#8226; 6 kutija na kolicima</h2>
 
     <!-- Sekcija za skeniranje i Excel upload -->
     <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div class="big">đź”Ť Skeniraj fakture (max 6)</div>
+            <div class="big">&#x1F50D; Skeniraj fakture (max 6)</div>
             <div class="badge badge-blue" id="scanCounter">0/6</div>
         </div>
         
@@ -259,11 +259,11 @@
         
         <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:15px;" id="scannedInvoices"></div>
         
-        <!-- INFO O ULAZIMA/IZLAZIMA I NAÄŚINU RUTIRANJA -->
+        <!-- INFO O ULAZIMA/IZLAZIMA I NAINU RUTIRANJA -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600">đźšŞ Ulazi/Izlazi:</span>
+                    <span style="font-weight:600"> &#x1F6AA; Ulazi/Izlazi:</span>
                 </div>
                 <div style="display:flex; gap:16px; flex-wrap:wrap">
                     <div><span class="badge badge-blue">ENTRANCE_1</span> Levo</div>
@@ -273,12 +273,12 @@
             
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600">đź—şď¸Ź NaÄŤin rutiranja:</span>
+                    <span style="font-weight:600"> Nain rutiranja:</span>
                 </div>
                 <select id="routingMode" style="padding:10px; width:100%; border-radius:8px; border:2px solid var(--border); background:white; font-weight:500">
-                    <option value="optimal" selected>âšˇ Optimalno (najkraÄ‡a putanja)</option>
-                    <option value="tsp">TSP (OR-Tools)</option>
-                    <option value="sector">đź“Ť Po sektorima (Aâ†’Bâ†’Câ†’Dâ†’E)</option>
+                    <option value="optimal" selected> Optimalno (najkraa putanja)</option>
+                    <option value="tsp">&#x1F9E0; Najkra&#263;a (OR-Tools, sporije)</option>
+                    <option value="sector"> Po sektorima (ABCDE)</option>
                 </select>
             </div>
         </div>
@@ -287,18 +287,18 @@
         <div style="margin-top:20px; padding:15px; background:#f8fafc; border-radius:12px; border:2px dashed var(--border)">
             <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:24px;">đź“Š</span>
-                    <span style="font-weight:600;">UÄŤitaj fakture iz Excel-a:</span>
+                    <span style="font-size:24px;"></span>
+                    <span style="font-weight:600;">Uitaj fakture iz Excel-a:</span>
                 </div>
                 
                 <input type="file" id="excelUpload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(this)">
                 
                 <div style="display:flex; gap:10px;">
                     <button class="btn" onclick="document.getElementById('excelUpload').click()" style="background:var(--primary); color:white;">
-                        Izaberi fajl
+                       &#x1F4C2; Izaberi fajl
                     </button>
                     <button class="btn" onclick="downloadSampleExcel()" style="background:#8b5cf6; color:white;">
-                        đź“Ą Uzorak fajla
+                        &#x1F4E5; Uzorak fajla
                     </button>
                 </div>
                 
@@ -306,23 +306,23 @@
             </div>
             
             <div class="muted" style="margin-top:10px; font-size:12px;">
-                đź“Ś Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
+                 &#x1F4CC; Format: kolone <b>broj fak, lokacija, sku, kolicina</b> (bilo koji redosled)
             </div>
         </div>
         
         <div style="display:flex; gap:10px; align-items:center; margin-top:15px;">
             <button class="btn btn-primary" id="startWaveBtn" onclick="startWave()" disabled style="font-size:18px; padding:15px 30px;">
-                đźš€ KREÄ†EMO SA PAKOVANJEM
+                 KREEMO SA PAKOVANJEM
             </button>
-            <button class="btn" onclick="clearScanned()">đź—‘ď¸Ź ObriĹˇi sve</button>
-            <button class="btn" onclick="debugWave()">đźž Debug</button>
-			<button class="btn" onclick="showMap()">đź—şď¸Ź Mapa</button>
+            <button class="btn" onclick="clearScanned()"> Obrii sve</button>
+            <button class="btn" onclick="debugWave()">&#x1F41E; Debug</button>
+			<button class="btn" onclick="showMap()">&#x1F5FA;&#xFE0F; Mapa</button>
         </div>
     </div>
 
     <div id="loadingIndicator" style="display:none; text-align:center; padding:20px">
         <div class="spinner" style="width:32px; height:32px;"></div>
-        <div style="margin-top:8px">UÄŤitavanje...</div>
+        <div style="margin-top:8px">Uitavanje...</div>
     </div>
 
     <!-- Glavni grid - pojavljuje se nakon starta -->
@@ -331,13 +331,13 @@
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
-                    <div class="big">đź“Ť Trenutna lokacija: <span id="curLoc" style="color:var(--primary);">-</span></div>
+                    <div class="big">&#x1F4CD; Trenutna lokacija: <span id="curLoc" style="color:var(--primary);">-</span></div>
                     <div id="currentBoxInfo" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"></div>
                 </div>
                 <div class="pill" id="progressPill">0/0</div>
             </div>
 
-            <!-- đź”Ą NOVI PANEL ZA PRIKAZ LOKACIJE I ARTIKALA đź”Ą -->
+            <!--  NOVI PANEL ZA PRIKAZ LOKACIJE I ARTIKALA  -->
             <div style="background:#f8fafc; border-radius:12px; padding:20px; margin-bottom:20px; border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,0.03);">
                 <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; text-align:center; font-size:16px;">
                     <div style="display:flex; flex-direction:column;">
@@ -345,11 +345,11 @@
                         <span style="font-weight:700; font-size:24px; color:var(--primary);" id="curLocBig">-</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">Ĺ IFRA</span>
+                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">IFRA</span>
                         <span style="font-weight:700; font-size:24px; font-family:monospace;" id="curSku">-</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">KOLIÄŚINA</span>
+                        <span style="color:#64748b; font-size:14px; margin-bottom:5px;">KOLIINA</span>
                         <span style="font-weight:700; font-size:24px; color:var(--success);" id="curQty">-</span>
                     </div>
                     <div style="display:flex; flex-direction:column;">
@@ -361,13 +361,13 @@
                 <!-- VELIKA DUGMAD ZA AKCIJU -->
                 <div style="display:flex; justify-content:center; gap:15px; margin-top:20px;">
                     <button class="btn btn-success" style="flex:1; padding:15px; font-size:18px; font-weight:600;" onclick="takeCurrentItem()">
-                        âś… UZETO
+                         UZETO
                     </button>
                     <button class="btn btn-warning" style="flex:1; padding:15px; font-size:18px; font-weight:600;" onclick="oosCurrentItem()">
-                        âťŚ NEMA
+                         NEMA
                     </button>
                     <button class="btn btn-danger" style="flex:1; padding:15px; font-size:18px; font-weight:600;" onclick="problemCurrentItem()">
-                        đź”§ PROBLEM
+                         PROBLEM
                     </button>
                 </div>
             </div>
@@ -381,12 +381,12 @@
                 <table id="itemsTable">
                     <thead style="background:#f8fafc; position:sticky; top:0">
                         <tr>
-                            <th>đź“¦ SKU</th>
-                            <th>đź“Š Kol</th>
-                            <th>đź“‹ Faktura</th>
-                            <th>đź“¦ Kutija</th>
-                            <th>đź”– Status</th>
-                            <th>đźŽŻ Akcija</th>
+                            <th>&#x1F4E6; SKU</th>
+                            <th>&#x1F4CA; Kol</th>
+                            <th>&#x1F4CB; Faktura</th>
+                            <th>&#x1F4E6; Kutija</th>
+                            <th>&#x1F516; Status</th>
+                            <th>&#x1F3AF; Akcija</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -394,36 +394,36 @@
             </div>
         </div>
 
-        <!-- Desna strana - Status kutija i statistika -->
+        <!-- Desna strana -&#x1F516; Status kutija i statistika -->
         <div class="card">
             <!-- STATISTIKA DEO -->
             <div style="margin-bottom:20px; padding:15px; background:#f8fafc; border-radius:12px; border:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div class="big" style="font-size:18px;">đź“Š Statistika</div>
+                    <div class="big" style="font-size:18px;">&#x1F4CA; Statistika</div>
                     <span class="badge badge-blue" id="timerDisplay">00:00</span>
                 </div>
                 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div style="padding:8px; background:white; border-radius:8px;">
-                        <div style="font-size:12px; color:var(--dark);">đź“¦ Artikli/sat</div>
+                        <div style="font-size:12px; color:var(--dark);">&#x1F4E6; Artikli/sat</div>
                         <div style="font-size:18px; font-weight:700;" id="itemsPerHour">0</div>
                     </div>
                     <div style="padding:8px; background:white; border-radius:8px;">
-                        <div style="font-size:12px; color:var(--dark);">âŹ±ď¸Ź Vreme po lok.</div>
+                        <div style="font-size:12px; color:var(--dark);">&#x23F1;&#xFE0F; Vreme po lok.</div>
                         <div style="font-size:18px; font-weight:700;" id="avgTimePerLoc">0s</div>
                     </div>
                 </div>
                 
                 <div style="margin-top:8px; padding:8px; background:white; border-radius:8px;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span style="font-size:12px; color:var(--dark);">đź“Ź PreÄ‘eno:</span>
+                        <span style="font-size:12px; color:var(--dark);"> Preeno:</span>
                         <span style="font-weight:600;" id="totalDistanceStat">0 m</span>
                     </div>
                 </div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <div class="big">đź“¦ Kutije na kolicima</div>
+                <div class="big">&#x1F4E6; Kutije na kolicima</div>
                 <div class="badge badge-blue" id="totalDistanceDisplay">- m</div>
             </div>
             <div id="boxesContainer" class="boxes-grid">
@@ -431,7 +431,7 @@
             </div>
             
             <div style="margin-top:20px;">
-                <div class="big" style="font-size:18px;">đź“‹ IzveĹˇtaj</div>
+                <div class="big" style="font-size:18px;">&#x1F4CB; Izve&#353;taj</div>
                 <div id="reportMini" style="margin-top:10px; max-height:200px; overflow-y:auto;"></div>
             </div>
         </div>
@@ -463,11 +463,11 @@
 
         function statusBadge(st) {
             const badges = {
-                "pending": `<span class="badge badge-gray">âŹł PENDING</span>`,
-                "partial": `<span class="badge badge-orange">âš ď¸Ź PARTIAL</span>`,
-                "taken": `<span class="badge badge-green">âś… UZETO</span>`,
-                "oos": `<span class="badge badge-orange">âťŚ NEMA</span>`,
-                "problem": `<span class="badge badge-red">đź”§ PROBLEM</span>`
+                "pending": `<span class="badge badge-gray">&#x23F3; PENDING</span>`,
+                "partial": `<span class="badge badge-orange">&#x26A0;&#xFE0F; PARTIAL</span>`,
+                "taken": `<span class="badge badge-green">&#x2705; UZETO</span>`,
+                "oos": `<span class="badge badge-orange">&#x274C; NEMA</span>`,
+                "problem": `<span class="badge badge-red">&#x1F527; PROBLEM</span>`
             };
             return badges[st] || `<span class="badge badge-gray">${st}</span>`;
         }
@@ -527,11 +527,11 @@
                         this.value = "";
                         document.getElementById("startWaveBtn").disabled = false;
                     } else {
-                        alert("âš ď¸Ź Faktura veÄ‡ skenirana!");
+                        alert("&#x1F4CB; Faktura ve skenirana!");
                         this.value = "";
                     }
                 } else if (scannedInvoices.length >= 6) {
-                    alert("âš ď¸Ź Maksimalno 6 faktura!");
+                    alert(" Maksimalno 6 faktura!");
                 }
             }
         });
@@ -545,9 +545,9 @@
                 const div = document.createElement('div');
                 div.className = 'invoice-pill';
                 div.innerHTML = `
-                    đź“‹ ${inv} 
+                     ${inv} 
                     <span style="background:var(--primary); color:white; padding:2px 10px; border-radius:20px;">Kutija ${boxNum}</span>
-                    <span style="cursor:pointer; margin-left:5px;" onclick="removeInvoice('${inv}')">âś•</span>
+                    <span style="cursor:pointer; margin-left:5px;" onclick="removeInvoice('${inv}')"></span>
                 `;
                 container.appendChild(div);
             });
@@ -575,7 +575,7 @@
             if (!file) return;
             
             setLoading(true);
-            document.getElementById("uploadStatus").innerHTML = `âŹł UÄŤitavam ${file.name}...`;
+            document.getElementById("uploadStatus").innerHTML = ` Uitavam ${file.name}...`;
             
             try {
                 let data = [];
@@ -601,7 +601,7 @@
                 }
                 
                 if (invoices.length > 6) {
-                    alert(`âš ď¸Ź PreviĹˇe faktura! Maksimalno 6, a u fajlu ih ima ${invoices.length}`);
+                    alert(` Previe faktura! Maksimalno 6, a u fajlu ih ima ${invoices.length}`);
                     return;
                 }
                 
@@ -609,15 +609,15 @@
                 updateScannedList();
                 
                 document.getElementById("uploadStatus").innerHTML = 
-                    `âś… Ucitano ${data.length} stavki, ${invoices.length} faktura`;
+                    ` U&#269;itano ${data.length} stavki, ${invoices.length} faktura`;
                 
                 document.getElementById("startWaveBtn").disabled = false;
                 
-                console.log("Ucitane stavke:", data);
+                console.log("U&#269;itane stavke:", data);
                 console.log("Pronadjene fakture:", invoices);
                 
             } catch (err) {
-                document.getElementById("uploadStatus").innerHTML = `âťŚ GreĹˇka: ${err.message}`;
+                document.getElementById("uploadStatus").innerHTML = ` Greka: ${err.message}`;
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -645,7 +645,7 @@
             
             if (fakturaIdx === -1 || lokacijaIdx === -1 || skuIdx === -1 || kolicinaIdx === -1) {
                 console.error("Indeksi:", {fakturaIdx, lokacijaIdx, skuIdx, kolicinaIdx});
-                throw new Error("Fajl mora sadrĹľati kolone: broj fak, lokacija, sku, kolicina");
+                throw new Error("Fajl mora sadrati kolone: broj fak, lokacija, sku, kolicina");
             }
             
             const result = [];
@@ -704,7 +704,7 @@
             a.click();
             URL.revokeObjectURL(url);
             
-            document.getElementById("uploadStatus").innerHTML = "đź“Ą Uzorak fajla preuzet";
+            document.getElementById("uploadStatus").innerHTML = "&#x1F4E5; Uzorak fajla preuzet";
         }
 
         // ==================== BOJE ZA KUTIJE ====================
@@ -712,10 +712,10 @@
             const colors = {
                 1: '#3b82f6', // plava
                 2: '#22c55e', // zelena
-                3: '#eab308', // Ĺľuta
-                4: '#f97316', // narandĹľasta
+                3: '#eab308', // uta
+                4: '#f97316', // narandasta
                 5: '#ef4444', // crvena
-                6: '#a855f7'  // ljubiÄŤasta
+                6: '#a855f7'  // ljubiasta
             };
             return colors[box] || '#64748b';
         }
@@ -737,7 +737,7 @@
                 return;
             }
             
-            // GrupiĹˇi stavke po kutijama (samo one koje ÄŤekaju)
+            // Grupii stavke po kutijama (samo one koje ekaju)
             const boxesMap = new Map();
             
             items.forEach(it => {
@@ -751,7 +751,7 @@
             });
             
             if (boxesMap.size === 0) {
-                infoDiv.innerHTML = '<span style="color:#0a7; font-weight:500;">âś… Sve obraÄ‘eno</span>';
+                infoDiv.innerHTML = '<span style="color:#0a7; font-weight:500;"> Sve obraeno</span>';
                 return;
             }
             
@@ -762,7 +762,7 @@
                 const itemList = items.map(it => `${it.sku} (${it.qty})`).join(', ');
                 const bgColor = getBoxColor(box);
 				const skuList = items.map(it => it.sku).join(', ');
-				html += `<span style="display:inline-block; background:${bgColor}; color:white; padding:6px 16px; border-radius:25px; font-size:16px; font-weight:600; margin-right:8px; cursor:help; box-shadow:0 2px 4px rgba(0,0,0,0.1);" title="SKU: ${itemList}">đź“¦ Kutija ${box} - ${skuList}</span>`;
+				html += `<span style="display:inline-block; background:${bgColor}; color:white; padding:6px 16px; border-radius:25px; font-size:16px; font-weight:600; margin-right:8px; cursor:help; box-shadow:0 2px 4px rgba(0,0,0,0.1);" title="SKU: ${itemList}">&#x1F4E6; Kutija ${box} - ${skuList}</span>`;
                 
             });
             
@@ -782,7 +782,7 @@
             const curLoc = waveData.current_location;
             const items = waveData.items_by_loc[curLoc] || [];
             
-            // Uzmi prvu stavku koja nije zavrĹˇena (pending ili partial)
+            // Uzmi prvu stavku koja nije zavr&#353;ena (pending ili partial)
             const activeItem = items.find(it => it.status === 'pending' || it.status === 'partial');
             
             if (activeItem) {
@@ -870,8 +870,8 @@
 
                 const boxHtml = `
                     <div class="${boxClass}" style="border-color: ${boxColor}; cursor: pointer;" onclick="showBoxDetails(${i})">
-                        <div class="box-number" style="color: ${boxColor};"> Kutija ${i}</div>
-                        ${invoice ? `<div class="invoice-pill" style="margin-bottom:10px; background:${boxColor}; color:white;"> đź“‹ ${invoice}</div>` : 
+                        <div class="box-number" style="color: ${boxColor};">&#x1F4E6; Kutija ${i}</div>
+                        ${invoice ? `<div class="invoice-pill" style="margin-bottom:10px; background:${boxColor}; color:white;">  ${invoice}</div>` : 
                                     `<div class="muted" style="margin-bottom:10px;"> slobodna</div>`}
                         ${invoice ? `
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -895,7 +895,7 @@
 
             const curLoc = data.current_location;
             if (!curLoc) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px">đźŹ Task zavrĹˇen!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px"> Task zavr&#353;en!</td></tr>`;
                 return;
             }
 
@@ -909,21 +909,21 @@
                 if (it.status === "pending" || it.status === "partial") {
                     actionButtons = `
                         <button class="btn btn-success" style="padding:4px 8px; font-size:11px" 
-                                onclick="takeItem('${it.sku}', '${it.invoice}', ${it.qty_required})">âś… Uzeto</button>
+                                onclick="takeItem('${it.sku}', '${it.invoice}', ${it.qty_required})">&#x2705; Uzeto</button>
                         <button class="btn btn-warning" style="padding:4px 8px; font-size:11px" 
-                                onclick="setOOS('${it.sku}', '${it.invoice}')">âťŚ Nema</button>
+                                onclick="setOOS('${it.sku}', '${it.invoice}')"> Nema</button>
                         <button class="btn btn-danger" style="padding:4px 8px; font-size:11px" 
-                                onclick="setProblem('${it.sku}', '${it.invoice}', ${it.qty_required})">đź”§ Problem</button>
+                                onclick="setProblem('${it.sku}', '${it.invoice}', ${it.qty_required})">&#x1F527; Problem</button>
                     `;
                 }
 
                 tr.innerHTML = `
                     <td><span class="mono">${it.sku}</span></td>
                     <td>${it.qty_required} ${it.qty_picked ? `(uzeto ${it.qty_picked})` : ''}</td>
-                    <td><span class="invoice-pill">đź“‹ ${it.invoice}</span></td>
+                    <td><span class="invoice-pill"> ${it.invoice}</span></td>
                     <td><span style="display:inline-block; background:${getBoxColor(it.box)}; color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Kutija ${it.box}</span></td>
                     <td>${statusBadge(it.status)}</td>
-                    <td>${actionButtons || '<span class="badge badge-gray">âś”ď¸Ź ZavrĹˇeno</span>'}</td>
+                    <td>${actionButtons || '<span class="badge badge-gray"> Zavreno</span>'}</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -948,17 +948,17 @@
             }
 
             if (problems.length > 0) {
-                container.innerHTML += '<div style="margin-bottom:10px;"><span class="badge badge-red">đź”§ PROBLEM</span></div>';
+                container.innerHTML += '<div style="margin-bottom:10px;"><span class="badge badge-red">&#x1F527; PROBLEM</span></div>';
                 problems.forEach(it => {
                     container.innerHTML += `
                         <div style="padding:8px; background:#fff5f5; border-radius:8px; margin-bottom:5px;">
                             <div><strong>${it.sku}</strong> (Kutija ${it.box})</div>
-                            <div>đź“‹ ${it.invoice}</div>
+                            <div> ${it.invoice}</div>
                             <div class="muted">${it.note || ''}</div>
                             <div style="display:flex; gap:5px; margin-top:5px;">
                                 <button class="btn btn-purple" style="padding:4px 8px; font-size:11px" 
                                         onclick="dopuni('${it.sku}', '${it.invoice}', ${it.qty_required}, ${it.qty_picked || 0})">
-                                     đź”„ DOPUNI
+                                      DOPUNI
                                 </button>
                             </div>
                         </div>
@@ -967,12 +967,12 @@
             }
 
             if (taken.length > 0) {
-                container.innerHTML += '<div style="margin:10px 0;"><span class="badge badge-green">âś… UZETO</span></div>';
+                container.innerHTML += '<div style="margin:10px 0;"><span class="badge badge-green">&#x2705; UZETO</span></div>';
                 taken.slice(0, 5).forEach(it => {
-                    container.innerHTML += `<div>${it.sku} (Kutija ${it.box}) - đź“‹ ${it.invoice}</div>`;
+                    container.innerHTML += `<div>${it.sku} (Kutija ${it.box}) -  ${it.invoice}</div>`;
                 });
                 if (taken.length > 5) {
-                    container.innerHTML += `<div class="muted">+ joĹˇ ${taken.length - 5}</div>`;
+                    container.innerHTML += `<div class="muted">+ jo ${taken.length - 5}</div>`;
                 }
             }
         }
@@ -1018,24 +1018,24 @@
             }
             
             // Napravi poruku za prikaz
-            let message = `đź“¦ KUTIJA ${boxNum} - ${invoice}\n`;
+            let message = ` KUTIJA ${boxNum} - ${invoice}\n`;
             message += `\n\n`;
             
             let ukupno = 0;
             let uzeto = 0;
             
             boxItems.forEach((it, index) => {
-                const statusIcon = it.status === "taken" ? "âś…" : 
-                                  (it.status === "problem" ? "đź”§" : 
-                                  (it.status === "oos" ? "âťŚ" : "âŹł"));
+                const statusIcon = it.status === "taken" ? "" : 
+                                  (it.status === "problem" ? "" : 
+                                  (it.status === "oos" ? "" : ""));
                 message += `${index+1}. ${statusIcon} ${it.sku}\n`;
-                message += `    đź“Ť ${it.location || it.locationName}\n`;
-                message += `    đź“Š ${it.qty_picked || 0}/${it.qty_required}`;
+                message += `     ${it.location || it.locationName}\n`;
+                message += `     ${it.qty_picked || 0}/${it.qty_required}`;
                 if (it.status !== "taken" && it.qty_missing > 0) {
                     message += ` (fali ${it.qty_missing})`;
                 }
                 message += `\n`;
-                if (it.note) message += `    đź“ť ${it.note}\n`;
+                if (it.note) message += `     ${it.note}\n`;
                 message += `\n`;
                 
                 ukupno += it.qty_required;
@@ -1043,25 +1043,25 @@
             });
             
             message += `\n`;
-            message += `đź“Š UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
+            message += ` UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
             
             alert(message);
         }
 
         // ==================== RENDER WAVE ====================
         async function renderWave(data) {
-            waveData = data;  // SaÄŤuvaj podatke globalno za prikaz detalja kutije
+            waveData = data;  // Sauvaj podatke globalno za prikaz detalja kutije
             
             document.getElementById("curLoc").innerText = data.current_location || "ZAVRSENO";
             document.getElementById("routeInfo").innerHTML = 
-                `${data.mode} | đźšŞ ${data.start} â†’ ${data.end} | đź“Ź ${data.distance_m}m`;
+                `${data.mode} |  ${data.start}  ${data.end} |  ${data.distance_m}m`;
 
             document.getElementById("totalDistanceDisplay").innerText = `${data.distance_m} m`;
 
             const p = data.progress || {};
             document.getElementById("progressPill").innerHTML = 
-                `đź“¦ ${p.done_items || 0}/${p.total_items || 0} stavki`;
-            document.getElementById("progressPercent").innerHTML = `đź“Š ${p.progress_percent || 0}%`;
+                ` ${p.done_items || 0}/${p.total_items || 0} stavki`;
+            document.getElementById("progressPercent").innerHTML = ` ${p.progress_percent || 0}%`;
 
             renderBoxes(data);
             renderItemsTable(data);
@@ -1070,13 +1070,13 @@
             // Prikaz kutije za trenutnu lokaciju
             updateCurrentBoxInfo(data);
             
-            // AĹľuriraj novi panel
+            // Auriraj novi panel
             updateCurrentItemPanel();
             
-            // AĹľuriraj statistiku
+            // Auriraj statistiku
             updateStats();
             
-            // Zaustavi tajmer ako je wave zavrĹˇen
+            // Zaustavi tajmer ako je wave zavr&#353;en
             if (!data.current_location) {
                 stopTimer();
             }
@@ -1085,7 +1085,7 @@
 		// ==================== FUNKCIJA ZA PRIKAZ MAPE SA RUTOM ====================
         async function showMap() {
             if (uploadedItems.length === 0) {
-                alert("Prvo uÄŤitaj Excel fajl sa lokacijama!");
+                alert("Prvo uitaj Excel fajl sa lokacijama!");
                 return;
             }
 
@@ -1108,13 +1108,13 @@
                     trenutnaLokacija = waveData.current_location;
                 }
 
-                // IzraÄŤunaj granice mape
+                // Izraunaj granice mape
                 const minX = Math.min(...sveLokacije.map(l => l.x)) - 1;
                 const maxX = Math.max(...sveLokacije.map(l => l.x)) + 1;
                 const minY = Math.min(...sveLokacije.map(l => l.y)) - 1;
                 const maxY = Math.max(...sveLokacije.map(l => l.y)) + 1;
                 
-                // đź“‹ Fakture za boje
+                //  Fakture za boje
                 const fakture = [...new Set(uploadedItems.map(i => i.faktura))];
 
                 // Otvori prozor
@@ -1184,7 +1184,7 @@
                         </div>
                         <div class="info">
                             <div class="stats">
-                                <strong>đź“Ť Lokacije za posetu:</strong> ${filterLokacije.length}
+                                <strong> Lokacije za posetu:</strong> ${filterLokacije.length}
                             </div>
                             <div class="legend" id="legend"></div>
                         </div>
@@ -1198,7 +1198,7 @@
                             const trenutnaLokacija = ${JSON.stringify(trenutnaLokacija)};
                             const fakture = ${JSON.stringify(fakture)};
                             
-                            // PomoÄ‡na funkcija za boju fakture
+                            // Pomona funkcija za boju fakture
                             function getFakturaColor(lokacija) {
                                 const item = uploadedItems.find(i => i.lokacija === lokacija);
                                 if (!item) return '#94a3b8';
@@ -1260,7 +1260,7 @@
                                     ctx.fillText(lok.location, x + 8, y - 5);
                                 });
                                 
-                                // Nacrtaj liniju rute (ako ima viĹˇe od 1 lokacije)
+                                // Nacrtaj liniju rute (ako ima vie od 1 lokacije)
                                 if (waveData && waveData.ordered_locations && waveData.ordered_locations.length > 1) {
                                     const ruta = waveData.ordered_locations;
                                     ctx.beginPath();
@@ -1299,7 +1299,7 @@
                                     ctx.stroke();
                                 });
                                 
-                                // Oznaci trenutnu lokaciju (trepÄ‡e)
+                                // Oznaci trenutnu lokaciju (trepe)
                                 if (trenutnaLokacija) {
                                     const trenutna = sveLokacije.find(l => l.location === trenutnaLokacija);
                                     if (trenutna) {
@@ -1352,7 +1352,7 @@
                 `);
                 
             } catch (err) {
-                alert("GreĹˇka pri uÄŤitavanju mape: " + err.message);
+                alert("Greka pri uitavanju mape: " + err.message);
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -1374,10 +1374,10 @@
             setLoading(true);
             try {
                 const mode = document.getElementById("routingMode").value;
-                console.log("Ĺ aljem stavke u backend:", uploadedItems);
+                console.log("aljem stavke u backend:", uploadedItems);
                 console.log("Broj stavki:", uploadedItems.length);
                 console.log("Fakture:", [...new Set(uploadedItems.map(i => i.faktura))]);
-                console.log("NaÄŤin rutiranja:", mode);
+                console.log("Nain rutiranja:", mode);
                 
                 const itemsForBackend = uploadedItems
                     .filter(item => scannedInvoices.includes(item.faktura))
@@ -1400,8 +1400,8 @@
                 const data = await res.json();
                 
                 if (!res.ok) {
-                    alert("GreĹˇka: " + (data.detail || JSON.stringify(data)));
-                    console.error("Detalji greĹˇke:", data);
+                    alert("Greka: " + (data.detail || JSON.stringify(data)));
+                    console.error("Detalji greke:", data);
                     return;
                 }
 
@@ -1414,7 +1414,7 @@
                 await renderWave(data);
                 
             } catch (err) {
-                alert("MreĹľna greĹˇka: " + err.message);
+                alert("Mrena greka: " + err.message);
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -1434,7 +1434,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert("GreĹˇka: " + err.message);
+                alert("Greka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1453,7 +1453,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert("GreĹˇka: " + err.message);
+                alert("Greka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1474,7 +1474,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert("GreĹˇka: " + err.message);
+                alert("Greka: " + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1483,14 +1483,14 @@
         async function dopuni(sku, invoice, required, picked) {
             const fali = required - (picked || 0);
             
-            // Ako nema Ĺˇta da se dopuni
+            // Ako nema ta da se dopuni
             if (fali <= 0) {
-                alert("âś… Ova stavka je veÄ‡ kompletna!");
+                alert(" Ova stavka je ve kompletna!");
                 return;
             }
             
             // Pitanje za dopunu - pokazuje koliko fali
-            if (!confirm(`Da li si dopunio SKU ${sku} sa preostalih ${fali} komada?`)) {
+            if (!confirm(`Da li si dopunio&#x1F4E6; SKU ${sku} sa preostalih ${fali} komada?`)) {
                 return;
             }
             
@@ -1503,28 +1503,28 @@
                         sku: sku,
                         invoice: invoice,
                         action: "dopuna",
-                        qty_picked: required,  // Ĺˇaljemo punu koliÄŤinu
-                        note: `Dopunjeno do pune koliÄŤine (dodato ${fali})`
+                        qty_picked: required,  // aljemo punu koliinu
+                        note: `Dopunjeno do pune koliine (dodato ${fali})`
                     })
                 });
                 
                 if (!res.ok) {
                     const err = await res.json();
-                    throw new Error(err.detail || "GreĹˇka pri dopuni");
+                    throw new Error(err.detail || "Greka pri dopuni");
                 }
                 
                 await refreshWave();
-                alert(`âś… Stavka ${sku} je kompletirana!`);
+                alert(` Stavka ${sku} je kompletirana!`);
                 
             } catch (err) {
-                alert("GreĹˇka: " + err.message);
+                alert("Greka: " + err.message);
             } finally {
                 setLoading(false);
             }
         }
 
         async function kompletiraj(sku, invoice, required) {
-            if (!confirm(`Kompletiraj SKU ${sku}?`)) return;
+            if (!confirm(`Kompletiraj&#x1F4E6; SKU ${sku}?`)) return;
             
             setLoading(true);
             try {
@@ -1535,7 +1535,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert("GreĹˇka: " + err.message);
+                alert("Greka: " + err.message);
             } finally {
                 setLoading(false);
             }
