@@ -243,7 +243,7 @@
             cursor: help;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-    \n        /* Mobile-specific overrides */\n        @media (max-width: 900px) {\n            body { padding: 12px; max-width: 100%; }\n            h2 { font-size: 1.4rem; }\n            .card { padding: 14px; margin-top: 12px; }\n            .mainGrid { grid-template-columns: 1fr; gap: 12px; }\n            .scan-input { font-size: 16px; padding: 12px; }\n            .btn { width: 100%; justify-content: center; font-size: 16px; }\n            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }\n            #itemsTable { display: none; }\n            #boxesContainer { display: none; }\n            #reportMini { display: none; }\n            #totalDistanceDisplay { display: none; }\n            #timerDisplay { display: none; }\n            .mainGrid > .card:last-child { display: none; }\n        }\n</style>
+\n        /* Mobile-specific overrides */\n        @media (max-width: 900px) {\n            body { padding: 12px; max-width: 100%; }\n            h2 { font-size: 1.4rem; }\n            .card { padding: 14px; margin-top: 12px; }\n            .mainGrid { grid-template-columns: 1fr; gap: 12px; }\n            .scan-input { font-size: 16px; padding: 12px; }\n            .btn { width: 100%; justify-content: center; font-size: 16px; }\n            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }\n            #itemsTable { display: none; }\n            #boxesContainer { display: none; }\n            #reportMini { display: none; }\n            #totalDistanceDisplay { display: none; }\n            #timerDisplay { display: none; }\n            .mainGrid > .card:last-child { display: none; }\n        }\n</style>
 </head>
 <body>
     <h2> Wave Picking &#8226; 6 kutija na kolicima</h2>
@@ -428,6 +428,18 @@
         // ==================== KONFIGURACIJA ====================
         const API = "https://maga-codex.onrender.com";
         const MOBILE_MODE = true;
+        function applyMobileHides() {
+            if (!MOBILE_MODE) return;
+            const hideIds = ["boxesContainer", "reportMini", "totalDistanceDisplay", "timerDisplay"]; 
+            hideIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = "none";
+            });
+            const rightCard = document.querySelector(".mainGrid > .card:last-child");
+            if (rightCard) rightCard.style.display = "none";
+        }
+
+        window.addEventListener("load", applyMobileHides);
         let SESSION_ID = null;
         let LOADING = false;
         let scannedInvoices = [];
@@ -1164,7 +1176,7 @@
                                 50% { opacity: 0.6; transform: scale(1.2); }
                                 100% { opacity: 1; transform: scale(1); }
                             }
-                        \n        /* Mobile-specific overrides */\n        @media (max-width: 900px) {\n            body { padding: 12px; max-width: 100%; }\n            h2 { font-size: 1.4rem; }\n            .card { padding: 14px; margin-top: 12px; }\n            .mainGrid { grid-template-columns: 1fr; gap: 12px; }\n            .scan-input { font-size: 16px; padding: 12px; }\n            .btn { width: 100%; justify-content: center; font-size: 16px; }\n            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }\n            #itemsTable { display: none; }\n            #boxesContainer { display: none; }\n            #reportMini { display: none; }\n            #totalDistanceDisplay { display: none; }\n            #timerDisplay { display: none; }\n            .mainGrid > .card:last-child { display: none; }\n        }\n</style>
+                    \n        /* Mobile-specific overrides */\n        @media (max-width: 900px) {\n            body { padding: 12px; max-width: 100%; }\n            h2 { font-size: 1.4rem; }\n            .card { padding: 14px; margin-top: 12px; }\n            .mainGrid { grid-template-columns: 1fr; gap: 12px; }\n            .scan-input { font-size: 16px; padding: 12px; }\n            .btn { width: 100%; justify-content: center; font-size: 16px; }\n            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }\n            #itemsTable { display: none; }\n            #boxesContainer { display: none; }\n            #reportMini { display: none; }\n            #totalDistanceDisplay { display: none; }\n            #timerDisplay { display: none; }\n            .mainGrid > .card:last-child { display: none; }\n        }\n</style>
                     </head>
                     <body>
                         <div class="canvas-container">
@@ -1572,6 +1584,10 @@
     </script>
 </body>
 </html>
+
+
+
+
 
 
 
