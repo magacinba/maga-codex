@@ -243,7 +243,54 @@
             cursor: help;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-\n        /* Mobile-specific overrides */\n        @media (max-width: 900px) {\n            body { padding: 12px; max-width: 100%; }\n            h2 { font-size: 1.4rem; }\n            .card { padding: 14px; margin-top: 12px; }\n            .mainGrid { grid-template-columns: 1fr; gap: 12px; }\n            .scan-input { font-size: 16px; padding: 12px; }\n            .btn { width: 100%; justify-content: center; font-size: 16px; }\n            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }\n            #itemsTable { display: none; }\n            #boxesContainer { display: none; }\n            #reportMini { display: none; }\n            #totalDistanceDisplay { display: none; }\n            #timerDisplay { display: none; }\n            .mainGrid > .card:last-child { display: none; }\n        }\n</style>
+
+        /* Mobile-specific overrides */
+        @media (max-width: 900px) {
+            body { padding: 12px; max-width: 100%; }
+            h2 { font-size: 1.4rem; }
+            .card { padding: 14px; margin-top: 12px; }
+            .mainGrid { grid-template-columns: 1fr; gap: 12px; }
+            .scan-input { font-size: 16px; padding: 12px; }
+            .btn { width: 100%; justify-content: center; font-size: 16px; }
+            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }
+            #itemsTable { display: none; }
+            #boxesContainer { display: none; }
+            #reportMini { display: none; }
+            #totalDistanceDisplay { display: none; }
+            #timerDisplay { display: none; }
+            .mainGrid > .card:last-child { display: none; }
+        }
+
+        .route-card {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .route-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 15px;
+        }
+        .route-ico { font-size: 18px; }
+        .route-select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: white;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04) inset;
+        }
+
+</style>
 </head>
 <body>
     <h2> Wave Picking &#8226; 6 kutija na kolicima</h2>
@@ -634,7 +681,8 @@
 
         function parseCSV(csvText) {
             const cleanText = csvText.replace(/"/g, '');
-            const lines = cleanText.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+            const lines = cleanText.split(/\r?
+/).map(l => l.trim()).filter(l => l);
             
             if (lines.length === 0) return [];
             
@@ -701,7 +749,8 @@
                 ['B1987', '101010', '1', 'FAKTURA-02'],
             ];
             
-            let csv = sampleData.map(row => row.join('\t')).join('\n');
+            let csv = sampleData.map(row => row.join('\t')).join('
+');
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -1025,8 +1074,11 @@
             }
             
             // Napravi poruku za prikaz
-            let message = ` KUTIJA ${boxNum} - ${invoice}\n`;
-            message += `\n\n`;
+            let message = ` KUTIJA ${boxNum} - ${invoice}
+`;
+            message += `
+
+`;
             
             let ukupno = 0;
             let uzeto = 0;
@@ -1035,21 +1087,27 @@
                 const statusIcon = it.status === "taken" ? "" : 
                                   (it.status === "problem" ? "" : 
                                   (it.status === "oos" ? "" : ""));
-                message += `${index+1}. ${statusIcon} ${it.sku}\n`;
-                message += `     ${it.location || it.locationName}\n`;
+                message += `${index+1}. ${statusIcon} ${it.sku}
+`;
+                message += `     ${it.location || it.locationName}
+`;
                 message += `     ${it.qty_picked || 0}/${it.qty_required}`;
                 if (it.status !== "taken" && it.qty_missing > 0) {
                     message += ` (fali ${it.qty_missing})`;
                 }
-                message += `\n`;
-                if (it.note) message += `     ${it.note}\n`;
-                message += `\n`;
+                message += `
+`;
+                if (it.note) message += `     ${it.note}
+`;
+                message += `
+`;
                 
                 ukupno += it.qty_required;
                 uzeto += it.qty_picked || 0;
             });
             
-            message += `\n`;
+            message += `
+`;
             message += ` UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
             
             alert(message);
@@ -1183,7 +1241,54 @@
                                 50% { opacity: 0.6; transform: scale(1.2); }
                                 100% { opacity: 1; transform: scale(1); }
                             }
-                    \n        /* Mobile-specific overrides */\n        @media (max-width: 900px) {\n            body { padding: 12px; max-width: 100%; }\n            h2 { font-size: 1.4rem; }\n            .card { padding: 14px; margin-top: 12px; }\n            .mainGrid { grid-template-columns: 1fr; gap: 12px; }\n            .scan-input { font-size: 16px; padding: 12px; }\n            .btn { width: 100%; justify-content: center; font-size: 16px; }\n            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }\n            #itemsTable { display: none; }\n            #boxesContainer { display: none; }\n            #reportMini { display: none; }\n            #totalDistanceDisplay { display: none; }\n            #timerDisplay { display: none; }\n            .mainGrid > .card:last-child { display: none; }\n        }\n</style>
+                    
+        /* Mobile-specific overrides */
+        @media (max-width: 900px) {
+            body { padding: 12px; max-width: 100%; }
+            h2 { font-size: 1.4rem; }
+            .card { padding: 14px; margin-top: 12px; }
+            .mainGrid { grid-template-columns: 1fr; gap: 12px; }
+            .scan-input { font-size: 16px; padding: 12px; }
+            .btn { width: 100%; justify-content: center; font-size: 16px; }
+            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }
+            #itemsTable { display: none; }
+            #boxesContainer { display: none; }
+            #reportMini { display: none; }
+            #totalDistanceDisplay { display: none; }
+            #timerDisplay { display: none; }
+            .mainGrid > .card:last-child { display: none; }
+        }
+
+        .route-card {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .route-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 15px;
+        }
+        .route-ico { font-size: 18px; }
+        .route-select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: white;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04) inset;
+        }
+
+</style>
                     </head>
                     <body>
                         <div class="canvas-container">
@@ -1591,6 +1696,7 @@
     </script>
 </body>
 </html>
+
 
 
 
