@@ -243,54 +243,7 @@
             cursor: help;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        /* Mobile-specific overrides */
-        @media (max-width: 900px) {
-            body { padding: 12px; max-width: 100%; }
-            h2 { font-size: 1.4rem; }
-            .card { padding: 14px; margin-top: 12px; }
-            .mainGrid { grid-template-columns: 1fr; gap: 12px; }
-            .scan-input { font-size: 16px; padding: 12px; }
-            .btn { width: 100%; justify-content: center; font-size: 16px; }
-            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }
-            #itemsTable { display: none; }
-            #boxesContainer { display: none; }
-            #reportMini { display: none; }
-            #totalDistanceDisplay { display: none; }
-            #timerDisplay { display: none; }
-            .mainGrid > .card:last-child { display: none; }
-        }
-
-        .route-card {
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-        .route-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            color: var(--dark);
-            font-size: 15px;
-        }
-        .route-ico { font-size: 18px; }
-        .route-select {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 2px solid var(--border);
-            background: white;
-            font-weight: 600;
-            font-size: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04) inset;
-        }
-
-</style>
+    </style>
 </head>
 <body>
     <h2> Wave Picking &#8226; 6 kutija na kolicima</h2>
@@ -310,14 +263,22 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
             <div style="padding:12px; background:#f1f5f9; border-radius:8px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px">
-                    <span style="font-weight:600">&#x1F5FA;&#xFE0F; Na&#269;in rutiranja:</span>
+                   <span style="font-weight:600">&#x1F6AA; Ulazi/Izlazi:</span>
                 </div>
-                <select id="routingMode" style="padding:10px; width:100%; border-radius:8px; border:2px solid var(--border); background:white; font-weight:500">
-                    <option value="optimal" selected>&#x26A1; Optimalno (najkra&#263;a putanja)</option>
-                    <option value="ortools">&#x1F9E0; Najkra&#263;a (OR-Tools, sporije)</option>
-                    <option value="sector">&#x1F4CD; Po sektorima (A&rarr;B&rarr;C&rarr;D&rarr;E)</option>
-                </select>
+                <div style="display:flex; gap:16px; flex-wrap:wrap">
+                    <div><span class="badge badge-blue">ENTRANCE_1</span> Levo</div>
+                    <div><span class="badge badge-blue">ENTRANCE_2</span> Desno</div>
+                </div>
             </div>
+            
+            <div class="route-card">
+    <div class="route-label"><span class="route-ico">&#x1F5FA;&#xFE0F;</span><span>Na&#269;in rutiranja</span></div>
+    <select id="routingMode" class="route-select">
+        <option value="optimal" selected>&#x26A1; Optimalno (najkra&#263;a putanja)</option>
+        <option value="ortools">&#x1F9E0; Najkra&#263;a (OR-Tools, sporije)</option>
+        <option value="sector">&#x1F4CD; Po sektorima (A&rarr;B&rarr;C&rarr;D&rarr;E)</option>
+    </select>
+</div>
         </div>
         
         <!-- EXCEL UPLOAD -->
@@ -349,9 +310,7 @@
                 &#x1F680; KRE&#262;EMO SA PAKOVANJEM
             </button>
             <button class="btn" onclick="clearScanned()"> Obrii sve</button>
-            
-			
-        </div>
+            </div>
     </div>
 
     <div id="loadingIndicator" style="display:none; text-align:center; padding:20px">
@@ -474,26 +433,26 @@
     <script>
         // ==================== KONFIGURACIJA ====================
         const API = "https://maga-codex.onrender.com";
-        const MOBILE_MODE = true;
-        function applyMobileHides() {
-            if (!MOBILE_MODE) return;
-            const hideIds = ["boxesContainer", "reportMini", "totalDistanceDisplay", "timerDisplay", "itemsTable"];
-            hideIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = "none";
-            });
-            const rightCard = document.querySelector(".mainGrid > .card:last-child");
-            if (rightCard) rightCard.style.display = "none";
+const MOBILE_MODE = true;
+function applyMobileHides() {
+    if (!MOBILE_MODE) return;
+    const hideIds = ["boxesContainer", "reportMini", "totalDistanceDisplay", "timerDisplay", "itemsTable"];
+    hideIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+    const rightCard = document.querySelector(".mainGrid > .card:last-child");
+    if (rightCard) rightCard.style.display = "none";
 
-            const itemsTable = document.getElementById("itemsTable");
-            if (itemsTable) {
-                itemsTable.style.display = "none";
-                const wrap = itemsTable.closest("div");
-                if (wrap) wrap.style.display = "none";
-            }
-        }
+    const itemsTable = document.getElementById("itemsTable");
+    if (itemsTable) {
+        itemsTable.style.display = "none";
+        const wrap = itemsTable.closest("div");
+        if (wrap) wrap.style.display = "none";
+    }
+}
 
-        window.addEventListener("load", applyMobileHides);
+window.addEventListener("load", applyMobileHides);
         let SESSION_ID = null;
         let LOADING = false;
         let scannedInvoices = [];
@@ -682,7 +641,7 @@
         function parseCSV(csvText) {
             let cleanText = csvText.replace(/"/g, "");
 
-            // Ako su \"\\n\" i \"\\r\\n\" ostali kao tekst, normalizuj
+            // Ako su "\\n" i "\\r\\n" ostali kao tekst, normalizuj
             if (cleanText.includes("\\n") || cleanText.includes("\\r\\n")) {
                 cleanText = cleanText.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n");
             }
@@ -754,8 +713,7 @@
                 ['B1987', '101010', '1', 'FAKTURA-02'],
             ];
             
-            let csv = sampleData.map(row => row.join('\t')).join('
-');
+            let csv = sampleData.map(row => row.join('\t')).join('\n');
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -1079,11 +1037,8 @@
             }
             
             // Napravi poruku za prikaz
-            let message = ` KUTIJA ${boxNum} - ${invoice}
-`;
-            message += `
-
-`;
+            let message = ` KUTIJA ${boxNum} - ${invoice}\n`;
+            message += `\n\n`;
             
             let ukupno = 0;
             let uzeto = 0;
@@ -1092,27 +1047,21 @@
                 const statusIcon = it.status === "taken" ? "" : 
                                   (it.status === "problem" ? "" : 
                                   (it.status === "oos" ? "" : ""));
-                message += `${index+1}. ${statusIcon} ${it.sku}
-`;
-                message += `     ${it.location || it.locationName}
-`;
+                message += `${index+1}. ${statusIcon} ${it.sku}\n`;
+                message += `     ${it.location || it.locationName}\n`;
                 message += `     ${it.qty_picked || 0}/${it.qty_required}`;
                 if (it.status !== "taken" && it.qty_missing > 0) {
                     message += ` (fali ${it.qty_missing})`;
                 }
-                message += `
-`;
-                if (it.note) message += `     ${it.note}
-`;
-                message += `
-`;
+                message += `\n`;
+                if (it.note) message += `     ${it.note}\n`;
+                message += `\n`;
                 
                 ukupno += it.qty_required;
                 uzeto += it.qty_picked || 0;
             });
             
-            message += `
-`;
+            message += `\n`;
             message += ` UKUPNO: ${uzeto}/${ukupno} (${Math.round(uzeto/ukupno*100)}%)`;
             
             alert(message);
@@ -1133,18 +1082,11 @@
                 ` ${p.done_items || 0}/${p.total_items || 0} stavki`;
             document.getElementById("progressPercent").innerHTML = ` ${p.progress_percent || 0}%`;
 
-            renderBoxes(data);
-            renderItemsTable(data);
-            renderMiniReport(data);
-            
-            // Prikaz kutije za trenutnu lokaciju
+            if (!MOBILE_MODE) {\n                renderBoxes(data);\n                renderItemsTable(data);\n                renderMiniReport(data);\n                updateStats();\n            }\n\n            // Prikaz kutije za trenutnu lokaciju
             updateCurrentBoxInfo(data);
             
             // Auriraj novi panel
-            updateCurrentItemPanel();
-            
-            // Auriraj statistiku
-            updateStats();
+            updateCurrentItemPanel();
             
             // Zaustavi tajmer ako je wave zavr&#353;en
             if (!data.current_location) {
@@ -1246,54 +1188,7 @@
                                 50% { opacity: 0.6; transform: scale(1.2); }
                                 100% { opacity: 1; transform: scale(1); }
                             }
-                    
-        /* Mobile-specific overrides */
-        @media (max-width: 900px) {
-            body { padding: 12px; max-width: 100%; }
-            h2 { font-size: 1.4rem; }
-            .card { padding: 14px; margin-top: 12px; }
-            .mainGrid { grid-template-columns: 1fr; gap: 12px; }
-            .scan-input { font-size: 16px; padding: 12px; }
-            .btn { width: 100%; justify-content: center; font-size: 16px; }
-            .btn.btn-success, .btn.btn-warning, .btn.btn-danger { font-size: 18px; padding: 14px; }
-            #itemsTable { display: none; }
-            #boxesContainer { display: none; }
-            #reportMini { display: none; }
-            #totalDistanceDisplay { display: none; }
-            #timerDisplay { display: none; }
-            .mainGrid > .card:last-child { display: none; }
-        }
-
-        .route-card {
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-        .route-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            color: var(--dark);
-            font-size: 15px;
-        }
-        .route-ico { font-size: 18px; }
-        .route-select {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 2px solid var(--border);
-            background: white;
-            font-weight: 600;
-            font-size: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04) inset;
-        }
-
-</style>
+                        </style>
                     </head>
                     <body>
                         <div class="canvas-container">
@@ -1701,26 +1596,6 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
