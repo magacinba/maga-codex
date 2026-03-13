@@ -681,8 +681,7 @@
 
         function parseCSV(csvText) {
             const cleanText = csvText.replace(/"/g, '');
-            const lines = cleanText.split(/\r?
-/).map(l => l.trim()).filter(l => l);
+            const lines = cleanText.split(/\\r?\\n/).map(l => l.trim()).filter(l => l);
             
             if (lines.length === 0) return [];
             
@@ -1696,6 +1695,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
