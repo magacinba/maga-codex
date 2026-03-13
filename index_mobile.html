@@ -680,11 +680,17 @@
         }
 
         function parseCSV(csvText) {
-            const cleanText = csvText.replace(/"/g, '');
-            const lines = cleanText.split(/\\r?\\n/).map(l => l.trim()).filter(l => l);
-            
+            let cleanText = csvText.replace(/"/g, "");
+
+            // Ako su \"\\n\" i \"\\r\\n\" ostali kao tekst, normalizuj
+            if (cleanText.includes("\\n") || cleanText.includes("\\r\\n")) {
+                cleanText = cleanText.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n");
+            }
+
+            const lines = cleanText.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+
             if (lines.length === 0) return [];
-            
+
             const headers = lines[0].split(/[,\t;]/).map(h => h.trim().toLowerCase());
             console.log("Zaglavlje:", headers);
             
@@ -748,7 +754,8 @@
                 ['B1987', '101010', '1', 'FAKTURA-02'],
             ];
             
-            let csv = sampleData.map(row => row.join('\t')).join('\\n');
+            let csv = sampleData.map(row => row.join('\t')).join('
+');
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -1694,6 +1701,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
