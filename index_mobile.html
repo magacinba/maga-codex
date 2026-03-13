@@ -430,13 +430,20 @@
         const MOBILE_MODE = true;
         function applyMobileHides() {
             if (!MOBILE_MODE) return;
-            const hideIds = ["boxesContainer", "reportMini", "totalDistanceDisplay", "timerDisplay"]; 
+            const hideIds = ["boxesContainer", "reportMini", "totalDistanceDisplay", "timerDisplay", "itemsTable"];
             hideIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = "none";
             });
             const rightCard = document.querySelector(".mainGrid > .card:last-child");
             if (rightCard) rightCard.style.display = "none";
+
+            const itemsTable = document.getElementById("itemsTable");
+            if (itemsTable) {
+                itemsTable.style.display = "none";
+                const wrap = itemsTable.closest("div");
+                if (wrap) wrap.style.display = "none";
+            }
         }
 
         window.addEventListener("load", applyMobileHides);
@@ -1584,6 +1591,11 @@
     </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
