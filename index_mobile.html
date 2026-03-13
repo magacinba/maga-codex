@@ -748,8 +748,7 @@
                 ['B1987', '101010', '1', 'FAKTURA-02'],
             ];
             
-            let csv = sampleData.map(row => row.join('\t')).join('
-');
+            let csv = sampleData.map(row => row.join('\t')).join('\\n');
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -1695,6 +1694,7 @@
     </script>
 </body>
 </html>
+
 
 
 
