@@ -590,6 +590,70 @@
         </div>
     </div>
 
+    <!-- Sekcija za izveštaje - dodati u index_mobile.html -->
+    <div id="reportsSection" style="display: none;">
+        <!-- Header sa periodom -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 20px; font-weight: 600;">📊 Izveštaj</h3>
+            <select id="reportPeriod" style="padding: 8px; border-radius: 20px; border: 1px solid var(--gray-light);">
+                <option value="today">Danas</option>
+                <option value="week">Nedelja</option>
+                <option value="month">Mesec</option>
+                <option value="all">Sve</option>
+            </select>
+        </div>
+        
+        <!-- KPI kartice -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <div class="stat-card">
+                <div class="stat-label">Ukupno artikala</div>
+                <div class="stat-value" id="reportTotalItems">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Uzeto</div>
+                <div class="stat-value" id="reportTakenItems">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Problem/Nema</div>
+                <div class="stat-value" id="reportProblemItems">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Prećeno</div>
+                <div class="stat-value" id="reportDistance">0 m</div>
+            </div>
+        </div>
+        
+        <!-- Vreme rada -->
+        <div class="report-section">
+            <div class="section-title">⏱️ Vreme rada</div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Ukupno vreme:</span>
+                <span class="value" id="reportTotalTime">00:00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Artikli po satu:</span>
+                <span class="value" id="reportItemsPerHour">0</span>
+            </div>
+        </div>
+        
+        <!-- Po kutijama -->
+        <div class="report-section">
+            <div class="section-title">📦 Po kutijama</div>
+            <div id="reportBoxes"></div>
+        </div>
+        
+        <!-- Problematične stavke -->
+        <div class="report-section">
+            <div class="section-title">⚠️ Problematične stavke</div>
+            <div id="reportProblems"></div>
+        </div>
+        
+        <!-- Dugme za izvoz -->
+        <button class="export-btn" onclick="exportReport()">
+            📤 Izvezi izveštaj (CSV)
+        </button>
+    </div>
+
     <!-- Donja navigacija -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showSection('picking')">
