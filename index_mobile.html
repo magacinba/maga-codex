@@ -1082,7 +1082,14 @@ window.addEventListener("load", applyMobileHides);
                 ` ${p.done_items || 0}/${p.total_items || 0} stavki`;
             document.getElementById("progressPercent").innerHTML = ` ${p.progress_percent || 0}%`;
 
-            if (!MOBILE_MODE) {\n                renderBoxes(data);\n                renderItemsTable(data);\n                renderMiniReport(data);\n                updateStats();\n            }\n\n            // Prikaz kutije za trenutnu lokaciju
+            if (!MOBILE_MODE) {
+                renderBoxes(data);
+                renderItemsTable(data);
+                renderMiniReport(data);
+                updateStats();
+            }
+
+            // Prikaz kutije za trenutnu lokaciju
             updateCurrentBoxInfo(data);
             
             // Auriraj novi panel
@@ -1596,6 +1603,8 @@ window.addEventListener("load", applyMobileHides);
     </script>
 </body>
 </html>
+
+
 
 
 
