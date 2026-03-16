@@ -1215,6 +1215,189 @@
             }, 1000);
         }
         
+
+        // ==================== IZVESTAJI ====================
+        function showReports() {
+            const picking = document.getElementById('pickingSection');
+            const reports = document.getElementById('reportsSection');
+            if (picking) picking.style.display = 'none';
+            if (reports) reports.style.display = 'block';
+            loadReportData();
+        }
+
+        function loadReportData() {
+            const period = document.getElementById('reportPeriod').value;
+            
+            // Uzmi podatke iz trenutne sesije ili iz localStorage
+            let data = waveData;
+            if (!data) {
+                const saved = localStorage.getItem('waveData');
+                if (saved) data = JSON.parse(saved);
+            }
+            
+            if (!data) {
+                document.getElementById('reportTotalItems').innerText = '0';
+                return;
+            }
+            
+            // Izracunaj statistiku
+            const stats = calculateStats(data);
+            
+            // Popuni KPI kartice
+            document.getElementById('reportTotalItems').innerText = stats.totalItems;
+            document.getElementById('reportTakenItems').innerText = stats.takenItems;
+            document.getElementById('reportProblemItems').innerText = stats.problemItems;
+            document.getElementById('reportDistance').innerText = stats.distance + ' m';
+            
+            // Vreme
+            document.getElementById('reportTotalTime').innerText = stats.totalTime;
+            document.getElementById('reportItemsPerHour').innerText = stats.itemsPerHour;
+            
+            // Po kutijama
+            renderBoxReport(stats.boxes);
+            
+            // Problematicke stavke
+            renderProblemItems(stats.problems);
+        }
+
+        function calculateStats(data) {
+            let totalItems = 0;
+            let takenItems = 0;
+            let problemItems = 0;
+            let problems = [];
+            let boxes = {};
+            
+            // Inicijalizuj kutije
+            for (let i = 1; i <= 6; i++) {
+                boxes[i] = { total: 0, taken: 0, problems: 0 };
+            }
+            
+            // Prodji kroz sve stavke
+            for (const loc in data.items_by_loc) {
+                data.items_by_loc[loc].forEach(item => {
+                    totalItems += item.qty_required;
+                    
+                    if (item.status === 'taken') {
+                        takenItems += item.qty_picked || item.qty_required;
+                        boxes[item.box].taken += item.qty_picked || item.qty_required;
+                    } else if (item.status === 'problem' || item.status === 'oos') {
+                        problemItems += (item.qty_required - (item.qty_picked || 0));
+                        problems.push({
+                            sku: item.sku,
+                            invoice: item.invoice,
+                            location: loc,
+                            box: item.box,
+                            missing: item.qty_required - (item.qty_picked || 0),
+                            note: item.note || 'N/A'
+                        });
+                        boxes[item.box].problems += item.qty_required - (item.qty_picked || 0);
+                    }
+                    
+                    boxes[item.box].total += item.qty_required;
+                });
+            }
+            
+            // Izracunaj vreme
+            const elapsed = waveStartTime ? Math.floor((Date.now() - waveStartTime) / 1000) : 0;
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const totalTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            
+            const itemsPerHour = elapsed > 0 ? Math.round((takenItems / elapsed) * 3600) : 0;
+            
+            return {
+                totalItems,
+                takenItems,
+                problemItems,
+                problems,
+                boxes,
+                distance: data.distance_m || 0,
+                totalTime,
+                itemsPerHour
+            };
+        }
+
+        function renderBoxReport(boxes) {
+            const container = document.getElementById('reportBoxes');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= 6; i++) {
+                const box = boxes[i];
+                const percent = box.total > 0 ? Math.round((box.taken / box.total) * 100) : 0;
+                const boxColor = getBoxColor(i);
+                
+                container.innerHTML += `
+                    <div class="box-progress-item">
+                        <div class="box-color" style="background: ${boxColor};"></div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Kutija ${i}</span>
+                                <span>${box.taken}/${box.total}</span>
+                            </div>
+                            <div class="progress-bar" style="margin: 4px 0;">
+                                <div class="progress-fill" style="width: ${percent}%; background: ${boxColor};"></div>
+                            </div>
+                            ${box.problems > 0 ? `<span style="color: var(--danger); font-size: 12px;">\u26A0\uFE0F Nedostaje: ${box.problems}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProblemItems(problems) {
+            const container = document.getElementById('reportProblems');
+            container.innerHTML = '';
+            
+            if (problems.length === 0) {
+                container.innerHTML = '<div style="color: var(--success); padding: 20px; text-align: center;">\u2705 Nema problematicnih stavki</div>';
+                return;
+            }
+            
+            problems.forEach(p => {
+                container.innerHTML += `
+                    <div class="problem-item">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>${p.sku}</strong>
+                            <span style="color: var(--danger);">Fali: ${p.missing}</span>
+                        </div>
+                        <div style="font-size: 13px; margin-top: 4px;">
+                            \uD83D\uDCCD ${p.location} | \uD83D\uDCE6 Kutija ${p.box} | \uD83D\uDCCB ${p.invoice}
+                        </div>
+                        ${p.note ? `<div style="font-size: 12px; color: var(--gray); margin-top: 4px;">\uD83D\uDCDD ${p.note}</div>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        function exportReport() {
+            const data = calculateStats(waveData);
+            
+            // Kreiraj CSV
+            let csv = 'Tip,SKU,Lokacija,Kutija,Faktura,Status,Kolicina,Napomena\n';
+            
+            for (const loc in waveData.items_by_loc) {
+                waveData.items_by_loc[loc].forEach(item => {
+                    csv += `${item.status},${item.sku},${loc},${item.box},${item.invoice},${item.status},${item.qty_picked || 0}/${item.qty_required},${item.note || ''}\n`;
+                });
+            }
+            
+            // Dodaj statistiku
+            csv += '\n\nSTATISTIKA\n';
+            csv += `Ukupno artikala,${data.totalItems}\n`;
+            csv += `Uzeto,${data.takenItems}\n`;
+            csv += `Problem,${data.problemItems}\n`;
+            csv += `Predjeno,${data.distance} m\n`;
+            csv += `Vreme,${data.totalTime}\n`;
+            csv += `Artikli/sat,${data.itemsPerHour}\n`;
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wave-report-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
         // ==================== NAVIGACIJA ====================
         function showSection(section) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -1224,7 +1407,7 @@
             if (section === 'boxes') {
                 alert('Pregled kutija - biće uskoro dostupno');
             } else if (section === 'reports') {
-                alert('Izveštaj - biće uskoro dostupno');
+                showReports();
             } else if (section === 'settings') {
                 alert('Podešavanja - biće uskoro dostupno');
             }
@@ -1260,3 +1443,4 @@
     </script>
 </body>
 </html>
+
