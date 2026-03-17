@@ -720,21 +720,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Sekcija za izveštaje - dodati u index_mobile.html -->
-    <div id="reportsSection" style="display: none;">
-        <!-- Header sa periodom -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-size: 20px; font-weight: 600;">📊 Izveštaj</h3>
-            <select id="reportPeriod" style="padding: 8px; border-radius: 20px; border: 1px solid var(--gray-light);">
-                <option value="today">Danas</option>
-                <option value="week">Nedelja</option>
-                <option value="month">Mesec</option>
-                <option value="all">Sve</option>
-            </select>
-        </div>
-        
-        <!-- KPI kartice -->
+<!-- KPI kartice -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
             <div class="stat-card">
                 <div class="stat-label">Ukupno artikala</div>
@@ -785,6 +771,11 @@
         </button>
     </div>
 
+
+    <!-- Sekcija za kutije -->
+    <div id="boxesSection" style="display: none;"></div>\r\n\r\n    <!-- Sekcija za izvestaje -->\r\n    <div id="reportsSection" style="display: none;"></div>
+<!-- Sekcija za pode�avanja -->
+    <div id="settingsSection" style="display: none;"></div>
     <!-- Donja navigacija -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showSection('picking')">
@@ -1608,6 +1599,9 @@ function showSection(section) {
     </script>
 </body>
 </html>
+
+
+
 
 
 
