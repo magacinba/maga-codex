@@ -1569,23 +1569,31 @@ function showSection(section) {
     }
 }
 
-// ==================== INIT ====================
-        // Proveri da li postoji sačuvana sesija
-        window.addEventListener('load', () => {
-            const savedSession = localStorage.getItem('session_id');
-            const savedWave = localStorage.getItem('waveData');
-            
-            if (savedSession && savedWave) {
-                if (confirm('Nastavi prethodnu sesiju?')) {
-                    SESSION_ID = savedSession;
-                    waveData = JSON.parse(savedWave);
-                    document.getElementById('scanSection').style.display = 'none';
-                    document.getElementById('pickingSection').style.display = 'block';
-                    renderWave(waveData);
-                    startTimer();
-                }
-            }
-        });
+// ==================== INIT - OVDE DODAJ KOD ====================
+window.addEventListener('load', () => {
+    // Aktiviraj picking sekciju
+    const activeItem = document.querySelector('.nav-item.active');
+    if (activeItem) {
+        activeItem.classList.remove('active');
+    }
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    showSection('picking');
+    
+    // Proveri da li postoji sacuvana sesija
+    const savedSession = localStorage.getItem('session_id');
+    const savedWave = localStorage.getItem('waveData');
+    
+    if (savedSession && savedWave) {
+        if (confirm('Nastavi prethodnu sesiju?')) {
+            SESSION_ID = savedSession;
+            waveData = JSON.parse(savedWave);
+            document.getElementById('scanSection').style.display = 'none';
+            document.getElementById('pickingSection').style.display = 'block';
+            renderWave(waveData);
+            startTimer();
+        }
+    }
+});
         
         // ==================== EXPORT ====================
         window.removeInvoice = removeInvoice;
@@ -1599,6 +1607,7 @@ function showSection(section) {
     </script>
 </body>
 </html>
+
 
 
 
