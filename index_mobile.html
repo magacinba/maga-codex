@@ -212,6 +212,62 @@
             outline: none;
             border-color: var(--primary);
         }
+
+        /* Donja navigacija - poboljsano */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 2px solid var(--gray-light);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-around;
+            max-width: 480px;
+            margin: 0 auto;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--gray);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            flex: 1;
+            max-width: 80px;
+        }
+
+        .nav-item:active {
+            background: var(--gray-light);
+            transform: scale(0.95);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-item.active .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            transition: transform 0.2s ease;
+        }
+
+        /* Dodati padding na dnu za sadrzaj da ne bude prekriven navigacijom */
+        .mobile-container {
+            padding-bottom: 90px;
+        }
         
         .scan-button {
             width: 100%;
@@ -1403,13 +1459,17 @@
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
-            // Za sada samo prikazujemo picking
-            if (section === 'boxes') {
-                alert('Pregled kutija - biće uskoro dostupno');
+            // Sakrij sve sekcije
+            document.getElementById('scanSection').style.display = 'none';
+            document.getElementById('pickingSection').style.display = 'none';
+            document.getElementById('reportsSection').style.display = 'none';
+            
+            // Prikazi izabranu
+            if (section === 'picking') {
+                document.getElementById('pickingSection').style.display = 'block';
             } else if (section === 'reports') {
-                showReports();
-            } else if (section === 'settings') {
-                alert('Podešavanja - biće uskoro dostupno');
+                document.getElementById('reportsSection').style.display = 'block';
+                loadReportData();
             }
         }
         
@@ -1443,4 +1503,7 @@
     </script>
 </body>
 </html>
+
+
+
 
