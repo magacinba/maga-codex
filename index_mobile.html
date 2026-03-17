@@ -1509,27 +1509,9 @@ function exportReport() {
     a.href = url;
     a.download = `wave-report-${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
-});
-            }
-            
-            // Dodaj statistiku
-            csv += '\n\nSTATISTIKA\n';
-            csv += `Ukupno artikala,${data.totalItems}\n`;
-            csv += `Uzeto,${data.takenItems}\n`;
-            csv += `Problem,${data.problemItems}\n`;
-            csv += `Predjeno,${data.distance} m\n`;
-            csv += `Vreme,${data.totalTime}\n`;
-            csv += `Artikli/sat,${data.itemsPerHour}\n`;
-            
-            // Download
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `wave-report-${new Date().toISOString().slice(0,10)}.csv`;
-            a.click();
-        }
-        // ==================== NAVIGACIJA ====================
+}
+
+// ==================== NAVIGACIJA ====================
 function showSection(section) {
     // Ako nema eventa (pozvano direktno)
     if (event) {
@@ -1607,6 +1589,9 @@ window.addEventListener('load', () => {
     </script>
 </body>
 </html>
+
+
+
 
 
 
