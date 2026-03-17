@@ -1513,40 +1513,44 @@ function exportReport() {
 
 // ==================== NAVIGACIJA ====================
 function showSection(section) {
-    // Ako nema eventa (pozvano direktno)
-    if (event) {
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    // Proveri da li je event definisan (pozvano klikom ili programski)
+    if (typeof event !== 'undefined' && event) {
+        // Ukloni active klasu sa svih navigacionih stavki
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        // Dodaj active klasu na kliknutu stavku
+        if (event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
     }
     
     // Sakrij sve sekcije
-    document.getElementById('scanSection').style.display = 'none';
-    document.getElementById('pickingSection').style.display = 'none';
-    document.getElementById('boxesSection').style.display = 'none';
-    document.getElementById('reportsSection').style.display = 'none';
-    document.getElementById('settingsSection').style.display = 'none';
+    const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
     
-    // Prikaži izabranu sekciju
+    // Prikazi izabranu sekciju
+    const selectedSection = document.getElementById(section + 'Section');
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+    }
+    
+    // Ucitaj podatke za pojedine sekcije
     switch(section) {
         case 'picking':
-            document.getElementById('pickingSection').style.display = 'block';
-            // Ako je wave pokrenut, osveži podatke
             if (SESSION_ID) refreshWave();
             break;
-            
         case 'boxes':
-            document.getElementById('boxesSection').style.display = 'block';
-            loadBoxesSection();
+            if (typeof loadBoxesSection === 'function') loadBoxesSection();
             break;
-            
         case 'reports':
-            document.getElementById('reportsSection').style.display = 'block';
-            loadReportData();
+            if (typeof loadReportData === 'function') loadReportData();
             break;
-            
         case 'settings':
-            document.getElementById('settingsSection').style.display = 'block';
-            loadSettings();
+            if (typeof loadSettings === 'function') loadSettings();
             break;
     }
 }
@@ -1589,6 +1593,7 @@ window.addEventListener('load', () => {
     </script>
 </body>
 </html>
+
 
 
 
