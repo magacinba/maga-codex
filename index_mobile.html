@@ -1281,160 +1281,244 @@
             loadReportData();
         }
 
-        function loadReportData() {
-            const period = document.getElementById('reportPeriod').value;
-            
-            // Uzmi podatke iz trenutne sesije ili iz localStorage
-            let data = waveData;
-            if (!data) {
-                const saved = localStorage.getItem('waveData');
-                if (saved) data = JSON.parse(saved);
+        // ==================== SEKCIJA ZA KUTIJE ====================
+function loadBoxesSection() {
+    const container = document.getElementById('boxesSection');
+    if (!container) return;
+    
+    if (!waveData && !SESSION_ID) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px;">\uD83D\uDCE6 Pokreni picking prvo</div>';
+        return;
+    }
+    
+    let html = '<div style="padding: 16px;">';
+    html += '<h3 style="margin-bottom: 20px;">\uD83D\uDCE6 Kutije na kolicima</h3>';
+    
+    for (let i = 1; i <= 6; i++) {
+        let invoice = null;
+        let boxProgress = { total: 0, done: 0 };
+        
+        // Pronadji fakturu za ovu kutiju
+        for (const [inv, boxNum] of Object.entries(waveData?.box_assignment || {})) {
+            if (boxNum === i) {
+                invoice = inv;
+                break;
             }
-            
-            if (!data) {
-                document.getElementById('reportTotalItems').innerText = '0';
-                return;
-            }
-            
-            // Izracunaj statistiku
-            const stats = calculateStats(data);
-            
-            // Popuni KPI kartice
-            document.getElementById('reportTotalItems').innerText = stats.totalItems;
-            document.getElementById('reportTakenItems').innerText = stats.takenItems;
-            document.getElementById('reportProblemItems').innerText = stats.problemItems;
-            document.getElementById('reportDistance').innerText = stats.distance + ' m';
-            
-            // Vreme
-            document.getElementById('reportTotalTime').innerText = stats.totalTime;
-            document.getElementById('reportItemsPerHour').innerText = stats.itemsPerHour;
-            
-            // Po kutijama
-            renderBoxReport(stats.boxes);
-            
-            // Problematicke stavke
-            renderProblemItems(stats.problems);
         }
-
-        function calculateStats(data) {
-            let totalItems = 0;
-            let takenItems = 0;
-            let problemItems = 0;
-            let problems = [];
-            let boxes = {};
-            
-            // Inicijalizuj kutije
-            for (let i = 1; i <= 6; i++) {
-                boxes[i] = { total: 0, taken: 0, problems: 0 };
-            }
-            
-            // Prodji kroz sve stavke
-            for (const loc in data.items_by_loc) {
-                data.items_by_loc[loc].forEach(item => {
-                    totalItems += item.qty_required;
-                    
-                    if (item.status === 'taken') {
-                        takenItems += item.qty_picked || item.qty_required;
-                        boxes[item.box].taken += item.qty_picked || item.qty_required;
-                    } else if (item.status === 'problem' || item.status === 'oos') {
-                        problemItems += (item.qty_required - (item.qty_picked || 0));
-                        problems.push({
-                            sku: item.sku,
-                            invoice: item.invoice,
-                            location: loc,
-                            box: item.box,
-                            missing: item.qty_required - (item.qty_picked || 0),
-                            note: item.note || 'N/A'
-                        });
-                        boxes[item.box].problems += item.qty_required - (item.qty_picked || 0);
-                    }
-                    
-                    boxes[item.box].total += item.qty_required;
-                });
-            }
-            
-            // Izracunaj vreme
-            const elapsed = waveStartTime ? Math.floor((Date.now() - waveStartTime) / 1000) : 0;
-            const hours = Math.floor(elapsed / 3600);
-            const minutes = Math.floor((elapsed % 3600) / 60);
-            const totalTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            
-            const itemsPerHour = elapsed > 0 ? Math.round((takenItems / elapsed) * 3600) : 0;
-            
-            return {
-                totalItems,
-                takenItems,
-                problemItems,
-                problems,
-                boxes,
-                distance: data.distance_m || 0,
-                totalTime,
-                itemsPerHour
-            };
+        
+        if (invoice && waveData?.progress?.boxes[invoice]) {
+            boxProgress = waveData.progress.boxes[invoice];
         }
-
-        function renderBoxReport(boxes) {
-            const container = document.getElementById('reportBoxes');
-            container.innerHTML = '';
-            
-            for (let i = 1; i <= 6; i++) {
-                const box = boxes[i];
-                const percent = box.total > 0 ? Math.round((box.taken / box.total) * 100) : 0;
-                const boxColor = getBoxColor(i);
-                
-                container.innerHTML += `
-                    <div class="box-progress-item">
-                        <div class="box-color" style="background: ${boxColor};"></div>
-                        <div style="flex: 1;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span>Kutija ${i}</span>
-                                <span>${box.taken}/${box.total}</span>
-                            </div>
-                            <div class="progress-bar" style="margin: 4px 0;">
-                                <div class="progress-fill" style="width: ${percent}%; background: ${boxColor};"></div>
-                            </div>
-                            ${box.problems > 0 ? `<span style="color: var(--danger); font-size: 12px;">\u26A0\uFE0F Nedostaje: ${box.problems}</span>` : ''}
+        
+        const percent = boxProgress.total > 0 ? Math.round((boxProgress.done / boxProgress.total) * 100) : 0;
+        const boxColor = getBoxColor(i);
+        
+        html += `
+            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 2px solid ${boxColor};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 18px; font-weight: 700; color: ${boxColor};">Kutija ${i}</span>
+                    ${invoice ? `<span style="background: ${boxColor}; color: white; padding: 4px 12px; border-radius: 20px;">${invoice}</span>` : '<span style="color: var(--gray);">Prazna</span>'}
+                </div>
+                ${invoice ? `
+                    <div style="margin: 10px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Napredak:</span>
+                            <span>${boxProgress.done}/${boxProgress.total} (${percent}%)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percent}%; background: ${boxColor};"></div>
                         </div>
                     </div>
-                `;
-            }
-        }
+                    <button class="scan-button" style="margin-top: 10px;" onclick="showBoxDetails(${i})">
+                        \uD83D\uDCCB Detalji kutije
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
 
-        function renderProblemItems(problems) {
-            const container = document.getElementById('reportProblems');
-            container.innerHTML = '';
+// ==================== SEKCIJA ZA PODESAVANJA ====================
+function loadSettings() {
+    const container = document.getElementById('settingsSection');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div style="padding: 16px;">
+            <h3 style="margin-bottom: 20px;">\u2699\uFE0F Podesavanja</h3>
             
-            if (problems.length === 0) {
-                container.innerHTML = '<div style="color: var(--success); padding: 20px; text-align: center;">\u2705 Nema problematicnih stavki</div>';
-                return;
-            }
+            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                <div style="font-weight: 600; margin-bottom: 12px;">API Konfiguracija</div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px;">API URL:</label>
+                    <input type="text" id="apiUrl" value="${API}" style="width: 100%; padding: 10px; border: 1px solid var(--gray-light); border-radius: 8px;">
+                </div>
+                <button class="scan-button" onclick="saveApiUrl()">Sacuvaj</button>
+            </div>
             
-            problems.forEach(p => {
-                container.innerHTML += `
-                    <div class="problem-item">
-                        <div style="display: flex; justify-content: space-between;">
-                            <strong>${p.sku}</strong>
-                            <span style="color: var(--danger);">Fali: ${p.missing}</span>
-                        </div>
-                        <div style="font-size: 13px; margin-top: 4px;">
-                            \uD83D\uDCCD ${p.location} | \uD83D\uDCE6 Kutija ${p.box} | \uD83D\uDCCB ${p.invoice}
-                        </div>
-                        ${p.note ? `<div style="font-size: 12px; color: var(--gray); margin-top: 4px;">\uD83D\uDCDD ${p.note}</div>` : ''}
-                    </div>
-                `;
-            });
-        }
+            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                <div style="font-weight: 600; margin-bottom: 12px;">Rezim rada</div>
+                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <input type="radio" name="mode" value="optimal" checked> Optimalno (najkraca putanja)
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <input type="radio" name="mode" value="ortools"> OR-Tools (sporije, tacnije)
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <input type="radio" name="mode" value="sector"> Po sektorima
+                </label>
+            </div>
+            
+            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                <div style="font-weight: 600; margin-bottom: 12px;">Podaci</div>
+                <button class="scan-button" style="background: var(--warning);" onclick="clearLocalData()">
+                    \uD83D\uDDD1\uFE0F Obrisi lokalne podatke
+                </button>
+            </div>
+            
+            <div style="background: white; border-radius: 16px; padding: 16px;">
+                <div style="font-weight: 600; margin-bottom: 12px;">Info</div>
+                <div>Verzija: 1.0.0</div>
+                <div>Sesija: ${SESSION_ID || 'Nema aktivne sesije'}</div>
+            </div>
+        </div>
+    `;
+}
 
-        function exportReport() {
-            const data = calculateStats(waveData);
+// ==================== POMOCNE FUNKCIJE ZA PODESAVANJA ====================
+function saveApiUrl() {
+    const newUrl = document.getElementById('apiUrl').value;
+    localStorage.setItem('api_url', newUrl);
+    alert('API URL sacuvan. Osvezi stranicu da bi primenio promene.');
+}
+
+function clearLocalData() {
+    if (confirm('Obrisati sve lokalno sacuvane podatke?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        alert('Podaci obrisani. Osvezi stranicu.');
+    }
+}
+
+// ==================== SEKCIJA ZA IZVESTAJE ====================
+function loadReportData() {
+    const container = document.getElementById('reportsSection');
+    if (!container) return;
+    
+    if (!waveData) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px;">\uD83D\uDCCA Nema podataka za izvestaj</div>';
+        return;
+    }
+    
+    const stats = calculateStats(waveData);
+    
+    container.innerHTML = `
+        <div style="padding: 16px;">
+            <h3 style="margin-bottom: 20px;">\uD83D\uDCCA Izvestaj</h3>
             
-            // Kreiraj CSV
-            let csv = 'Tip,SKU,Lokacija,Kutija,Faktura,Status,Kolicina,Napomena\n';
+            <!-- KPI kartice -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-label">Ukupno</div>
+                    <div class="stat-value">${stats.totalItems}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Uzeto</div>
+                    <div class="stat-value">${stats.takenItems}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Problem</div>
+                    <div class="stat-value">${stats.problemItems}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Predjeno</div>
+                    <div class="stat-value">${stats.distance} m</div>
+                </div>
+            </div>
             
-            for (const loc in waveData.items_by_loc) {
-                waveData.items_by_loc[loc].forEach(item => {
-                    csv += `${item.status},${item.sku},${loc},${item.box},${item.invoice},${item.status},${item.qty_picked || 0}/${item.qty_required},${item.note || ''}\n`;
-                });
+            <!-- Vreme -->
+            <div class="report-section">
+                <div class="section-title">\u23F1\uFE0F Vreme</div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Ukupno:</span>
+                    <span class="value">${stats.totalTime}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Artikli/sat:</span>
+                    <span class="value">${stats.itemsPerHour}</span>
+                </div>
+            </div>
+            
+            <button class="export-btn" onclick="exportReport()">
+                \uD83D\uDCE4 Izvezi CSV
+            </button>
+        </div>
+    `;
+}
+
+// ==================== STATISTIKA ====================
+function calculateStats(data) {
+    let totalItems = 0;
+    let takenItems = 0;
+    let problemItems = 0;
+    
+    for (const loc in data.items_by_loc) {
+        waveData.items_by_loc[loc].forEach(item => {
+            totalItems += item.qty_required;
+            if (item.status === 'taken') {
+                takenItems += item.qty_picked || item.qty_required;
+            } else if (item.status === 'problem' || item.status === 'oos') {
+                problemItems += (item.qty_required - (item.qty_picked || 0));
+            }
+        });
+    }
+    
+    const elapsed = waveStartTime ? Math.floor((Date.now() - waveStartTime) / 1000) : 0;
+    const hours = Math.floor(elapsed / 3600);
+    const minutes = Math.floor((elapsed % 3600) / 60);
+    const totalTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    
+    const itemsPerHour = elapsed > 0 ? Math.round((takenItems / elapsed) * 3600) : 0;
+    
+    return {
+        totalItems,
+        takenItems,
+        problemItems,
+        distance: data.distance_m || 0,
+        totalTime,
+        itemsPerHour
+    };
+}
+
+function exportReport() {
+    if (!waveData) return;
+    
+    const stats = calculateStats(waveData);
+    let csv = 'Lokacija,SKU,Kutija,Faktura,Status,Trazeno,Uzeto,Napomena\n';
+    
+    for (const loc in waveData.items_by_loc) {
+        waveData.items_by_loc[loc].forEach(item => {
+            csv += `${loc},${item.sku},${item.box},${item.invoice},${item.status},${item.qty_required},${item.qty_picked || 0},${item.note || ''}\n`;
+        });
+    }
+    
+    csv += '\nSTATISTIKA\n';
+    csv += `Ukupno,${stats.totalItems}\n`;
+    csv += `Uzeto,${stats.takenItems}\n`;
+    csv += `Problem,${stats.problemItems}\n`;
+    csv += `Predjeno,${stats.distance} m\n`;
+    csv += `Vreme,${stats.totalTime}\n`;
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wave-report-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+});
             }
             
             // Dodaj statistiku
@@ -1455,25 +1539,46 @@
             a.click();
         }
         // ==================== NAVIGACIJA ====================
-        function showSection(section) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+function showSection(section) {
+    // Ako nema eventa (pozvano direktno)
+    if (event) {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+    
+    // Sakrij sve sekcije
+    document.getElementById('scanSection').style.display = 'none';
+    document.getElementById('pickingSection').style.display = 'none';
+    document.getElementById('boxesSection').style.display = 'none';
+    document.getElementById('reportsSection').style.display = 'none';
+    document.getElementById('settingsSection').style.display = 'none';
+    
+    // Prikaži izabranu sekciju
+    switch(section) {
+        case 'picking':
+            document.getElementById('pickingSection').style.display = 'block';
+            // Ako je wave pokrenut, osveži podatke
+            if (SESSION_ID) refreshWave();
+            break;
             
-            // Sakrij sve sekcije
-            document.getElementById('scanSection').style.display = 'none';
-            document.getElementById('pickingSection').style.display = 'none';
-            document.getElementById('reportsSection').style.display = 'none';
+        case 'boxes':
+            document.getElementById('boxesSection').style.display = 'block';
+            loadBoxesSection();
+            break;
             
-            // Prikazi izabranu
-            if (section === 'picking') {
-                document.getElementById('pickingSection').style.display = 'block';
-            } else if (section === 'reports') {
-                document.getElementById('reportsSection').style.display = 'block';
-                loadReportData();
-            }
-        }
-        
-        // ==================== INIT ====================
+        case 'reports':
+            document.getElementById('reportsSection').style.display = 'block';
+            loadReportData();
+            break;
+            
+        case 'settings':
+            document.getElementById('settingsSection').style.display = 'block';
+            loadSettings();
+            break;
+    }
+}
+
+// ==================== INIT ====================
         // Proveri da li postoji saÄuvana sesija
         window.addEventListener('load', () => {
             const savedSession = localStorage.getItem('session_id');
@@ -1503,6 +1608,10 @@
     </script>
 </body>
 </html>
+
+
+
+
 
 
 
