@@ -54,6 +54,10 @@ self.addEventListener('fetch', event => {
           if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
+          // Dodatna provera (samo GET sme u cache)
+          if (event.request.method !== 'GET') {
+            return response;
+          }
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, responseToCache).catch(err => {
