@@ -1555,29 +1555,39 @@ function showSection(section) {
     }
 }
 
-// ==================== INIT - OVDE DODAJ KOD ====================
+// ==================== INIT ====================
 window.addEventListener('load', () => {
-    // Aktiviraj picking sekciju
-    const activeItem = document.querySelector('.nav-item.active');
-    if (activeItem) {
-        activeItem.classList.remove('active');
+    console.log('Stranica ucitana');
+    
+    // Aktiviraj prvu navigacionu stavku
+    const firstNavItem = document.querySelector('.nav-item');
+    if (firstNavItem) {
+        // Ukloni active sa svih
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        // Dodaj na prvu
+        firstNavItem.classList.add('active');
+        // Pozovi showSection sa prvom sekcijom
+        showSection('picking');
     }
-    document.querySelectorAll('.nav-item')[0].classList.add('active');
-    showSection('picking');
     
     // Proveri da li postoji sacuvana sesija
     const savedSession = localStorage.getItem('session_id');
     const savedWave = localStorage.getItem('waveData');
     
     if (savedSession && savedWave) {
-        if (confirm('Nastavi prethodnu sesiju?')) {
-            SESSION_ID = savedSession;
-            waveData = JSON.parse(savedWave);
-            document.getElementById('scanSection').style.display = 'none';
-            document.getElementById('pickingSection').style.display = 'block';
-            renderWave(waveData);
-            startTimer();
-        }
+        // Sacekaj malo da se sve ucita
+        setTimeout(() => {
+            if (confirm('Nastavi prethodnu sesiju?')) {
+                SESSION_ID = savedSession;
+                waveData = JSON.parse(savedWave);
+                document.getElementById('scanSection').style.display = 'none';
+                document.getElementById('pickingSection').style.display = 'block';
+                renderWave(waveData);
+                startTimer();
+            }
+        }, 500);
     }
 });
         
@@ -1593,6 +1603,7 @@ window.addEventListener('load', () => {
     </script>
 </body>
 </html>
+
 
 
 
