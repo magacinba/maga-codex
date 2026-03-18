@@ -2,8 +2,9 @@
 <html lang="sr">
 <head>
     <meta charset="UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wave Picking Mobile ï 6 kutija</title>
+    <title>Wave Picking Mobile ‚Ä¢ 6 kutija</title>
     
     <!-- PWA Meta tagovi -->
     <link rel="manifest" href="manifest.json">
@@ -12,7 +13,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-title" content="Wave Picking">
-    <!-- Ikonicu za tab - da ne traûi favicon.ico -->
+    <!-- Ikonicu za tab - da ne tra≈æi favicon.ico -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='90' x='50' font-size='90' text-anchor='middle'>??</text></svg>">
     
     <!-- SheetJS za Excel import -->
@@ -621,7 +622,7 @@
             <!-- Excel Upload -->
             <div class="upload-area">
                 <div style="font-size: 32px; margin-bottom: 8px;">??</div>
-                <div style="font-weight: 600; margin-bottom: 8px;">UËitaj Excel fajl</div>
+                <div style="font-weight: 600; margin-bottom: 8px;">Uƒçitaj Excel fajl</div>
                 <input type="file" id="excelUpload" accept=".xlsx,.xls,.csv" style="display:none">
                 <button class="upload-button" onclick="document.getElementById('excelUpload').click()">
                     Izaberi fajl
@@ -630,11 +631,11 @@
             </div>
             
             <button class="scan-button" style="background: var(--success);" onclick="startWave()" id="startWaveBtn" disabled>
-                ?? KRE∆EMO SA PICKINGOM
+                ?? KREƒÜEMO SA PICKINGOM
             </button>
             
             <button class="scan-button" style="background: var(--gray);" onclick="clearScanned()">
-                Obriöi sve
+                Obri≈°i sve
             </button>
         </div>
 
@@ -650,11 +651,11 @@
             <!-- Info o artiklu -->
             <div class="item-card">
                 <div class="item-row">
-                    <span class="item-label">äifra artikla</span>
+                    <span class="item-label">≈†ifra artikla</span>
                     <span class="item-value" id="curSku">-</span>
                 </div>
                 <div class="item-row">
-                    <span class="item-label">Potrebna koliËina</span>
+                    <span class="item-label">Potrebna koliƒçina</span>
                     <span class="item-value" style="color: var(--success);" id="curQty">-</span>
                 </div>
                 <div class="item-row">
@@ -730,24 +731,26 @@
         </div>
         <div class="nav-item" onclick="showSection('reports')">
             <span class="nav-icon">??</span>
-            <span>Izveötaj</span>
+            <span>Izve≈°taj</span>
         </div>
         <div class="nav-item" onclick="showSection('settings')">
             <span class="nav-icon">??</span>
-            <span>Podeöavanja</span>
+            <span>Pode≈°avanja</span>
         </div>
     </div>
 
-    <!-- Service Worker registracija -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker registrovan'))
-                    .catch(err => console.log('Service Worker greöka:', err));
-            });
-        }
-    </script>
+    <!-- SERVICE WORKER - PRIVREMENO ISKLJUƒåEN -->
+	<!--
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('sw.js')
+					.then(reg => console.log('Service Worker registrovan'))
+					.catch(err => console.log('Service Worker gre≈°ka:', err));
+		});
+    }
+	</script>
+	-->
 
     <script>
         // ==================== KONFIGURACIJA ====================
@@ -765,15 +768,15 @@
             const colors = {
                 1: '#3b82f6', // plava
                 2: '#22c55e', // zelena
-                3: '#eab308', // ûuta
-                4: '#f97316', // narandûasta
+                3: '#eab308', // ≈æuta
+                4: '#f97316', // narand≈æasta
                 5: '#ef4444', // crvena
-                6: '#a855f7'  // ljubiËasta
+                6: '#a855f7'  // ljubiƒçasta
             };
             return colors[box] || '#64748b';
         }
         
-        // ==================== POMO∆NE FUNKCIJE ====================
+        // ==================== POMOƒÜNE FUNKCIJE ====================
         function setLoading(show) {
             document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
@@ -799,7 +802,7 @@
                         this.value = '';
                         document.getElementById('startWaveBtn').disabled = false;
                     } else {
-                        alert('?? Faktura veÊ skenirana!');
+                        alert('?? Faktura veƒá skenirana!');
                         this.value = '';
                     }
                 }
@@ -808,7 +811,7 @@
         
         function simulateScan() {
             if ('BarcodeDetector' in window) {
-                alert('Kamera nije dostupna u ovoj verziji. Koristite ruËni unos.');
+                alert('Kamera nije dostupna u ovoj verziji. Koristite ruƒçni unos.');
             } else {
                 const fakeBarcode = prompt('Unesite barkod fakture:');
                 if (fakeBarcode) {
@@ -856,7 +859,7 @@
             if (!file) return;
             
             setLoading(true);
-            document.getElementById('uploadStatus').innerText = 'UËitavanje...';
+            document.getElementById('uploadStatus').innerText = 'Uƒçitavanje...';
             
             try {
                 let data = [];
@@ -877,21 +880,21 @@
                 const invoices = [...new Set(data.map(row => row.faktura))];
                 
                 if (invoices.length > 6) {
-                    alert(`Previöe faktura! Maksimalno 6, ima ${invoices.length}`);
+                    alert(`Previ≈°e faktura! Maksimalno 6, ima ${invoices.length}`);
                     return;
                 }
                 
                 scannedInvoices = invoices;
                 updateScannedList();
-                document.getElementById('uploadStatus').innerHTML = `? UËitano ${data.length} stavki`;
+                document.getElementById('uploadStatus').innerHTML = `? Uƒçitano ${data.length} stavki`;
                 document.getElementById('startWaveBtn').disabled = false;
                 
-                // SaËuvaj u localStorage za offline
+                // Saƒçuvaj u localStorage za offline
                 localStorage.setItem('uploadedItems', JSON.stringify(data));
                 localStorage.setItem('scannedInvoices', JSON.stringify(invoices));
                 
             } catch (err) {
-                document.getElementById('uploadStatus').innerHTML = `? Greöka: ${err.message}`;
+                document.getElementById('uploadStatus').innerHTML = `? Gre≈°ka: ${err.message}`;
             } finally {
                 setLoading(false);
             }
@@ -914,7 +917,7 @@
             const kolicinaIdx = headers.findIndex(h => h.includes('kolicina') || h.includes('qty') || h.includes('quantity'));
             
             if (fakturaIdx === -1 || lokacijaIdx === -1 || skuIdx === -1 || kolicinaIdx === -1) {
-                throw new Error("Fajl mora sadrûati kolone: broj fak, lokacija, sku, kolicina");
+                throw new Error("Fajl mora sadr≈æati kolone: broj fak, lokacija, sku, kolicina");
             }
             
             const result = [];
@@ -952,7 +955,7 @@
                 if (saved) {
                     uploadedItems = JSON.parse(saved);
                 } else {
-                    alert('Nema uËitanih stavki!');
+                    alert('Nema uƒçitanih stavki!');
                     return;
                 }
             }
@@ -977,7 +980,7 @@
                 
                 const data = await res.json();
                 
-                if (!res.ok) throw new Error(data.detail || 'Greöka pri startovanju');
+                if (!res.ok) throw new Error(data.detail || 'Gre≈°ka pri startovanju');
                 
                 SESSION_ID = data.session_id;
                 waveData = data;
@@ -993,9 +996,9 @@
                 
             } catch (err) {
                 if (!navigator.onLine) {
-                    alert('Offline naËin rada nije joö implementiran.');
+                    alert('Offline naƒçin rada nije jo≈° implementiran.');
                 } else {
-                    alert('Greöka: ' + err.message);
+                    alert('Gre≈°ka: ' + err.message);
                 }
             } finally {
                 setLoading(false);
@@ -1007,7 +1010,7 @@
             waveData = data;
             
             document.getElementById('curLocBig').textContent = data.current_location || 'KRAJ';
-            document.getElementById('curSkuBig').textContent = data.current_location ? '??' : '?? ZAVRäENO';
+            document.getElementById('curSkuBig').textContent = data.current_location ? '??' : '?? ZAVR≈†ENO';
             
             updateCurrentItem();
             updateLocationItems();
@@ -1050,7 +1053,7 @@
             
             items.forEach(item => {
                 const statusClass = item.status === 'taken' ? 'status-taken' : 'status-pending';
-                const statusText = item.status === 'taken' ? '? Uzeto' : '? »eka';
+                const statusText = item.status === 'taken' ? '? Uzeto' : '? ƒåeka';
                 
                 const div = document.createElement('div');
                 div.className = 'item-entry';
@@ -1139,7 +1142,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert('Greöka: ' + err.message);
+                alert('Gre≈°ka: ' + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1155,7 +1158,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert('Greöka: ' + err.message);
+                alert('Gre≈°ka: ' + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1171,7 +1174,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert('Greöka: ' + err.message);
+                alert('Gre≈°ka: ' + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1186,7 +1189,7 @@
                 renderWave(data);
                 localStorage.setItem('waveData', JSON.stringify(data));
             } catch (err) {
-                console.log('Offline - koristim keöirane podatke');
+                console.log('Offline - koristim ke≈°irane podatke');
                 const cached = localStorage.getItem('waveData');
                 if (cached) renderWave(JSON.parse(cached));
             }
@@ -1283,7 +1286,7 @@
             
             container.innerHTML = `
                 <div style="padding: 16px;">
-                    <h3 style="margin-bottom: 20px;">?? Podeöavanja</h3>
+                    <h3 style="margin-bottom: 20px;">?? Pode≈°avanja</h3>
                     
                     <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
                         <div style="font-weight: 600; margin-bottom: 12px;">API Konfiguracija</div>
@@ -1291,16 +1294,16 @@
                             <label style="display: block; margin-bottom: 5px;">API URL:</label>
                             <input type="text" id="apiUrl" value="${API}" style="width: 100%; padding: 10px; border: 1px solid var(--gray-light); border-radius: 8px;">
                         </div>
-                        <button class="scan-button" onclick="saveApiUrl()">SaËuvaj</button>
+                        <button class="scan-button" onclick="saveApiUrl()">Saƒçuvaj</button>
                     </div>
                     
                     <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
-                        <div style="font-weight: 600; margin-bottom: 12px;">Reûim rada</div>
+                        <div style="font-weight: 600; margin-bottom: 12px;">Re≈æim rada</div>
                         <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <input type="radio" name="mode" value="optimal" checked> Optimalno (najkraÊa putanja)
+                            <input type="radio" name="mode" value="optimal" checked> Optimalno (najkraƒáa putanja)
                         </label>
                         <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <input type="radio" name="mode" value="ortools"> OR-Tools (sporije, taËnije)
+                            <input type="radio" name="mode" value="ortools"> OR-Tools (sporije, taƒçnije)
                         </label>
                         <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                             <input type="radio" name="mode" value="sector"> Po sektorima
@@ -1310,7 +1313,7 @@
                     <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
                         <div style="font-weight: 600; margin-bottom: 12px;">Podaci</div>
                         <button class="scan-button" style="background: var(--warning);" onclick="clearLocalData()">
-                            ??? Obriöi lokalne podatke
+                            ??? Obri≈°i lokalne podatke
                         </button>
                     </div>
                     
@@ -1323,28 +1326,28 @@
             `;
         }
 
-        // ==================== POMO∆NE FUNKCIJE ZA PODEäAVANJA ====================
+        // ==================== POMOƒÜNE FUNKCIJE ZA PODE≈†AVANJA ====================
         function saveApiUrl() {
             const newUrl = document.getElementById('apiUrl').value;
             localStorage.setItem('api_url', newUrl);
-            alert('API URL saËuvan. Osveûi stranicu da bi primenio promene.');
+            alert('API URL saƒçuvan. Osve≈æi stranicu da bi primenio promene.');
         }
 
         function clearLocalData() {
-            if (confirm('Obrisati sve lokalno saËuvane podatke?')) {
+            if (confirm('Obrisati sve lokalno saƒçuvane podatke?')) {
                 localStorage.clear();
                 sessionStorage.clear();
-                alert('Podaci obrisani. Osveûi stranicu.');
+                alert('Podaci obrisani. Osve≈æi stranicu.');
             }
         }
 
-        // ==================== SEKCIJA ZA IZVEäTAJE ====================
+        // ==================== SEKCIJA ZA IZVE≈†TAJE ====================
         function loadReportData() {
             const container = document.getElementById('reportsSection');
             if (!container) return;
             
             if (!waveData) {
-                container.innerHTML = '<div style="text-align: center; padding: 40px;">?? Nema podataka za izveötaj</div>';
+                container.innerHTML = '<div style="text-align: center; padding: 40px;">?? Nema podataka za izve≈°taj</div>';
                 return;
             }
             
@@ -1352,7 +1355,7 @@
             
             container.innerHTML = `
                 <div style="padding: 16px;">
-                    <h3 style="margin-bottom: 20px;">?? Izveötaj</h3>
+                    <h3 style="margin-bottom: 20px;">?? Izve≈°taj</h3>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
                         <div class="stat-card">
@@ -1368,7 +1371,7 @@
                             <div class="stat-value">${stats.problemItems}</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Preeno</div>
+                            <div class="stat-label">Preƒëeno</div>
                             <div class="stat-value">${stats.distance} m</div>
                         </div>
                     </div>
@@ -1430,7 +1433,7 @@
             if (!waveData) return;
             
             const stats = calculateStats(waveData);
-            let csv = 'Lokacija,SKU,Kutija,Faktura,Status,Traûeno,Uzeto,Napomena\n';
+            let csv = 'Lokacija,SKU,Kutija,Faktura,Status,Tra≈æeno,Uzeto,Napomena\n';
             
             for (const loc in waveData.items_by_loc) {
                 waveData.items_by_loc[loc].forEach(item => {
@@ -1442,7 +1445,7 @@
             csv += `Ukupno,${stats.totalItems}\n`;
             csv += `Uzeto,${stats.takenItems}\n`;
             csv += `Problem,${stats.problemItems}\n`;
-            csv += `Preeno,${stats.distance} m\n`;
+            csv += `Preƒëeno,${stats.distance} m\n`;
             csv += `Vreme,${stats.totalTime}\n`;
             
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -1452,74 +1455,88 @@
             a.download = `wave-report-${new Date().toISOString().slice(0,10)}.csv`;
             a.click();
         }
-
-        // ==================== NAVIGACIJA ====================
-        function showSection(section) {
-            if (typeof event !== 'undefined' && event) {
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                if (event.currentTarget) {
-                    event.currentTarget.classList.add('active');
-                }
-            }
-            
-            const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
-            sections.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = 'none';
-            });
-            
-            const selectedSection = document.getElementById(section + 'Section');
-            if (selectedSection) {
-                selectedSection.style.display = 'block';
-            }
-            
-            switch(section) {
-                case 'picking':
-                    if (SESSION_ID) refreshWave();
-                    break;
-                case 'boxes':
-                    if (typeof loadBoxesSection === 'function') loadBoxesSection();
-                    break;
-                case 'reports':
-                    if (typeof loadReportData === 'function') loadReportData();
-                    break;
-                case 'settings':
-                    if (typeof loadSettings === 'function') loadSettings();
-                    break;
-            }
+		// ==================== NAVIGACIJA ====================
+	function showSection(section) {
+    // Proveri da li je event definisan (pozvano klikom)
+    if (window.event) {
+        // Ukloni active klasu sa svih navigacionih stavki
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        // Dodaj active klasu na kliknutu stavku
+        if (window.event.currentTarget) {
+            window.event.currentTarget.classList.add('active');
         }
+    }
+    
+    // Sakrij sve sekcije
+    const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    
+    // Prika≈æi izabranu sekciju
+    const selectedSection = document.getElementById(section + 'Section');
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+    } else {
+        console.log('Sekcija ne postoji:', section + 'Section');
+    }
+    
+    // Uƒçitaj podatke za pojedine sekcije
+    switch(section) {
+        case 'picking':
+            if (SESSION_ID) refreshWave();
+            break;
+        case 'boxes':
+            if (typeof loadBoxesSection === 'function') loadBoxesSection();
+            break;
+        case 'reports':
+            if (typeof loadReportData === 'function') loadReportData();
+            break;
+        case 'settings':
+            if (typeof loadSettings === 'function') loadSettings();
+            break;
+    }
+	}
 
         // ==================== INIT ====================
-        window.addEventListener('load', () => {
-            console.log('Stranica uËitana');
-            
-            const firstNavItem = document.querySelector('.nav-item');
-            if (firstNavItem) {
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                firstNavItem.classList.add('active');
-                showSection('picking');
-            }
-            
-            const savedSession = localStorage.getItem('session_id');
-            const savedWave = localStorage.getItem('waveData');
-            
-            if (savedSession && savedWave) {
-                setTimeout(() => {
-                    if (confirm('Nastavi prethodnu sesiju?')) {
-                        SESSION_ID = savedSession;
-                        waveData = JSON.parse(savedWave);
-                        document.getElementById('scanSection').style.display = 'none';
-                        document.getElementById('pickingSection').style.display = 'block';
-                        renderWave(waveData);
-                        startTimer();
-                    }
-                }, 500);
-            }
+	window.addEventListener('load', () => {
+		console.log('Stranica uƒçitana');
+    
+    // Aktiviraj prvu navigacionu stavku
+    const firstNavItem = document.querySelector('.nav-item');
+    if (firstNavItem) {
+        // Ukloni active sa svih
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
         });
+        // Dodaj na prvu
+        firstNavItem.classList.add('active');
+        // Pozovi showSection sa prvom sekcijom
+        showSection('picking');
+    }
+    
+    // Proveri da li postoji saƒçuvana sesija
+    const savedSession = localStorage.getItem('session_id');
+    const savedWave = localStorage.getItem('waveData');
+    
+		if (savedSession && savedWave) {
+			setTimeout(() => {
+            if (confirm('Nastavi prethodnu sesiju?')) {
+                SESSION_ID = savedSession;
+                waveData = JSON.parse(savedWave);
+                const scanSection = document.getElementById('scanSection');
+                const pickingSection = document.getElementById('pickingSection');
+                if (scanSection) scanSection.style.display = 'none';
+                if (pickingSection) pickingSection.style.display = 'block';
+                renderWave(waveData);
+                startTimer();
+            }
+        }, 500);
+		}
+	});
         
         // ==================== EXPORT ====================
         window.removeInvoice = removeInvoice;
