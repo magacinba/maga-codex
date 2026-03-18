@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wave Picking Mobile ‚Ä¢ 6 kutija</title>
+    <title>Wave Picking Mobile ï 6 kutija</title>
     
     <!-- PWA Meta tagovi -->
     <link rel="manifest" href="manifest.json">
@@ -12,9 +12,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-title" content="Wave Picking">
-    <!-- Ikonicu za tab - da ne trazi favicon.ico -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='90' x='50' font-size='90' text-anchor='middle'>&#x1F4E6;</text></svg>">
-        <!-- iOS Ikonice -->
+    <!-- Ikonicu za tab - da ne traûi favicon.ico -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='90' x='50' font-size='90' text-anchor='middle'>??</text></svg>">
+    
     <!-- SheetJS za Excel import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     
@@ -55,7 +55,7 @@
             max-width: 480px;
             margin: 0 auto;
             padding: 16px;
-            padding-bottom: 80px; /* Prostor za donji navbar */
+            padding-bottom: 90px;
         }
         
         /* Header */
@@ -214,62 +214,6 @@
             border-color: var(--primary);
         }
 
-        /* Donja navigacija - poboljsano */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            border-top: 2px solid var(--gray-light);
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-around;
-            max-width: 480px;
-            margin: 0 auto;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: var(--gray);
-            font-size: 12px;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 30px;
-            transition: all 0.2s ease;
-            flex: 1;
-            max-width: 80px;
-        }
-
-        .nav-item:active {
-            background: var(--gray-light);
-            transform: scale(0.95);
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .nav-item.active .nav-icon {
-            transform: scale(1.1);
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            transition: transform 0.2s ease;
-        }
-
-        /* Dodati padding na dnu za sadrzaj da ne bude prekriven navigacijom */
-        .mobile-container {
-            padding-bottom: 90px;
-        }
-        
         .scan-button {
             width: 100%;
             padding: 16px;
@@ -284,6 +228,7 @@
             justify-content: center;
             gap: 8px;
             margin-bottom: 8px;
+            cursor: pointer;
         }
         
         .scan-button:active {
@@ -345,6 +290,11 @@
             font-size: 16px;
             font-weight: 600;
             margin: 8px 0;
+            cursor: pointer;
+        }
+        
+        .upload-button:active {
+            background: var(--primary-dark);
         }
         
         /* Trenutna lokacija - VELIKI PRIKAZ */
@@ -435,6 +385,7 @@
             justify-content: center;
             gap: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
         
         .action-btn:active {
@@ -529,14 +480,16 @@
             left: 0;
             right: 0;
             background: var(--surface);
-            border-top: 1px solid var(--gray-light);
-            padding: 12px 24px;
+            border-top: 2px solid var(--gray-light);
+            padding: 8px 12px;
             display: flex;
             justify-content: space-around;
             max-width: 480px;
             margin: 0 auto;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+            z-index: 1000;
         }
-        
+
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -544,14 +497,31 @@
             gap: 4px;
             color: var(--gray);
             font-size: 12px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            flex: 1;
+            max-width: 80px;
         }
-        
+
+        .nav-item:active {
+            background: var(--gray-light);
+            transform: scale(0.95);
+        }
+
         .nav-item.active {
             color: var(--primary);
+            font-weight: 600;
         }
-        
+
+        .nav-item.active .nav-icon {
+            transform: scale(1.1);
+        }
+
         .nav-icon {
             font-size: 24px;
+            transition: transform 0.2s ease;
         }
         
         /* Loading indikator */
@@ -579,6 +549,23 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-light);
+            border-radius: 999px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 999px;
+            transition: width 0.3s ease;
         }
         
         /* Utility klase */
@@ -610,7 +597,7 @@
         <!-- Header -->
         <div class="app-header">
             <div class="app-title">
-                üì¶ Wave Picking
+                ?? Wave Picking
                 <span>6 kutija</span>
             </div>
             <div class="connection-status online" id="connectionStatus"></div>
@@ -619,22 +606,22 @@
         <!-- Sekcija za skeniranje (pre start-a) -->
         <div id="scanSection" class="scan-section">
             <div class="scan-label">
-                <span>üì∑ Skeniraj fakturu</span>
+                <span>?? Skeniraj fakturu</span>
                 <span class="invoice-pill" id="scanCounter">0/6</span>
             </div>
             
             <input type="text" id="barcodeInput" class="scan-input" placeholder="Barkod fakture..." autofocus>
             
             <button class="scan-button" onclick="simulateScan()">
-                <span>üì∑</span> Skeniraj kamerom
+                <span>??</span> Skeniraj kamerom
             </button>
             
             <div class="invoices-list" id="scannedInvoices"></div>
             
             <!-- Excel Upload -->
             <div class="upload-area">
-                <div style="font-size: 32px; margin-bottom: 8px;">üìä</div>
-                <div style="font-weight: 600; margin-bottom: 8px;">Uƒçitaj Excel fajl</div>
+                <div style="font-size: 32px; margin-bottom: 8px;">??</div>
+                <div style="font-weight: 600; margin-bottom: 8px;">UËitaj Excel fajl</div>
                 <input type="file" id="excelUpload" accept=".xlsx,.xls,.csv" style="display:none">
                 <button class="upload-button" onclick="document.getElementById('excelUpload').click()">
                     Izaberi fajl
@@ -643,11 +630,11 @@
             </div>
             
             <button class="scan-button" style="background: var(--success);" onclick="startWave()" id="startWaveBtn" disabled>
-                üöÄ KREƒÜEMO SA PICKINGOM
+                ?? KRE∆EMO SA PICKINGOM
             </button>
             
             <button class="scan-button" style="background: var(--gray);" onclick="clearScanned()">
-                Obri≈°i sve
+                Obriöi sve
             </button>
         </div>
 
@@ -663,11 +650,11 @@
             <!-- Info o artiklu -->
             <div class="item-card">
                 <div class="item-row">
-                    <span class="item-label">≈†ifra artikla</span>
+                    <span class="item-label">äifra artikla</span>
                     <span class="item-value" id="curSku">-</span>
                 </div>
                 <div class="item-row">
-                    <span class="item-label">Potrebna koliƒçina</span>
+                    <span class="item-label">Potrebna koliËina</span>
                     <span class="item-value" style="color: var(--success);" id="curQty">-</span>
                 </div>
                 <div class="item-row">
@@ -683,20 +670,20 @@
             <!-- Akciona dugmad -->
             <div class="action-buttons">
                 <button class="action-btn btn-success" onclick="takeCurrentItem()">
-                    <span>‚úÖ</span> UZETO
+                    <span>?</span> UZETO
                 </button>
                 <button class="action-btn btn-warning" onclick="oosCurrentItem()">
-                    <span>‚ùå</span> NEMA NA LOKACIJI
+                    <span>?</span> NEMA NA LOKACIJI
                 </button>
                 <button class="action-btn btn-danger" onclick="problemCurrentItem()">
-                    <span>‚ö†Ô∏è</span> PROBLEM
+                    <span>??</span> PROBLEM
                 </button>
             </div>
             
             <!-- Lista svih stavki na trenutnoj lokaciji -->
             <div class="items-list">
                 <div class="items-title">
-                    <span>üìã Stavke na lokaciji</span>
+                    <span>?? Stavke na lokaciji</span>
                     <span id="locItemsCount">0</span>
                 </div>
                 <div id="locationItems"></div>
@@ -711,7 +698,7 @@
                 <div>
                     <div style="color: var(--gray); font-size: 12px;">Kutije</div>
                     <div style="display: flex; gap: 4px;" id="boxesProgress">
-                        <span>‚¨ú‚¨ú‚¨ú‚¨ú‚¨ú‚¨ú</span>
+                        <span>??????</span>
                     </div>
                 </div>
                 <div>
@@ -720,80 +707,34 @@
                 </div>
             </div>
         </div>
-    </div>
-<!-- KPI kartice -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-            <div class="stat-card">
-                <div class="stat-label">Ukupno artikala</div>
-                <div class="stat-value" id="reportTotalItems">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Uzeto</div>
-                <div class="stat-value" id="reportTakenItems">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Problem/Nema</div>
-                <div class="stat-value" id="reportProblemItems">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">PrecÃÅeno</div>
-                <div class="stat-value" id="reportDistance">0 m</div>
-            </div>
-        </div>
-        
-        <!-- Vreme rada -->
-        <div class="report-section">
-            <div class="section-title">‚è±Ô∏è Vreme rada</div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Ukupno vreme:</span>
-                <span class="value" id="reportTotalTime">00:00</span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Artikli po satu:</span>
-                <span class="value" id="reportItemsPerHour">0</span>
-            </div>
-        </div>
-        
-        <!-- Po kutijama -->
-        <div class="report-section">
-            <div class="section-title">üì¶ Po kutijama</div>
-            <div id="reportBoxes"></div>
-        </div>
-        
-        <!-- ProblematicÃåne stavke -->
-        <div class="report-section">
-            <div class="section-title">‚ö†Ô∏è ProblematicÃåne stavke</div>
-            <div id="reportProblems"></div>
-        </div>
-        
-        <!-- Dugme za izvoz -->
-        <button class="export-btn" onclick="exportReport()">
-            üì§ Izvezi izve≈°taj (CSV)
-        </button>
+
+        <!-- Sekcija za kutije -->
+        <div id="boxesSection" style="display: none;"></div>
+
+        <!-- Sekcija za izvestaje -->
+        <div id="reportsSection" style="display: none;"></div>
+
+        <!-- Sekcija za podesavanja -->
+        <div id="settingsSection" style="display: none;"></div>
     </div>
 
-
-    <!-- Sekcija za kutije -->
-    <div id="boxesSection" style="display: none;"></div>\r\n\r\n    <!-- Sekcija za izvestaje -->\r\n    <div id="reportsSection" style="display: none;"></div>
-<!-- Sekcija za podeöavanja -->
-    <div id="settingsSection" style="display: none;"></div>
     <!-- Donja navigacija -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showSection('picking')">
-            <span class="nav-icon">üì¶</span>
+            <span class="nav-icon">??</span>
             <span>Picking</span>
         </div>
         <div class="nav-item" onclick="showSection('boxes')">
-            <span class="nav-icon">üì§</span>
+            <span class="nav-icon">??</span>
             <span>Kutije</span>
         </div>
         <div class="nav-item" onclick="showSection('reports')">
-            <span class="nav-icon">üìä</span>
-            <span>Izve≈°taj</span>
+            <span class="nav-icon">??</span>
+            <span>Izveötaj</span>
         </div>
         <div class="nav-item" onclick="showSection('settings')">
-            <span class="nav-icon">‚öôÔ∏è</span>
-            <span>Pode≈°avanja</span>
+            <span class="nav-icon">??</span>
+            <span>Podeöavanja</span>
         </div>
     </div>
 
@@ -803,7 +744,7 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
                     .then(reg => console.log('Service Worker registrovan'))
-                    .catch(err => console.log('Service Worker gre≈°ka:', err));
+                    .catch(err => console.log('Service Worker greöka:', err));
             });
         }
     </script>
@@ -819,7 +760,20 @@
         let timerInterval = null;
         let isOnline = navigator.onLine;
         
-        // ==================== POMOƒÜNE FUNKCIJE ====================
+        // ==================== BOJE ZA KUTIJE ====================
+        function getBoxColor(box) {
+            const colors = {
+                1: '#3b82f6', // plava
+                2: '#22c55e', // zelena
+                3: '#eab308', // ûuta
+                4: '#f97316', // narandûasta
+                5: '#ef4444', // crvena
+                6: '#a855f7'  // ljubiËasta
+            };
+            return colors[box] || '#64748b';
+        }
+        
+        // ==================== POMO∆NE FUNKCIJE ====================
         function setLoading(show) {
             document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
@@ -845,7 +799,7 @@
                         this.value = '';
                         document.getElementById('startWaveBtn').disabled = false;
                     } else {
-                        alert('üìã Faktura veƒá skenirana!');
+                        alert('?? Faktura veÊ skenirana!');
                         this.value = '';
                     }
                 }
@@ -854,7 +808,7 @@
         
         function simulateScan() {
             if ('BarcodeDetector' in window) {
-                alert('Kamera nije dostupna u ovoj verziji. Koristite ruƒçni unos.');
+                alert('Kamera nije dostupna u ovoj verziji. Koristite ruËni unos.');
             } else {
                 const fakeBarcode = prompt('Unesite barkod fakture:');
                 if (fakeBarcode) {
@@ -874,7 +828,7 @@
                 div.innerHTML = `
                     ${inv}
                     <span style="background: var(--primary); color:white; padding:2px 8px; border-radius:20px;">${index + 1}</span>
-                    <span class="remove-invoice" onclick="removeInvoice('${inv}')">‚úï</span>
+                    <span class="remove-invoice" onclick="removeInvoice('${inv}')">?</span>
                 `;
                 container.appendChild(div);
             });
@@ -902,7 +856,7 @@
             if (!file) return;
             
             setLoading(true);
-            document.getElementById('uploadStatus').innerText = 'Uƒçitavanje...';
+            document.getElementById('uploadStatus').innerText = 'UËitavanje...';
             
             try {
                 let data = [];
@@ -923,28 +877,27 @@
                 const invoices = [...new Set(data.map(row => row.faktura))];
                 
                 if (invoices.length > 6) {
-                    alert(`Previ≈°e faktura! Maksimalno 6, ima ${invoices.length}`);
+                    alert(`Previöe faktura! Maksimalno 6, ima ${invoices.length}`);
                     return;
                 }
                 
                 scannedInvoices = invoices;
                 updateScannedList();
-                document.getElementById('uploadStatus').innerHTML = `‚úÖ Uƒçitano ${data.length} stavki`;
+                document.getElementById('uploadStatus').innerHTML = `? UËitano ${data.length} stavki`;
                 document.getElementById('startWaveBtn').disabled = false;
                 
-                // Saƒçuvaj u localStorage za offline
+                // SaËuvaj u localStorage za offline
                 localStorage.setItem('uploadedItems', JSON.stringify(data));
                 localStorage.setItem('scannedInvoices', JSON.stringify(invoices));
                 
             } catch (err) {
-                document.getElementById('uploadStatus').innerHTML = `‚ùå Gre≈°ka: ${err.message}`;
+                document.getElementById('uploadStatus').innerHTML = `? Greöka: ${err.message}`;
             } finally {
                 setLoading(false);
             }
         }
         
         function parseCSV(csvText) {
-            // Isti parser kao u originalu
             let cleanText = csvText.replace(/"/g, "");
             if (cleanText.includes("\\n") || cleanText.includes("\\r\\n")) {
                 cleanText = cleanText.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n");
@@ -961,7 +914,7 @@
             const kolicinaIdx = headers.findIndex(h => h.includes('kolicina') || h.includes('qty') || h.includes('quantity'));
             
             if (fakturaIdx === -1 || lokacijaIdx === -1 || skuIdx === -1 || kolicinaIdx === -1) {
-                throw new Error("Fajl mora sadr≈æati kolone: broj fak, lokacija, sku, kolicina");
+                throw new Error("Fajl mora sadrûati kolone: broj fak, lokacija, sku, kolicina");
             }
             
             const result = [];
@@ -995,12 +948,11 @@
             }
             
             if (uploadedItems.length === 0) {
-                // Poku≈°aj iz localStorage
                 const saved = localStorage.getItem('uploadedItems');
                 if (saved) {
                     uploadedItems = JSON.parse(saved);
                 } else {
-                    alert('Nema uƒçitanih stavki!');
+                    alert('Nema uËitanih stavki!');
                     return;
                 }
             }
@@ -1025,12 +977,11 @@
                 
                 const data = await res.json();
                 
-                if (!res.ok) throw new Error(data.detail || 'Gre≈°ka pri startovanju');
+                if (!res.ok) throw new Error(data.detail || 'Greöka pri startovanju');
                 
                 SESSION_ID = data.session_id;
                 waveData = data;
                 
-                // Saƒçuvaj sesiju
                 localStorage.setItem('session_id', SESSION_ID);
                 localStorage.setItem('waveData', JSON.stringify(data));
                 
@@ -1042,9 +993,9 @@
                 
             } catch (err) {
                 if (!navigator.onLine) {
-                    alert('Offline naƒçin rada nije jo≈° implementiran.');
+                    alert('Offline naËin rada nije joö implementiran.');
                 } else {
-                    alert('Gre≈°ka: ' + err.message);
+                    alert('Greöka: ' + err.message);
                 }
             } finally {
                 setLoading(false);
@@ -1055,21 +1006,15 @@
         function renderWave(data) {
             waveData = data;
             
-            // A≈æuriraj veliki displej
             document.getElementById('curLocBig').textContent = data.current_location || 'KRAJ';
-            document.getElementById('curSkuBig').textContent = data.current_location ? 'üìç' : 'üéâ ZAVR≈†ENO';
+            document.getElementById('curSkuBig').textContent = data.current_location ? '??' : '?? ZAVRäENO';
             
-            // A≈æuriraj trenutnu stavku
             updateCurrentItem();
-            
-            // A≈æuriraj listu stavki na lokaciji
             updateLocationItems();
             
-            // A≈æuriraj progress
             const p = data.progress || {};
             document.getElementById('progressText').textContent = `${p.done_items || 0}/${p.total_items || 0}`;
             
-            // A≈æuriraj kutije
             updateBoxesProgress();
         }
         
@@ -1105,7 +1050,7 @@
             
             items.forEach(item => {
                 const statusClass = item.status === 'taken' ? 'status-taken' : 'status-pending';
-                const statusText = item.status === 'taken' ? '‚úÖ Uzeto' : '‚è≥ ƒåeka';
+                const statusText = item.status === 'taken' ? '? Uzeto' : '? »eka';
                 
                 const div = document.createElement('div');
                 div.className = 'item-entry';
@@ -1137,7 +1082,7 @@
                         break;
                     }
                 }
-                html += completed ? '‚úÖ' : '‚¨ú';
+                html += completed ? '?' : '?';
             }
             
             boxes.innerHTML = html;
@@ -1194,7 +1139,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert('Gre≈°ka: ' + err.message);
+                alert('Greöka: ' + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1210,7 +1155,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert('Gre≈°ka: ' + err.message);
+                alert('Greöka: ' + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1226,7 +1171,7 @@
                 });
                 await refreshWave();
             } catch (err) {
-                alert('Gre≈°ka: ' + err.message);
+                alert('Greöka: ' + err.message);
             } finally {
                 setLoading(false);
             }
@@ -1241,7 +1186,7 @@
                 renderWave(data);
                 localStorage.setItem('waveData', JSON.stringify(data));
             } catch (err) {
-                console.log('Offline - koristim ke≈°irane podatke');
+                console.log('Offline - koristim keöirane podatke');
                 const cached = localStorage.getItem('waveData');
                 if (cached) renderWave(JSON.parse(cached));
             }
@@ -1263,7 +1208,6 @@
             }, 1000);
         }
         
-
         // ==================== IZVESTAJI ====================
         function showReports() {
             const picking = document.getElementById('pickingSection');
@@ -1274,323 +1218,308 @@
         }
 
         // ==================== SEKCIJA ZA KUTIJE ====================
-function loadBoxesSection() {
-    const container = document.getElementById('boxesSection');
-    if (!container) return;
-    
-    if (!waveData && !SESSION_ID) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px;">\uD83D\uDCE6 Pokreni picking prvo</div>';
-        return;
-    }
-    
-    let html = '<div style="padding: 16px;">';
-    html += '<h3 style="margin-bottom: 20px;">\uD83D\uDCE6 Kutije na kolicima</h3>';
-    
-    for (let i = 1; i <= 6; i++) {
-        let invoice = null;
-        let boxProgress = { total: 0, done: 0 };
-        
-        // Pronadji fakturu za ovu kutiju
-        for (const [inv, boxNum] of Object.entries(waveData?.box_assignment || {})) {
-            if (boxNum === i) {
-                invoice = inv;
-                break;
+        function loadBoxesSection() {
+            const container = document.getElementById('boxesSection');
+            if (!container) return;
+            
+            if (!waveData && !SESSION_ID) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px;">?? Pokreni picking prvo</div>';
+                return;
+            }
+            
+            let html = '<div style="padding: 16px;">';
+            html += '<h3 style="margin-bottom: 20px;">?? Kutije na kolicima</h3>';
+            
+            for (let i = 1; i <= 6; i++) {
+                let invoice = null;
+                let boxProgress = { total: 0, done: 0 };
+                
+                for (const [inv, boxNum] of Object.entries(waveData?.box_assignment || {})) {
+                    if (boxNum === i) {
+                        invoice = inv;
+                        break;
+                    }
+                }
+                
+                if (invoice && waveData?.progress?.boxes[invoice]) {
+                    boxProgress = waveData.progress.boxes[invoice];
+                }
+                
+                const percent = boxProgress.total > 0 ? Math.round((boxProgress.done / boxProgress.total) * 100) : 0;
+                const boxColor = getBoxColor(i);
+                
+                html += `
+                    <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 2px solid ${boxColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-size: 18px; font-weight: 700; color: ${boxColor};">Kutija ${i}</span>
+                            ${invoice ? `<span style="background: ${boxColor}; color: white; padding: 4px 12px; border-radius: 20px;">${invoice}</span>` : '<span style="color: var(--gray);">Prazna</span>'}
+                        </div>
+                        ${invoice ? `
+                            <div style="margin: 10px 0;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Napredak:</span>
+                                    <span>${boxProgress.done}/${boxProgress.total} (${percent}%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${percent}%; background: ${boxColor};"></div>
+                                </div>
+                            </div>
+                            <button class="scan-button" style="margin-top: 10px;" onclick="alert('Detalji kutije ${i}')">
+                                ?? Detalji kutije
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ==================== SEKCIJA ZA PODESAVANJA ====================
+        function loadSettings() {
+            const container = document.getElementById('settingsSection');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div style="padding: 16px;">
+                    <h3 style="margin-bottom: 20px;">?? Podeöavanja</h3>
+                    
+                    <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                        <div style="font-weight: 600; margin-bottom: 12px;">API Konfiguracija</div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">API URL:</label>
+                            <input type="text" id="apiUrl" value="${API}" style="width: 100%; padding: 10px; border: 1px solid var(--gray-light); border-radius: 8px;">
+                        </div>
+                        <button class="scan-button" onclick="saveApiUrl()">SaËuvaj</button>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                        <div style="font-weight: 600; margin-bottom: 12px;">Reûim rada</div>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <input type="radio" name="mode" value="optimal" checked> Optimalno (najkraÊa putanja)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <input type="radio" name="mode" value="ortools"> OR-Tools (sporije, taËnije)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <input type="radio" name="mode" value="sector"> Po sektorima
+                        </label>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                        <div style="font-weight: 600; margin-bottom: 12px;">Podaci</div>
+                        <button class="scan-button" style="background: var(--warning);" onclick="clearLocalData()">
+                            ??? Obriöi lokalne podatke
+                        </button>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 16px; padding: 16px;">
+                        <div style="font-weight: 600; margin-bottom: 12px;">Info</div>
+                        <div>Verzija: 1.0.0</div>
+                        <div>Sesija: ${SESSION_ID || 'Nema aktivne sesije'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== POMO∆NE FUNKCIJE ZA PODEäAVANJA ====================
+        function saveApiUrl() {
+            const newUrl = document.getElementById('apiUrl').value;
+            localStorage.setItem('api_url', newUrl);
+            alert('API URL saËuvan. Osveûi stranicu da bi primenio promene.');
+        }
+
+        function clearLocalData() {
+            if (confirm('Obrisati sve lokalno saËuvane podatke?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('Podaci obrisani. Osveûi stranicu.');
             }
         }
-        
-        if (invoice && waveData?.progress?.boxes[invoice]) {
-            boxProgress = waveData.progress.boxes[invoice];
-        }
-        
-        const percent = boxProgress.total > 0 ? Math.round((boxProgress.done / boxProgress.total) * 100) : 0;
-        const boxColor = getBoxColor(i);
-        
-        html += `
-            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 2px solid ${boxColor};">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-size: 18px; font-weight: 700; color: ${boxColor};">Kutija ${i}</span>
-                    ${invoice ? `<span style="background: ${boxColor}; color: white; padding: 4px 12px; border-radius: 20px;">${invoice}</span>` : '<span style="color: var(--gray);">Prazna</span>'}
-                </div>
-                ${invoice ? `
-                    <div style="margin: 10px 0;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span>Napredak:</span>
-                            <span>${boxProgress.done}/${boxProgress.total} (${percent}%)</span>
+
+        // ==================== SEKCIJA ZA IZVEäTAJE ====================
+        function loadReportData() {
+            const container = document.getElementById('reportsSection');
+            if (!container) return;
+            
+            if (!waveData) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px;">?? Nema podataka za izveötaj</div>';
+                return;
+            }
+            
+            const stats = calculateStats(waveData);
+            
+            container.innerHTML = `
+                <div style="padding: 16px;">
+                    <h3 style="margin-bottom: 20px;">?? Izveötaj</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                        <div class="stat-card">
+                            <div class="stat-label">Ukupno</div>
+                            <div class="stat-value">${stats.totalItems}</div>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${percent}%; background: ${boxColor};"></div>
+                        <div class="stat-card">
+                            <div class="stat-label">Uzeto</div>
+                            <div class="stat-value">${stats.takenItems}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Problem</div>
+                            <div class="stat-value">${stats.problemItems}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Preeno</div>
+                            <div class="stat-value">${stats.distance} m</div>
                         </div>
                     </div>
-                    <button class="scan-button" style="margin-top: 10px;" onclick="showBoxDetails(${i})">
-                        \uD83D\uDCCB Detalji kutije
+                    
+                    <div class="report-section">
+                        <div class="section-title">?? Vreme</div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Ukupno:</span>
+                            <span class="value">${stats.totalTime}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Artikli/sat:</span>
+                            <span class="value">${stats.itemsPerHour}</span>
+                        </div>
+                    </div>
+                    
+                    <button class="export-btn" onclick="exportReport()">
+                        ?? Izvezi CSV
                     </button>
-                ` : ''}
-            </div>
-        `;
-    }
-    
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-// ==================== SEKCIJA ZA PODESAVANJA ====================
-function loadSettings() {
-    const container = document.getElementById('settingsSection');
-    if (!container) return;
-    
-    container.innerHTML = `
-        <div style="padding: 16px;">
-            <h3 style="margin-bottom: 20px;">\u2699\uFE0F Podesavanja</h3>
-            
-            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
-                <div style="font-weight: 600; margin-bottom: 12px;">API Konfiguracija</div>
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px;">API URL:</label>
-                    <input type="text" id="apiUrl" value="${API}" style="width: 100%; padding: 10px; border: 1px solid var(--gray-light); border-radius: 8px;">
                 </div>
-                <button class="scan-button" onclick="saveApiUrl()">Sacuvaj</button>
-            </div>
-            
-            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
-                <div style="font-weight: 600; margin-bottom: 12px;">Rezim rada</div>
-                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <input type="radio" name="mode" value="optimal" checked> Optimalno (najkraca putanja)
-                </label>
-                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <input type="radio" name="mode" value="ortools"> OR-Tools (sporije, tacnije)
-                </label>
-                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <input type="radio" name="mode" value="sector"> Po sektorima
-                </label>
-            </div>
-            
-            <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
-                <div style="font-weight: 600; margin-bottom: 12px;">Podaci</div>
-                <button class="scan-button" style="background: var(--warning);" onclick="clearLocalData()">
-                    \uD83D\uDDD1\uFE0F Obrisi lokalne podatke
-                </button>
-            </div>
-            
-            <div style="background: white; border-radius: 16px; padding: 16px;">
-                <div style="font-weight: 600; margin-bottom: 12px;">Info</div>
-                <div>Verzija: 1.0.0</div>
-                <div>Sesija: ${SESSION_ID || 'Nema aktivne sesije'}</div>
-            </div>
-        </div>
-    `;
-}
-
-// ==================== POMOCNE FUNKCIJE ZA PODESAVANJA ====================
-function saveApiUrl() {
-    const newUrl = document.getElementById('apiUrl').value;
-    localStorage.setItem('api_url', newUrl);
-    alert('API URL sacuvan. Osvezi stranicu da bi primenio promene.');
-}
-
-function clearLocalData() {
-    if (confirm('Obrisati sve lokalno sacuvane podatke?')) {
-        localStorage.clear();
-        sessionStorage.clear();
-        alert('Podaci obrisani. Osvezi stranicu.');
-    }
-}
-
-// ==================== SEKCIJA ZA IZVESTAJE ====================
-function loadReportData() {
-    const container = document.getElementById('reportsSection');
-    if (!container) return;
-    
-    if (!waveData) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px;">\uD83D\uDCCA Nema podataka za izvestaj</div>';
-        return;
-    }
-    
-    const stats = calculateStats(waveData);
-    
-    container.innerHTML = `
-        <div style="padding: 16px;">
-            <h3 style="margin-bottom: 20px;">\uD83D\uDCCA Izvestaj</h3>
-            
-            <!-- KPI kartice -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-                <div class="stat-card">
-                    <div class="stat-label">Ukupno</div>
-                    <div class="stat-value">${stats.totalItems}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Uzeto</div>
-                    <div class="stat-value">${stats.takenItems}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Problem</div>
-                    <div class="stat-value">${stats.problemItems}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Predjeno</div>
-                    <div class="stat-value">${stats.distance} m</div>
-                </div>
-            </div>
-            
-            <!-- Vreme -->
-            <div class="report-section">
-                <div class="section-title">\u23F1\uFE0F Vreme</div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Ukupno:</span>
-                    <span class="value">${stats.totalTime}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Artikli/sat:</span>
-                    <span class="value">${stats.itemsPerHour}</span>
-                </div>
-            </div>
-            
-            <button class="export-btn" onclick="exportReport()">
-                \uD83D\uDCE4 Izvezi CSV
-            </button>
-        </div>
-    `;
-}
-
-// ==================== STATISTIKA ====================
-function calculateStats(data) {
-    let totalItems = 0;
-    let takenItems = 0;
-    let problemItems = 0;
-    
-    for (const loc in data.items_by_loc) {
-        waveData.items_by_loc[loc].forEach(item => {
-            totalItems += item.qty_required;
-            if (item.status === 'taken') {
-                takenItems += item.qty_picked || item.qty_required;
-            } else if (item.status === 'problem' || item.status === 'oos') {
-                problemItems += (item.qty_required - (item.qty_picked || 0));
-            }
-        });
-    }
-    
-    const elapsed = waveStartTime ? Math.floor((Date.now() - waveStartTime) / 1000) : 0;
-    const hours = Math.floor(elapsed / 3600);
-    const minutes = Math.floor((elapsed % 3600) / 60);
-    const totalTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    
-    const itemsPerHour = elapsed > 0 ? Math.round((takenItems / elapsed) * 3600) : 0;
-    
-    return {
-        totalItems,
-        takenItems,
-        problemItems,
-        distance: data.distance_m || 0,
-        totalTime,
-        itemsPerHour
-    };
-}
-
-function exportReport() {
-    if (!waveData) return;
-    
-    const stats = calculateStats(waveData);
-    let csv = 'Lokacija,SKU,Kutija,Faktura,Status,Trazeno,Uzeto,Napomena\n';
-    
-    for (const loc in waveData.items_by_loc) {
-        waveData.items_by_loc[loc].forEach(item => {
-            csv += `${loc},${item.sku},${item.box},${item.invoice},${item.status},${item.qty_required},${item.qty_picked || 0},${item.note || ''}\n`;
-        });
-    }
-    
-    csv += '\nSTATISTIKA\n';
-    csv += `Ukupno,${stats.totalItems}\n`;
-    csv += `Uzeto,${stats.takenItems}\n`;
-    csv += `Problem,${stats.problemItems}\n`;
-    csv += `Predjeno,${stats.distance} m\n`;
-    csv += `Vreme,${stats.totalTime}\n`;
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `wave-report-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-}
-
-// ==================== NAVIGACIJA ====================
-function showSection(section) {
-    // Proveri da li je event definisan (pozvano klikom ili programski)
-    if (typeof event !== 'undefined' && event) {
-        // Ukloni active klasu sa svih navigacionih stavki
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        // Dodaj active klasu na kliknutu stavku
-        if (event.currentTarget) {
-            event.currentTarget.classList.add('active');
+            `;
         }
-    }
-    
-    // Sakrij sve sekcije
-    const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
-    sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
-    
-    // Prikazi izabranu sekciju
-    const selectedSection = document.getElementById(section + 'Section');
-    if (selectedSection) {
-        selectedSection.style.display = 'block';
-    }
-    
-    // Ucitaj podatke za pojedine sekcije
-    switch(section) {
-        case 'picking':
-            if (SESSION_ID) refreshWave();
-            break;
-        case 'boxes':
-            if (typeof loadBoxesSection === 'function') loadBoxesSection();
-            break;
-        case 'reports':
-            if (typeof loadReportData === 'function') loadReportData();
-            break;
-        case 'settings':
-            if (typeof loadSettings === 'function') loadSettings();
-            break;
-    }
-}
 
-// ==================== INIT ====================
-window.addEventListener('load', () => {
-    console.log('Stranica ucitana');
-    
-    // Aktiviraj prvu navigacionu stavku
-    const firstNavItem = document.querySelector('.nav-item');
-    if (firstNavItem) {
-        // Ukloni active sa svih
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        // Dodaj na prvu
-        firstNavItem.classList.add('active');
-        // Pozovi showSection sa prvom sekcijom
-        showSection('picking');
-    }
-    
-    // Proveri da li postoji sacuvana sesija
-    const savedSession = localStorage.getItem('session_id');
-    const savedWave = localStorage.getItem('waveData');
-    
-    if (savedSession && savedWave) {
-        // Sacekaj malo da se sve ucita
-        setTimeout(() => {
-            if (confirm('Nastavi prethodnu sesiju?')) {
-                SESSION_ID = savedSession;
-                waveData = JSON.parse(savedWave);
-                document.getElementById('scanSection').style.display = 'none';
-                document.getElementById('pickingSection').style.display = 'block';
-                renderWave(waveData);
-                startTimer();
+        // ==================== STATISTIKA ====================
+        function calculateStats(data) {
+            let totalItems = 0;
+            let takenItems = 0;
+            let problemItems = 0;
+            
+            for (const loc in data.items_by_loc) {
+                data.items_by_loc[loc].forEach(item => {
+                    totalItems += item.qty_required;
+                    if (item.status === 'taken') {
+                        takenItems += item.qty_picked || item.qty_required;
+                    } else if (item.status === 'problem' || item.status === 'oos') {
+                        problemItems += (item.qty_required - (item.qty_picked || 0));
+                    }
+                });
             }
-        }, 500);
-    }
-});
+            
+            const elapsed = waveStartTime ? Math.floor((Date.now() - waveStartTime) / 1000) : 0;
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const totalTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            
+            const itemsPerHour = elapsed > 0 ? Math.round((takenItems / elapsed) * 3600) : 0;
+            
+            return {
+                totalItems,
+                takenItems,
+                problemItems,
+                distance: data.distance_m || 0,
+                totalTime,
+                itemsPerHour
+            };
+        }
+
+        function exportReport() {
+            if (!waveData) return;
+            
+            const stats = calculateStats(waveData);
+            let csv = 'Lokacija,SKU,Kutija,Faktura,Status,Traûeno,Uzeto,Napomena\n';
+            
+            for (const loc in waveData.items_by_loc) {
+                waveData.items_by_loc[loc].forEach(item => {
+                    csv += `${loc},${item.sku},${item.box},${item.invoice},${item.status},${item.qty_required},${item.qty_picked || 0},${item.note || ''}\n`;
+                });
+            }
+            
+            csv += '\nSTATISTIKA\n';
+            csv += `Ukupno,${stats.totalItems}\n`;
+            csv += `Uzeto,${stats.takenItems}\n`;
+            csv += `Problem,${stats.problemItems}\n`;
+            csv += `Preeno,${stats.distance} m\n`;
+            csv += `Vreme,${stats.totalTime}\n`;
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wave-report-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        // ==================== NAVIGACIJA ====================
+        function showSection(section) {
+            if (typeof event !== 'undefined' && event) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                if (event.currentTarget) {
+                    event.currentTarget.classList.add('active');
+                }
+            }
+            
+            const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            
+            const selectedSection = document.getElementById(section + 'Section');
+            if (selectedSection) {
+                selectedSection.style.display = 'block';
+            }
+            
+            switch(section) {
+                case 'picking':
+                    if (SESSION_ID) refreshWave();
+                    break;
+                case 'boxes':
+                    if (typeof loadBoxesSection === 'function') loadBoxesSection();
+                    break;
+                case 'reports':
+                    if (typeof loadReportData === 'function') loadReportData();
+                    break;
+                case 'settings':
+                    if (typeof loadSettings === 'function') loadSettings();
+                    break;
+            }
+        }
+
+        // ==================== INIT ====================
+        window.addEventListener('load', () => {
+            console.log('Stranica uËitana');
+            
+            const firstNavItem = document.querySelector('.nav-item');
+            if (firstNavItem) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                firstNavItem.classList.add('active');
+                showSection('picking');
+            }
+            
+            const savedSession = localStorage.getItem('session_id');
+            const savedWave = localStorage.getItem('waveData');
+            
+            if (savedSession && savedWave) {
+                setTimeout(() => {
+                    if (confirm('Nastavi prethodnu sesiju?')) {
+                        SESSION_ID = savedSession;
+                        waveData = JSON.parse(savedWave);
+                        document.getElementById('scanSection').style.display = 'none';
+                        document.getElementById('pickingSection').style.display = 'block';
+                        renderWave(waveData);
+                        startTimer();
+                    }
+                }, 500);
+            }
+        });
         
         // ==================== EXPORT ====================
         window.removeInvoice = removeInvoice;
@@ -1601,29 +1530,9 @@ window.addEventListener('load', () => {
         window.oosCurrentItem = oosCurrentItem;
         window.problemCurrentItem = problemCurrentItem;
         window.showSection = showSection;
+        window.exportReport = exportReport;
+        window.saveApiUrl = saveApiUrl;
+        window.clearLocalData = clearLocalData;
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
