@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="sr">
 <head>
     <meta charset="UTF-8">
@@ -718,21 +718,21 @@
         <div id="settingsSection" style="display: none;"></div>
     </div>
 
-    <!-- Donja navigacija -->
+    <!-- Donja navigacija - sa data-section atributima -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="showSection('picking')">
+        <div class="nav-item active" data-section="picking">
             <span class="nav-icon">📦</span>
             <span>Picking</span>
         </div>
-        <div class="nav-item" onclick="showSection('boxes')">
+        <div class="nav-item" data-section="boxes">
             <span class="nav-icon">📤</span>
             <span>Kutije</span>
         </div>
-        <div class="nav-item" onclick="showSection('reports')">
+        <div class="nav-item" data-section="reports">
             <span class="nav-icon">📊</span>
             <span>Izveštaj</span>
         </div>
-        <div class="nav-item" onclick="showSection('settings')">
+        <div class="nav-item" data-section="settings">
             <span class="nav-icon">⚙️</span>
             <span>Podešavanja</span>
         </div>
@@ -765,12 +765,12 @@
         // ==================== BOJE ZA KUTIJE ====================
         function getBoxColor(box) {
             const colors = {
-                1: '#3b82f6', // plava
-                2: '#22c55e', // zelena
-                3: '#eab308', // žuta
-                4: '#f97316', // narandžasta
-                5: '#ef4444', // crvena
-                6: '#a855f7'  // ljubičasta
+                1: '#3b82f6',
+                2: '#22c55e',
+                3: '#eab308',
+                4: '#f97316',
+                5: '#ef4444',
+                6: '#a855f7'
             };
             return colors[box] || '#64748b';
         }
@@ -888,7 +888,6 @@
                 document.getElementById('uploadStatus').innerHTML = `✅ Učitano ${data.length} stavki`;
                 document.getElementById('startWaveBtn').disabled = false;
                 
-                // Sačuvaj u localStorage za offline
                 localStorage.setItem('uploadedItems', JSON.stringify(data));
                 localStorage.setItem('scannedInvoices', JSON.stringify(invoices));
                 
@@ -1462,12 +1461,10 @@
                 item.classList.remove('active');
             });
             
-            // Pronađi kliknuti element i dodaj mu active klasu
-            const activeItem = Array.from(document.querySelectorAll('.nav-item')).find(
-                item => item.getAttribute('onclick') && item.getAttribute('onclick').includes(section)
-            );
-            if (activeItem) {
-                activeItem.classList.add('active');
+            // Dodaj active klasu na izabranu stavku (tražimo po data-section atributu)
+            const selectedNavItem = document.querySelector(`.nav-item[data-section="${section}"]`);
+            if (selectedNavItem) {
+                selectedNavItem.classList.add('active');
             }
             
             // Sakrij sve sekcije
@@ -1505,7 +1502,7 @@
             console.log('Stranica učitana');
             
             // Aktiviraj prvu navigacionu stavku
-            const firstNavItem = document.querySelector('.nav-item');
+            const firstNavItem = document.querySelector('.nav-item[data-section="picking"]');
             if (firstNavItem) {
                 // Ukloni active sa svih
                 document.querySelectorAll('.nav-item').forEach(item => {
@@ -1535,6 +1532,18 @@
                     }
                 }, 500);
             }
+        });
+
+        // Dodaj event listenere za navigaciju (umesto onclick u HTML-u)
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    if (section) {
+                        showSection(section);
+                    }
+                });
+            });
         });
         
         // ==================== EXPORT ====================
