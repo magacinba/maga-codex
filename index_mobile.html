@@ -1504,51 +1504,91 @@
         }
 
         // ==================== NAVIGACIJA ====================
-        function showSection(section) {
-            // Ukloni active klasu sa svih navigacionih stavki
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Pronađi kliknuti element i dodaj mu active klasu
-            const navItems = document.querySelectorAll('.nav-item');
-            for (let i = 0; i < navItems.length; i++) {
-                const item = navItems[i];
-                if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(section)) {
-                    item.classList.add('active');
-                    break;
-                }
-            }
-            
-            // Sakrij sve sekcije
-            const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
-            sections.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = 'none';
-            });
-            
-            // Prikaži izabranu sekciju
-            const selectedSection = document.getElementById(section + 'Section');
-            if (selectedSection) {
-                selectedSection.style.display = 'block';
-            }
-            
-            // Učitaj podatke za pojedine sekcije
-            switch(section) {
-                case 'picking':
-                    if (SESSION_ID) refreshWave();
-                    break;
-                case 'boxes':
-                    if (typeof loadBoxesSection === 'function') loadBoxesSection();
-                    break;
-                case 'reports':
-                    if (typeof loadReportData === 'function') loadReportData();
-                    break;
-                case 'settings':
-                    if (typeof loadSettings === 'function') loadSettings();
-                    break;
-            }
+function showSection(section) {
+    console.log('Navigacija na sekciju:', section);
+    
+    // Ukloni active klasu sa svih navigacionih stavki
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Pronađi kliknuti element i dodaj mu active klasu
+    const navItems = document.querySelectorAll('.nav-item');
+    for (let i = 0; i < navItems.length; i++) {
+        const item = navItems[i];
+        const onclick = item.getAttribute('onclick') || '';
+        if (onclick.includes(section)) {
+            item.classList.add('active');
+            console.log('Aktivirana stavka:', section);
+            break;
         }
+    }
+    
+    // Sakrij sve sekcije
+    const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'none';
+        }
+    });
+    
+    // Prikaži izabranu sekciju
+    const selectedSection = document.getElementById(section + 'Section');
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+        console.log('Prikazana sekcija:', section + 'Section');
+    } else {
+        console.error('Sekcija ne postoji:', section + 'Section');
+        alert(`Sekcija "${section}" ne postoji!`);
+        return;
+    }
+    
+    // Učitaj podatke za pojedine sekcije
+    try {
+        switch(section) {
+            case 'picking':
+                console.log('Učitavam picking...');
+                if (SESSION_ID) {
+                    refreshWave();
+                } else {
+                    console.log('Nema aktivne sesije za picking');
+                }
+                break;
+                
+            case 'boxes':
+                console.log('Učitavam kutije...');
+                if (typeof loadBoxesSection === 'function') {
+                    loadBoxesSection();
+                } else {
+                    console.error('❌ loadBoxesSection nije definisana!');
+                    document.getElementById('boxesSection').innerHTML = '<div style="padding:20px; text-align:center;">Greška: Funkcija za kutije nije dostupna</div>';
+                }
+                break;
+                
+            case 'reports':
+                console.log('Učitavam izveštaj...');
+                if (typeof loadReportData === 'function') {
+                    loadReportData();
+                } else {
+                    console.error('❌ loadReportData nije definisana!');
+                }
+                break;
+                
+            case 'settings':
+                console.log('Učitavam podešavanja...');
+                if (typeof loadSettings === 'function') {
+                    loadSettings();
+                } else {
+                    console.error('❌ loadSettings nije definisana!');
+                }
+                break;
+        }
+    } catch (error) {
+        console.error('Greška pri učitavanju sekcije:', error);
+        alert('Došlo je do greške: ' + error.message);
+    }
+}
 
         // ==================== INIT ====================
 window.addEventListener('load', () => {
