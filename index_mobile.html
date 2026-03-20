@@ -709,65 +709,69 @@
             </div>
         </div>
 
-        <!-- KPI kartice -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-            <div class="stat-card">
-                <div class="stat-label">Ukupno artikala</div>
-                <div class="stat-value" id="reportTotalItems">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Uzeto</div>
-                <div class="stat-value" id="reportTakenItems">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Problem/Nema</div>
-                <div class="stat-value" id="reportProblemItems">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Pređeno</div>
-                <div class="stat-value" id="reportDistance">0 m</div>
+        <!-- Sekcija za kutije -->
+        <div id="boxesSection" style="display: none;"></div>
+
+        <!-- Sekcija za izveštaje -->
+        <div id="reportsSection" style="display: none;">
+            <div style="padding: 16px;">
+                <h3 style="margin-bottom: 20px;">📊 Izveštaj</h3>
+                
+                <!-- KPI kartice -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Ukupno artikala</div>
+                        <div class="stat-value" id="reportTotalItems">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Uzeto</div>
+                        <div class="stat-value" id="reportTakenItems">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Problem/Nema</div>
+                        <div class="stat-value" id="reportProblemItems">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pređeno</div>
+                        <div class="stat-value" id="reportDistance">0 m</div>
+                    </div>
+                </div>
+                
+                <!-- Vreme rada -->
+                <div class="report-section">
+                    <div class="section-title">⏱️ Vreme rada</div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Ukupno vreme:</span>
+                        <span class="value" id="reportTotalTime">00:00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Artikli po satu:</span>
+                        <span class="value" id="reportItemsPerHour">0</span>
+                    </div>
+                </div>
+                
+                <!-- Po kutijama -->
+                <div class="report-section">
+                    <div class="section-title">📦 Po kutijama</div>
+                    <div id="reportBoxes"></div>
+                </div>
+                
+                <!-- Problematične stavke -->
+                <div class="report-section">
+                    <div class="section-title">⚠️ Problematične stavke</div>
+                    <div id="reportProblems"></div>
+                </div>
+                
+                <!-- Dugme za izvoz -->
+                <button class="export-btn" onclick="exportReport()">
+                    📤 Izvezi izveštaj (CSV)
+                </button>
             </div>
         </div>
         
-        <!-- Vreme rada -->
-        <div class="report-section">
-            <div class="section-title">⏱️ Vreme rada</div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Ukupno vreme:</span>
-                <span class="value" id="reportTotalTime">00:00</span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Artikli po satu:</span>
-                <span class="value" id="reportItemsPerHour">0</span>
-            </div>
-        </div>
-        
-        <!-- Po kutijama -->
-        <div class="report-section">
-            <div class="section-title">📦 Po kutijama</div>
-            <div id="reportBoxes"></div>
-        </div>
-        
-        <!-- Problematične stavke -->
-        <div class="report-section">
-            <div class="section-title">⚠️ Problematične stavke</div>
-            <div id="reportProblems"></div>
-        </div>
-        
-        <!-- Dugme za izvoz -->
-        <button class="export-btn" onclick="exportReport()">
-            📤 Izvezi izveštaj (CSV)
-        </button>
+        <!-- Sekcija za podešavanja -->
+        <div id="settingsSection" style="display: none;"></div>
     </div>
-
-    <!-- Sekcija za kutije -->
-    <div id="boxesSection" style="display: none;"></div>
-
-    <!-- Sekcija za izveštaje -->
-    <div id="reportsSection" style="display: none;"></div>
-    
-    <!-- Sekcija za podešavanja -->
-    <div id="settingsSection" style="display: none;"></div>
     
     <!-- Donja navigacija -->
     <div class="bottom-nav">
@@ -1390,56 +1394,88 @@
 
         // ==================== SEKCIJA ZA IZVEŠTAJE ====================
         function loadReportData() {
-            const container = document.getElementById('reportsSection');
-            if (!container) return;
-            
             if (!waveData) {
-                container.innerHTML = '<div style="text-align: center; padding: 40px;">📊 Nema podataka za izveštaj</div>';
+                document.getElementById('reportTotalItems').innerText = '0';
+                document.getElementById('reportTakenItems').innerText = '0';
+                document.getElementById('reportProblemItems').innerText = '0';
+                document.getElementById('reportDistance').innerText = '0 m';
+                document.getElementById('reportTotalTime').innerText = '00:00';
+                document.getElementById('reportItemsPerHour').innerText = '0';
+                document.getElementById('reportBoxes').innerHTML = '<div>Nema podataka</div>';
+                document.getElementById('reportProblems').innerHTML = '<div>Nema podataka</div>';
                 return;
             }
             
             const stats = calculateStats(waveData);
             
-            container.innerHTML = `
-                <div style="padding: 16px;">
-                    <h3 style="margin-bottom: 20px;">📊 Izveštaj</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-                        <div class="stat-card">
-                            <div class="stat-label">Ukupno</div>
-                            <div class="stat-value">${stats.totalItems}</div>
+            // Ažuriraj KPI kartice
+            document.getElementById('reportTotalItems').innerText = stats.totalItems;
+            document.getElementById('reportTakenItems').innerText = stats.takenItems;
+            document.getElementById('reportProblemItems').innerText = stats.problemItems;
+            document.getElementById('reportDistance').innerText = stats.distance + ' m';
+            document.getElementById('reportTotalTime').innerText = stats.totalTime;
+            document.getElementById('reportItemsPerHour').innerText = stats.itemsPerHour;
+            
+            // Ažuriraj prikaz po kutijama
+            let boxesHtml = '';
+            for (let i = 1; i <= 6; i++) {
+                let invoice = null;
+                let boxProgress = { total: 0, done: 0 };
+                
+                for (const [inv, boxNum] of Object.entries(waveData.box_assignment || {})) {
+                    if (boxNum === i) {
+                        invoice = inv;
+                        break;
+                    }
+                }
+                
+                if (invoice && waveData.progress?.boxes[invoice]) {
+                    boxProgress = waveData.progress.boxes[invoice];
+                }
+                
+                const percent = boxProgress.total > 0 ? Math.round((boxProgress.done / boxProgress.total) * 100) : 0;
+                const boxColor = getBoxColor(i);
+                
+                boxesHtml += `
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Kutija ${i}${invoice ? ` (${invoice})` : ''}</span>
+                            <span>${boxProgress.done}/${boxProgress.total}</span>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Uzeto</div>
-                            <div class="stat-value">${stats.takenItems}</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Problem</div>
-                            <div class="stat-value">${stats.problemItems}</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Pređeno</div>
-                            <div class="stat-value">${stats.distance} m</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percent}%; background: ${boxColor};"></div>
                         </div>
                     </div>
-                    
-                    <div class="report-section">
-                        <div class="section-title">⏱️ Vreme</div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>Ukupno:</span>
-                            <span class="value">${stats.totalTime}</span>
+                `;
+            }
+            document.getElementById('reportBoxes').innerHTML = boxesHtml;
+            
+            // Ažuriraj problematične stavke
+            const problems = [];
+            for (const loc in waveData.items_by_loc) {
+                waveData.items_by_loc[loc].forEach(item => {
+                    if (item.status === 'problem' || item.status === 'oos') {
+                        problems.push({...item, location: loc});
+                    }
+                });
+            }
+            
+            if (problems.length === 0) {
+                document.getElementById('reportProblems').innerHTML = '<div style="color: var(--success);">✅ Nema problematičnih stavki</div>';
+            } else {
+                let problemsHtml = '';
+                problems.forEach(p => {
+                    problemsHtml += `
+                        <div class="problem-item">
+                            <strong>${p.sku}</strong> - ${p.invoice}<br>
+                            Lokacija: ${p.location} | Kutija: ${p.box}<br>
+                            Status: ${p.status === 'oos' ? 'Nema na lokaciji' : 'Problem'}<br>
+                            ${p.note ? `Napomena: ${p.note}` : ''}
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>Artikli/sat:</span>
-                            <span class="value">${stats.itemsPerHour}</span>
-                        </div>
-                    </div>
-                    
-                    <button class="export-btn" onclick="exportReport()">
-                        📤 Izvezi CSV
-                    </button>
-                </div>
-            `;
+                    `;
+                });
+                document.getElementById('reportProblems').innerHTML = problemsHtml;
+            }
         }
 
         // ==================== STATISTIKA ====================
@@ -1504,128 +1540,128 @@
         }
 
         // ==================== NAVIGACIJA ====================
-function showSection(section) {
-    console.log('Navigacija na sekciju:', section);
-    
-    // Ukloni active klasu sa svih navigacionih stavki
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Pronađi kliknuti element i dodaj mu active klasu
-    const navItems = document.querySelectorAll('.nav-item');
-    for (let i = 0; i < navItems.length; i++) {
-        const item = navItems[i];
-        const onclick = item.getAttribute('onclick') || '';
-        if (onclick.includes(section)) {
-            item.classList.add('active');
-            console.log('Aktivirana stavka:', section);
-            break;
+        function showSection(section) {
+            console.log('Navigacija na sekciju:', section);
+            
+            // Ukloni active klasu sa svih navigacionih stavki
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Pronađi kliknuti element i dodaj mu active klasu
+            const navItems = document.querySelectorAll('.nav-item');
+            for (let i = 0; i < navItems.length; i++) {
+                const item = navItems[i];
+                const onclick = item.getAttribute('onclick') || '';
+                if (onclick.includes(section)) {
+                    item.classList.add('active');
+                    console.log('Aktivirana stavka:', section);
+                    break;
+                }
+            }
+            
+            // Sakrij sve sekcije
+            const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = 'none';
+                }
+            });
+            
+            // Prikaži izabranu sekciju
+            const selectedSection = document.getElementById(section + 'Section');
+            if (selectedSection) {
+                selectedSection.style.display = 'block';
+                console.log('Prikazana sekcija:', section + 'Section');
+            } else {
+                console.error('Sekcija ne postoji:', section + 'Section');
+                alert(`Sekcija "${section}" ne postoji!`);
+                return;
+            }
+            
+            // Učitaj podatke za pojedine sekcije
+            try {
+                switch(section) {
+                    case 'picking':
+                        console.log('Učitavam picking...');
+                        if (SESSION_ID) {
+                            refreshWave();
+                        } else {
+                            console.log('Nema aktivne sesije za picking');
+                        }
+                        break;
+                        
+                    case 'boxes':
+                        console.log('Učitavam kutije...');
+                        if (typeof loadBoxesSection === 'function') {
+                            loadBoxesSection();
+                        } else {
+                            console.error('❌ loadBoxesSection nije definisana!');
+                            document.getElementById('boxesSection').innerHTML = '<div style="padding:20px; text-align:center;">Greška: Funkcija za kutije nije dostupna</div>';
+                        }
+                        break;
+                        
+                    case 'reports':
+                        console.log('Učitavam izveštaj...');
+                        if (typeof loadReportData === 'function') {
+                            loadReportData();
+                        } else {
+                            console.error('❌ loadReportData nije definisana!');
+                        }
+                        break;
+                        
+                    case 'settings':
+                        console.log('Učitavam podešavanja...');
+                        if (typeof loadSettings === 'function') {
+                            loadSettings();
+                        } else {
+                            console.error('❌ loadSettings nije definisana!');
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error('Greška pri učitavanju sekcije:', error);
+                alert('Došlo je do greške: ' + error.message);
+            }
         }
-    }
-    
-    // Sakrij sve sekcije
-    const sections = ['scanSection', 'pickingSection', 'boxesSection', 'reportsSection', 'settingsSection'];
-    sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.style.display = 'none';
-        }
-    });
-    
-    // Prikaži izabranu sekciju
-    const selectedSection = document.getElementById(section + 'Section');
-    if (selectedSection) {
-        selectedSection.style.display = 'block';
-        console.log('Prikazana sekcija:', section + 'Section');
-    } else {
-        console.error('Sekcija ne postoji:', section + 'Section');
-        alert(`Sekcija "${section}" ne postoji!`);
-        return;
-    }
-    
-    // Učitaj podatke za pojedine sekcije
-    try {
-        switch(section) {
-            case 'picking':
-                console.log('Učitavam picking...');
-                if (SESSION_ID) {
-                    refreshWave();
-                } else {
-                    console.log('Nema aktivne sesije za picking');
-                }
-                break;
-                
-            case 'boxes':
-                console.log('Učitavam kutije...');
-                if (typeof loadBoxesSection === 'function') {
-                    loadBoxesSection();
-                } else {
-                    console.error('❌ loadBoxesSection nije definisana!');
-                    document.getElementById('boxesSection').innerHTML = '<div style="padding:20px; text-align:center;">Greška: Funkcija za kutije nije dostupna</div>';
-                }
-                break;
-                
-            case 'reports':
-                console.log('Učitavam izveštaj...');
-                if (typeof loadReportData === 'function') {
-                    loadReportData();
-                } else {
-                    console.error('❌ loadReportData nije definisana!');
-                }
-                break;
-                
-            case 'settings':
-                console.log('Učitavam podešavanja...');
-                if (typeof loadSettings === 'function') {
-                    loadSettings();
-                } else {
-                    console.error('❌ loadSettings nije definisana!');
-                }
-                break;
-        }
-    } catch (error) {
-        console.error('Greška pri učitavanju sekcije:', error);
-        alert('Došlo je do greške: ' + error.message);
-    }
-}
 
         // ==================== INIT ====================
-window.addEventListener('load', () => {
-    console.log('Stranica učitana');
-    
-    // Prvo prikaži scanSection (ekran za skeniranje)
-    document.getElementById('scanSection').style.display = 'block';
-    document.getElementById('pickingSection').style.display = 'none';
-    
-    // Aktiviraj prvu navigacionu stavku
-    const firstNavItem = document.querySelector('.nav-item');
-    if (firstNavItem) {
-        // Ukloni active sa svih
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        // Dodaj na prvu
-        firstNavItem.classList.add('active');
-    }
-    
-    // Proveri da li postoji sačuvana sesija
-    const savedSession = localStorage.getItem('session_id');
-    const savedWave = localStorage.getItem('waveData');
-    
-    if (savedSession && savedWave) {
-        setTimeout(() => {
-            if (confirm('Nastavi prethodnu sesiju?')) {
-                SESSION_ID = savedSession;
-                waveData = JSON.parse(savedWave);
-                document.getElementById('scanSection').style.display = 'none';
-                document.getElementById('pickingSection').style.display = 'block';
-                renderWave(waveData);
-                startTimer();
+        window.addEventListener('load', () => {
+            console.log('Stranica učitana');
+            
+            // Prvo prikaži scanSection (ekran za skeniranje)
+            document.getElementById('scanSection').style.display = 'block';
+            document.getElementById('pickingSection').style.display = 'none';
+            
+            // Aktiviraj prvu navigacionu stavku
+            const firstNavItem = document.querySelector('.nav-item');
+            if (firstNavItem) {
+                // Ukloni active sa svih
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                // Dodaj na prvu
+                firstNavItem.classList.add('active');
             }
-        }, 500);
-    }
-});
+            
+            // Proveri da li postoji sačuvana sesija
+            const savedSession = localStorage.getItem('session_id');
+            const savedWave = localStorage.getItem('waveData');
+            
+            if (savedSession && savedWave) {
+                setTimeout(() => {
+                    if (confirm('Nastavi prethodnu sesiju?')) {
+                        SESSION_ID = savedSession;
+                        waveData = JSON.parse(savedWave);
+                        document.getElementById('scanSection').style.display = 'none';
+                        document.getElementById('pickingSection').style.display = 'block';
+                        renderWave(waveData);
+                        startTimer();
+                    }
+                }, 500);
+            }
+        });
         
         // ==================== EXPORT ====================
         window.removeInvoice = removeInvoice;
