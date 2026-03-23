@@ -1082,14 +1082,7 @@
             document.getElementById('progressText').textContent = `${p.done_items || 0}/${p.total_items || 0}`;
             
             updateBoxesProgress();
-            // ⭐ DODAJ OVO - ZAUSTAVI TIMER KADA JE WAVE ZAVRŠEN
-            if (!data.current_location) {
-                stopTimer();
-                // Opciono: prikaži poruku o završetku
-                setTimeout(() => {
-                    alert('🎉 Čestitamo! Wave je završen! ✅');
-                }, 100);
-            }
+            
         }
         
         function updateCurrentItem() {
