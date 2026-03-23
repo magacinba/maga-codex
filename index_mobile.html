@@ -1070,6 +1070,14 @@
             document.getElementById('progressText').textContent = `${p.done_items || 0}/${p.total_items || 0}`;
             
             updateBoxesProgress();
+            // ⭐ DODAJ OVO - ZAUSTAVI TIMER KADA JE WAVE ZAVRŠEN
+            if (!data.current_location) {
+                stopTimer();
+                // Opciono: prikaži poruku o završetku
+                setTimeout(() => {
+                    alert('🎉 Čestitamo! Wave je završen! ✅');
+                }, 100);
+            }
         }
         
         function updateCurrentItem() {
@@ -1260,6 +1268,13 @@
                 document.getElementById('timerDisplay').textContent = 
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }, 1000);
+        }
+        // ⭐ DODAJ OVU FUNKCIJU
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
         }
         
         // ==================== IZVESTAJI ====================
