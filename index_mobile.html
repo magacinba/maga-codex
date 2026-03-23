@@ -1062,10 +1062,18 @@
             
             // ⭐ POPRAVLJENA PROVERA KRAJA
             const isFinished = !data.current_location || data.current_location === '' || data.current_location === 'KRAJ';
-            
-            
-            document.getElementById('curLocBig').textContent = data.current_location || 'KRAJ';
-            document.getElementById('curSkuBig').textContent = data.current_location ? '📍' : '🎉 ZAVRŠENO';
+           if (isFinished) {
+                document.getElementById('curLocBig').textContent = 'KRAJ';
+                document.getElementById('curSkuBig').textContent = '🎉 ZAVRŠENO';
+            stopTimer();
+            if (!window._waveFinishedAlertShown) {
+                  window._waveFinishedAlertShown = true;
+                setTimeout(() => alert('🎉 Čestitamo! Wave je završen! ✅'), 100);
+                }
+            } else {
+                document.getElementById('curLocBig').textContent = data.current_location;
+                document.getElementById('curSkuBig').textContent = '📍';
+        }
             
             updateCurrentItem();
             updateLocationItems();
