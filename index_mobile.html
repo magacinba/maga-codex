@@ -1060,6 +1060,10 @@
         function renderWave(data) {
             waveData = data;
             
+            // ⭐ POPRAVLJENA PROVERA KRAJA
+            const isFinished = !data.current_location || data.current_location === '' || data.current_location === 'KRAJ';
+            
+            
             document.getElementById('curLocBig').textContent = data.current_location || 'KRAJ';
             document.getElementById('curSkuBig').textContent = data.current_location ? '📍' : '🎉 ZAVRŠENO';
             
@@ -1081,7 +1085,14 @@
         }
         
         function updateCurrentItem() {
-            if (!waveData || !waveData.current_location) return;
+            // ⭐ DODAJ PROVERU ZA KRAJ
+             if (!waveData || !waveData.current_location || waveData.current_location === '' || waveData.current_location === 'KRAJ') {
+                document.getElementById('curSku').textContent = '-';
+                document.getElementById('curQty').textContent = '-';
+                document.getElementById('curInvoice').textContent = '-';
+                document.getElementById('curBox').textContent = '-';
+                return;
+              }
             
             const curLoc = waveData.current_location;
             const items = waveData.items_by_loc[curLoc] || [];
@@ -1101,7 +1112,13 @@
         }
         
         function updateLocationItems() {
-            if (!waveData || !waveData.current_location) return;
+            // ⭐ DODAJ PROVERU ZA KRAJ
+            if (!waveData || !waveData.current_location || waveData.current_location === '' || waveData.current_location === 'KRAJ') {
+                const container = document.getElementById('locationItems');
+                    if (container) container.innerHTML = '<div style="text-align:center; padding:20px;">🎉 Wave završen!</div>';
+                    document.getElementById('locItemsCount').textContent = '0';
+                    return;
+            }
             
             const curLoc = waveData.current_location;
             const items = waveData.items_by_loc[curLoc] || [];
