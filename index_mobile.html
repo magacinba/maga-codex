@@ -709,7 +709,7 @@
             </div>
         </div>
 
-                <!-- Sekcija za kutije -->
+        <!-- Sekcija za kutije -->
         <div id="boxesSection" style="display: none;"></div>
 
         <!-- Sekcija za izveštaje -->
@@ -813,6 +813,7 @@
         let waveData = null;
         let waveStartTime = null;
         let timerInterval = null;
+        let finalElapsedSeconds = null; // ⭐ Čuva konačno vreme kada se wave završi
         let isOnline = navigator.onLine;
         
         // ==================== BOJE ZA KUTIJE ====================
@@ -1035,6 +1036,7 @@
                 
                 SESSION_ID = data.session_id;
                 waveData = data;
+                finalElapsedSeconds = null; // Resetuj konačno vreme
                 
                 localStorage.setItem('session_id', SESSION_ID);
                 localStorage.setItem('waveData', JSON.stringify(data));
@@ -1060,20 +1062,21 @@
         function renderWave(data) {
             waveData = data;
             
-            // ⭐ POPRAVLJENA PROVERA KRAJA
+            // Provera kraja
             const isFinished = !data.current_location || data.current_location === '' || data.current_location === 'KRAJ';
-           if (isFinished) {
+            
+            if (isFinished) {
                 document.getElementById('curLocBig').textContent = 'KRAJ';
                 document.getElementById('curSkuBig').textContent = '🎉 ZAVRŠENO';
-            stopTimer();
-            if (!window._waveFinishedAlertShown) {
-                  window._waveFinishedAlertShown = true;
-                setTimeout(() => alert('🎉 Čestitamo! Wave je završen! ✅'), 100);
+                stopTimer();
+                if (!window._waveFinishedAlertShown) {
+                    window._waveFinishedAlertShown = true;
+                    setTimeout(() => alert('🎉 Čestitamo! Wave je završen! ✅'), 100);
                 }
             } else {
                 document.getElementById('curLocBig').textContent = data.current_location;
                 document.getElementById('curSkuBig').textContent = '📍';
-        }
+            }
             
             updateCurrentItem();
             updateLocationItems();
@@ -1083,17 +1086,21 @@
             
             updateBoxesProgress();
             
+            // Ažuriraj izveštaj ako je prikazan
+            if (document.getElementById('reportsSection').style.display === 'block') {
+                loadReportData();
+            }
         }
         
         function updateCurrentItem() {
-            // ⭐ DODAJ PROVERU ZA KRAJ
-             if (!waveData || !waveData.current_location || waveData.current_location === '' || waveData.current_location === 'KRAJ') {
+            // Provera za kraj
+            if (!waveData || !waveData.current_location || waveData.current_location === '' || waveData.current_location === 'KRAJ') {
                 document.getElementById('curSku').textContent = '-';
                 document.getElementById('curQty').textContent = '-';
                 document.getElementById('curInvoice').textContent = '-';
                 document.getElementById('curBox').textContent = '-';
                 return;
-              }
+            }
             
             const curLoc = waveData.current_location;
             const items = waveData.items_by_loc[curLoc] || [];
@@ -1113,12 +1120,12 @@
         }
         
         function updateLocationItems() {
-            // ⭐ DODAJ PROVERU ZA KRAJ
+            // Provera za kraj
             if (!waveData || !waveData.current_location || waveData.current_location === '' || waveData.current_location === 'KRAJ') {
                 const container = document.getElementById('locationItems');
-                    if (container) container.innerHTML = '<div style="text-align:center; padding:20px;">🎉 Wave završen!</div>';
-                    document.getElementById('locItemsCount').textContent = '0';
-                    return;
+                if (container) container.innerHTML = '<div style="text-align:center; padding:20px;">🎉 Wave završen!</div>';
+                document.getElementById('locItemsCount').textContent = '0';
+                return;
             }
             
             const curLoc = waveData.current_location;
@@ -1275,21 +1282,40 @@
         // ==================== TIMER ====================
         function startTimer() {
             waveStartTime = Date.now();
+            finalElapsedSeconds = null;
             if (timerInterval) clearInterval(timerInterval);
             
             timerInterval = setInterval(() => {
                 if (!waveStartTime) return;
+                if (finalElapsedSeconds !== null) return; // Ako je završeno, ne ažuriraj
                 
                 const elapsed = Math.floor((Date.now() - waveStartTime) / 1000);
                 const minutes = Math.floor(elapsed / 60);
                 const seconds = elapsed % 60;
-                document.getElementById('timerDisplay').textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('timerDisplay').textContent = timeStr;
+                
+                // Ažuriraj i izveštaj ako je otvoren
+                if (document.getElementById('reportsSection').style.display === 'block') {
+                    document.getElementById('reportTotalTime').innerText = timeStr;
+                }
             }, 1000);
         }
-        // ⭐ DODAJ OVU FUNKCIJU
+        
         function stopTimer() {
             if (timerInterval) {
+                // Sačuvaj konačno vreme
+                if (waveStartTime) {
+                    finalElapsedSeconds = Math.floor((Date.now() - waveStartTime) / 1000);
+                    const minutes = Math.floor(finalElapsedSeconds / 60);
+                    const seconds = finalElapsedSeconds % 60;
+                    const finalTimeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    document.getElementById('timerDisplay').textContent = finalTimeStr;
+                    
+                    // Sačuvaj u localStorage za izveštaj
+                    localStorage.setItem('finalWaveTime', finalTimeStr);
+                    localStorage.setItem('finalWaveSeconds', finalElapsedSeconds);
+                }
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
@@ -1427,7 +1453,7 @@
 
         // ==================== SEKCIJA ZA IZVEŠTAJE ====================
         function loadReportData() {
-            if (!waveData) {
+            if (!waveData && !finalElapsedSeconds) {
                 document.getElementById('reportTotalItems').innerText = '0';
                 document.getElementById('reportTakenItems').innerText = '0';
                 document.getElementById('reportProblemItems').innerText = '0';
@@ -1446,7 +1472,15 @@
             document.getElementById('reportTakenItems').innerText = stats.takenItems;
             document.getElementById('reportProblemItems').innerText = stats.problemItems;
             document.getElementById('reportDistance').innerText = stats.distance + ' m';
-            document.getElementById('reportTotalTime').innerText = stats.totalTime;
+            
+            // ⭐ Vreme rada - koristi finalElapsedSeconds ako je wave završen
+            let totalTimeStr = stats.totalTime;
+            if (finalElapsedSeconds !== null) {
+                const minutes = Math.floor(finalElapsedSeconds / 60);
+                const seconds = finalElapsedSeconds % 60;
+                totalTimeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            document.getElementById('reportTotalTime').innerText = totalTimeStr;
             document.getElementById('reportItemsPerHour').innerText = stats.itemsPerHour;
             
             // Ažuriraj prikaz po kutijama
@@ -1455,15 +1489,17 @@
                 let invoice = null;
                 let boxProgress = { total: 0, done: 0 };
                 
-                for (const [inv, boxNum] of Object.entries(waveData.box_assignment || {})) {
-                    if (boxNum === i) {
-                        invoice = inv;
-                        break;
+                if (waveData) {
+                    for (const [inv, boxNum] of Object.entries(waveData.box_assignment || {})) {
+                        if (boxNum === i) {
+                            invoice = inv;
+                            break;
+                        }
                     }
-                }
-                
-                if (invoice && waveData.progress?.boxes[invoice]) {
-                    boxProgress = waveData.progress.boxes[invoice];
+                    
+                    if (invoice && waveData.progress?.boxes[invoice]) {
+                        boxProgress = waveData.progress.boxes[invoice];
+                    }
                 }
                 
                 const percent = boxProgress.total > 0 ? Math.round((boxProgress.done / boxProgress.total) * 100) : 0;
@@ -1485,12 +1521,14 @@
             
             // Ažuriraj problematične stavke
             const problems = [];
-            for (const loc in waveData.items_by_loc) {
-                waveData.items_by_loc[loc].forEach(item => {
-                    if (item.status === 'problem' || item.status === 'oos') {
-                        problems.push({...item, location: loc});
-                    }
-                });
+            if (waveData) {
+                for (const loc in waveData.items_by_loc) {
+                    waveData.items_by_loc[loc].forEach(item => {
+                        if (item.status === 'problem' || item.status === 'oos') {
+                            problems.push({...item, location: loc});
+                        }
+                    });
+                }
             }
             
             if (problems.length === 0) {
@@ -1513,6 +1551,17 @@
 
         // ==================== STATISTIKA ====================
         function calculateStats(data) {
+            if (!data) {
+                return {
+                    totalItems: 0,
+                    takenItems: 0,
+                    problemItems: 0,
+                    distance: 0,
+                    totalTime: '00:00',
+                    itemsPerHour: 0
+                };
+            }
+            
             let totalItems = 0;
             let takenItems = 0;
             let problemItems = 0;
@@ -1528,12 +1577,21 @@
                 });
             }
             
-            const elapsed = waveStartTime ? Math.floor((Date.now() - waveStartTime) / 1000) : 0;
-            const hours = Math.floor(elapsed / 3600);
-            const minutes = Math.floor((elapsed % 3600) / 60);
-            const totalTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            // Vreme rada
+            let totalTime = '00:00';
+            if (finalElapsedSeconds !== null) {
+                const minutes = Math.floor(finalElapsedSeconds / 60);
+                const seconds = finalElapsedSeconds % 60;
+                totalTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else if (waveStartTime) {
+                const elapsed = Math.floor((Date.now() - waveStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                totalTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
             
-            const itemsPerHour = elapsed > 0 ? Math.round((takenItems / elapsed) * 3600) : 0;
+            const elapsedSeconds = finalElapsedSeconds !== null ? finalElapsedSeconds : (waveStartTime ? Math.floor((Date.now() - waveStartTime) / 1000) : 0);
+            const itemsPerHour = elapsedSeconds > 0 ? Math.round((takenItems / elapsedSeconds) * 3600) : 0;
             
             return {
                 totalItems,
@@ -1662,6 +1720,12 @@
         // ==================== INIT ====================
         window.addEventListener('load', () => {
             console.log('Stranica učitana');
+            
+            // Pročitaj sačuvano finalno vreme ako postoji
+            const savedFinalTime = localStorage.getItem('finalWaveTime');
+            if (savedFinalTime) {
+                document.getElementById('reportTotalTime').innerText = savedFinalTime;
+            }
             
             // Prvo prikaži scanSection (ekran za skeniranje)
             document.getElementById('scanSection').style.display = 'block';
